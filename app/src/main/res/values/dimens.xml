@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="h1">61sp</dimen>
+    <dimen name="h2">49sp</dimen>
+    <dimen name="h3">39sp</dimen>
+    <dimen name="h4">31sp</dimen>
+    <dimen name="h5">25sp</dimen>
+    <dimen name="h6">20sp</dimen>
+
+    <dimen name="body">16sp</dimen>
+
+    <dimen name="small1">13sp</dimen>
+    <dimen name="small2">10sp</dimen>
+
+
+    <dimen name="radius">8sp</dimen>
+    <dimen name="elevation">6sp</dimen>
+</resources>
