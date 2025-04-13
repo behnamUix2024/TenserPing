@@ -147,7 +147,7 @@ class MainActivity : AppCompatActivity() {
                 val uploadSpeed = withContext(Dispatchers.IO) {
                     networkTester.getUploadSpeed(uploadUrl)
                 }
-                tv_speed_upload.text = if (uploadSpeed != null) "سرعت آپلود: ${
+                tv_speed_upload.text = if (uploadSpeed != null) " ${
                     String.format(
                         "%.2f",
                         uploadSpeed
