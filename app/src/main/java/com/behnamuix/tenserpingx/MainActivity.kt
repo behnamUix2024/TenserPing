@@ -142,7 +142,7 @@ class MainActivity : AppCompatActivity() {
                         "%.2f",
                         downloadSpeed
                     )
-                } Mbps" else "خطا "
+                } " else "خطا "
                 Log.i("tenser",downloadSpeed.toString())
                 val uploadSpeed = withContext(Dispatchers.IO) {
                     networkTester.getUploadSpeed(uploadUrl)
@@ -152,7 +152,7 @@ class MainActivity : AppCompatActivity() {
                         "%.2f",
                         uploadSpeed
                     )
-                } " else "خطا در تست آپلود"
+                } " else "خطا "
                 // برای پینگ: نیاز به پیاده سازی جداگانه دارید
                 // pingTextView.text = "قابلیت پینگ با okhttp به طور مستقیم وجود ندارد."
         }
