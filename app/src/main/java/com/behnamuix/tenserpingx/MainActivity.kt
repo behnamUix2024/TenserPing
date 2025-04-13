@@ -4,6 +4,8 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
+import android.content.IntentFilter
+import android.net.ConnectivityManager
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
@@ -71,6 +73,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun config() {
+        registerReceiver(networkReceiver, IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION))
         lav_info=binding.lavInfo
         networkTester = InternetSpeedTester(this)
         et_addr = binding.etAddr
