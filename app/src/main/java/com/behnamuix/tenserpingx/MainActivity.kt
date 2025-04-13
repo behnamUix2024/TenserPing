@@ -35,6 +35,9 @@ class MainActivity : AppCompatActivity() {
     private lateinit var lav_info: LottieAnimationView
     private lateinit var tv_speed_download: TextView
     private lateinit var tv_speed_upload: TextView
+    private lateinit var tv_status_ping: TextView
+    private lateinit var tv_ping: TextView
+    private lateinit var tv_status: TextView
     private lateinit var vw_start: ConstraintLayout
     private lateinit var networkTester: InternetSpeedTester
     private var isDialogShowing = false
@@ -73,6 +76,9 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun config() {
+        tv_status_ping=binding.tvStatusPing
+        tv_ping=binding.tvPing
+        tv_status=binding.tvStatus
         registerReceiver(networkReceiver, IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION))
         lav_info=binding.lavInfo
         networkTester = InternetSpeedTester(this)
@@ -105,41 +111,52 @@ class MainActivity : AppCompatActivity() {
             dialog.show()
         }
         vw_start.setOnClickListener() {
-           //testStart()
+           testStart()
 
         }
     }
 
     private fun testStart() {
         val website = et_addr.text.toString()
-        val uploadUrl = "https://httpbin.org/post" // آدرس سرور آپلود خود را اینجا قرار دهید
+        if(!website.startsWith("https://")){
+            Toast.makeText(this,"لطفا ادرس اینترنتی را با https:// شروع کنید",Toast.LENGTH_SHORT).show()
+            et_addr.requestFocus()
+        }else{
+            val uploadUrl = "https://httpbin.org/post" // آدرس سرور آپلود خود را اینجا قرار دهید
 
-        CoroutineScope(Dispatchers.Main).launch {
-            tv_speed_download.text = "در حال تست دانلود..."
-            tv_speed_upload.text = "در حال تست آپلود..."
+            CoroutineScope(Dispatchers.Main).launch {
+                tv_speed_download.text = "در حال تست دانلود..."
+                tv_speed_upload.text = "در حال تست آپلود..."
+                tv_status_ping.text = "در حال گرفتن پینگ ..."
+                val pingResult = withContext(Dispatchers.IO) {
+                    networkTester.ping()
+                }
+                tv_ping.text = if (pingResult != null) " ${pingResult} " else "خطا "
+                tv_status_ping.text = "پینگ"
 
-            val downloadSpeed = withContext(Dispatchers.IO) {
-                networkTester.getDownloadSpeed(website)
-            }
-            tv_speed_download.text = if (downloadSpeed != null) "سرعت دانلود: ${
-                String.format(
-                    "%.2f",
-                    downloadSpeed
-                )
-            } Mbps" else "خطا در تست دانلود"
+                val downloadSpeed = withContext(Dispatchers.IO) {
+                    networkTester.getDownloadSpeed(website,3000000)
+                }
+                tv_speed_download.text = if (downloadSpeed != null) " ${
+                    String.format(
+                        "%.2f",
+                        downloadSpeed
+                    )
+                } Mbps" else "خطا "
+                Log.i("tenser",downloadSpeed.toString())
+                val uploadSpeed = withContext(Dispatchers.IO) {
+                    networkTester.getUploadSpeed(uploadUrl)
+                }
+                tv_speed_upload.text = if (uploadSpeed != null) "سرعت آپلود: ${
+                    String.format(
+                        "%.2f",
+                        uploadSpeed
+                    )
+                } " else "خطا در تست آپلود"
+                // برای پینگ: نیاز به پیاده سازی جداگانه دارید
+                // pingTextView.text = "قابلیت پینگ با okhttp به طور مستقیم وجود ندارد."
+        }
 
-            /*val uploadSpeed = withContext(Dispatchers.IO) {
-                networkTester.getUploadSpeed(uploadUrl)
-            }
-            tv_speed_upload.text = if (uploadSpeed != null) "سرعت آپلود: ${
-                String.format(
-                    "%.2f",
-                    uploadSpeed
-                )
-            } Mbps" else "خطا در تست آپلود"
-*/
-            // برای پینگ: نیاز به پیاده سازی جداگانه دارید
-            // pingTextView.text = "قابلیت پینگ با okhttp به طور مستقیم وجود ندارد."
         }
     }
 

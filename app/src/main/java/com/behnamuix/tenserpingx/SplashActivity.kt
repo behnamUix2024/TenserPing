@@ -21,7 +21,7 @@ class SplashActivity : AppCompatActivity() {
             val intent = Intent(this, MainActivity::class.java)
             startActivity(intent)
             finish()
-        }, 8000)
+        }, 4000)
     }
     private fun changeNavbarStyle() {
         val window = window

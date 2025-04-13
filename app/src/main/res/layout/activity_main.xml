@@ -54,9 +54,10 @@
         android:background="@drawable/bg_addr"
         android:ems="10"
         android:fontFamily="@font/vazir_bold"
-        android:hint="www.google.com"
+        android:hint="https://www.google.com"
         android:inputType="text|textWebEditText"
         android:padding="10dp"
+        android:text="https://httpbin.org/"
         android:textColor="@color/white"
         android:textColorHint="#646464"
         android:textSize="@dimen/body"
@@ -64,9 +65,9 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textView13" />
 
-    <LinearLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/card_ping"
-        android:layout_width="108dp"
+        android:layout_width="150dp"
         android:layout_height="100dp"
         android:background="@drawable/bg_card"
         android:orientation="vertical"
@@ -77,36 +78,65 @@
         app:layout_constraintTop_toBottomOf="@+id/et_addr"
         app:layout_constraintVertical_bias="0.110000014">
 
-        <ImageView
-            android:id="@+id/imageView8"
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_marginTop="8dp"
-            android:src="@drawable/icon_speedometer" />
+            android:layout_height="match_parent"
+            android:layout_marginStart="4dp"
+            android:layout_marginEnd="4dp"
+            android:orientation="vertical"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
 
-        <TextView
-            android:id="@+id/tv_ping"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:fontFamily="@font/sprint"
-            android:gravity="center"
-            android:text="0"
-            android:textColor="@color/white"
-            android:textSize="@dimen/h6" />
+            <ImageView
+                android:id="@+id/imageView8"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:src="@drawable/icon_speedometer" />
 
-        <TextView
-            android:id="@+id/textView1897"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:fontFamily="@font/sprint"
-            android:gravity="center"
-            android:text="m/s"
-            android:textColor="@color/white"
-            android:textSize="@dimen/small1" />
-    </LinearLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/tv_ping"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="2"
+                    android:fontFamily="@font/sprint"
+                    android:gravity="center"
+                    android:text="0"
+                    android:textColor="@color/white"
+                    android:textSize="@dimen/h6" />
+
+                <TextView
+                    android:id="@+id/textView1897"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:fontFamily="@font/sprint"
+                    android:gravity="center"
+                    android:text="m/s"
+                    android:textColor="@color/white"
+                    android:textSize="@dimen/small1" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/tv_status_ping"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/vazir_medium"
+                android:gravity="center"
+                android:text="پینگ"
+                android:textColor="@color/accent_color"
+                android:textColorLink="#00FFFFFF" />
+        </LinearLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <LinearLayout
         android:id="@+id/linearLayout3"
@@ -127,9 +157,8 @@
 
             <LinearLayout
                 android:id="@+id/card_download"
-                android:layout_width="100dp"
+                android:layout_width="150dp"
                 android:layout_height="91dp"
-                android:layout_marginStart="16dp"
                 android:background="@drawable/bg_card"
                 android:orientation="vertical"
                 android:padding="8dp"
@@ -171,7 +200,7 @@
 
             <LinearLayout
                 android:id="@+id/card_upload"
-                android:layout_width="100dp"
+                android:layout_width="150dp"
                 android:layout_height="91dp"
                 android:background="@drawable/bg_card"
                 android:orientation="vertical"
