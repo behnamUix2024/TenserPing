@@ -9,10 +9,26 @@
 
     <!-- TODO: Update blank fragment layout -->
 
+    <TextView
+        android:id="@+id/tv_ip"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        android:fontFamily="@font/sprint"
+        android:gravity="center"
+        android:text="000.000.000.000"
+        android:textColor="@color/color_block"
+        android:textSize="@dimen/h5"
+        app:layout_constraintBottom_toTopOf="@+id/linearLayout3"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView"
+        app:layout_constraintVertical_bias="0.32999998" />
+
     <ImageView
         android:id="@+id/imageView7"
-        android:layout_width="80dp"
-        android:layout_height="80dp"
+        android:layout_width="70dp"
+        android:layout_height="70dp"
         android:layout_marginStart="32dp"
         android:tint="#E57373"
         app:layout_constraintBottom_toBottomOf="@+id/lav_info"
@@ -27,6 +43,7 @@
         android:layout_width="80dp"
         android:layout_height="80dp"
         android:layout_marginEnd="32dp"
+        android:layout_marginBottom="32dp"
         android:tint="@color/white"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -50,7 +67,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="@+id/textView"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.25">
+        app:layout_constraintVertical_bias="0.31">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -88,10 +105,10 @@
                         android:id="@+id/tv_speed_download"
                         android:layout_width="0dp"
                         android:layout_height="match_parent"
-                        android:layout_weight="1.8"
+                        android:layout_weight="2"
                         android:fontFamily="@font/sprint"
                         android:gravity="center"
-                        android:text="12.03"
+                        android:text="--.--"
                         android:textColor="@color/white"
                         android:textSize="@dimen/body" />
 
@@ -148,8 +165,7 @@
                         android:layout_height="60dp"
                         android:layout_gravity="center"
                         android:scaleType="fitXY"
-                        android:src="@drawable/icon_speedometer"
-                        android:tint="@color/end_color" />
+                        android:src="@drawable/icon_speedometer" />
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -165,8 +181,8 @@
                             android:layout_weight="2"
                             android:fontFamily="@font/sprint"
                             android:gravity="center"
-                            android:text="1000"
-                            android:textColor="@color/end_color"
+                            android:text="----"
+                            android:textColor="@color/white"
                             android:textSize="@dimen/h6" />
 
                         <TextView
@@ -178,7 +194,7 @@
                             android:fontFamily="@font/sprint"
                             android:gravity="center"
                             android:text="m/s"
-                            android:textColor="@color/end_color"
+                            android:textColor="@color/white"
                             android:textSize="@dimen/small1" />
                     </LinearLayout>
 
@@ -228,10 +244,10 @@
                         android:id="@+id/tv_speed_upload"
                         android:layout_width="0dp"
                         android:layout_height="match_parent"
-                        android:layout_weight="1.8"
+                        android:layout_weight="2"
                         android:fontFamily="@font/sprint"
                         android:gravity="center"
-                        android:text="0.03"
+                        android:text="--.--"
                         android:textColor="@color/white"
                         android:textSize="@dimen/body" />
 
@@ -258,7 +274,6 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="32dp"
         android:layout_marginEnd="32dp"
-        android:background="@drawable/bg_addr"
         android:padding="10dp"
         app:layout_constraintBottom_toTopOf="@+id/vw_start"
         app:layout_constraintEnd_toEndOf="parent"
@@ -269,9 +284,9 @@
             android:id="@+id/geo_card"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="#22713A3A"
+            android:background="#3B000000"
             android:orientation="vertical"
-            android:padding="6dp"
+            android:padding="20dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="1.0"
@@ -287,7 +302,7 @@
 
             <TextView
                 android:id="@+id/textView3"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/vazir_fd_wol"
                 android:gravity="center"
@@ -296,11 +311,11 @@
                 android:textSize="@dimen/small1" />
 
             <TextView
-                android:id="@+id/textView2"
-                android:layout_width="wrap_content"
+                android:id="@+id/tv_city"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center"
-                android:text="Tehran"
+                android:text="Null"
                 android:textColor="#87FFFFFF"
                 android:textSize="@dimen/h6" />
         </LinearLayout>
@@ -317,7 +332,7 @@
         app:layout_constraintEnd_toEndOf="@+id/linearLayout3"
         app:layout_constraintStart_toStartOf="@+id/linearLayout3"
         app:layout_constraintTop_toBottomOf="@+id/linearLayout3"
-        app:layout_constraintVertical_bias="0.53">
+        app:layout_constraintVertical_bias="0.52">
 
         <TextView
             android:id="@+id/tv_status"
@@ -350,7 +365,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
-        android:layout_marginTop="32dp"
+        android:layout_marginTop="16dp"
         android:fontFamily="@font/sprint"
         android:text="@string/app_name"
         android:textColor="@color/white"
