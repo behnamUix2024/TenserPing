@@ -12,7 +12,7 @@
         android:icon="@drawable/icon_speed"
         android:label="@string/app_name"
         android:roundIcon="@drawable/icon_speed"
-        android:supportsRtl="true"
+        android:supportsRtl="false"
         android:theme="@style/Theme.TenserPingX"
         tools:targetApi="31">
         <activity

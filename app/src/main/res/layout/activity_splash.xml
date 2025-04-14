@@ -11,15 +11,26 @@
     <LinearLayout
         android:id="@+id/card_upload"
         android:layout_width="0dp"
-        android:layout_height="40dp"
+        android:layout_height="wrap_content"
         android:orientation="vertical"
         android:padding="8dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.9"
+
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/vw_start"
+        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="1.0">
+
+        <com.airbnb.lottie.LottieAnimationView
+            android:id="@+id/lav_loading"
+            android:layout_width="match_parent"
+            android:layout_height="100dp"
+            android:layout_marginTop="32dp"
+            android:layout_marginBottom="32dp"
+            app:lottie_autoPlay="true"
+            app:lottie_loop="true"
+            app:lottie_rawRes="@raw/loading" />
 
         <TextView
             android:id="@+id/tv_speed_upload"
@@ -27,9 +38,10 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_marginTop="6dp"
+            android:layout_marginBottom="6dp"
             android:fontFamily="@font/sprint"
             android:gravity="center"
-            android:text="v 1.1.1 (alpha)"
+            android:text="@string/splash_tv_version"
             android:textColor="@color/white"
             android:textSize="@dimen/small1" />
 
@@ -40,7 +52,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:fontFamily="@font/vazir_bold"
-        android:text="تنسر پینگ"
+        android:text="@string/splash_app_name"
         android:textColor="@color/white"
         android:textSize="@dimen/h4"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -51,6 +63,7 @@
         app:layout_constraintVertical_bias="0.44" />
 
     <ImageView
+        android:contentDescription="@string/splash"
         android:id="@+id/imageView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -58,27 +71,11 @@
         android:scaleX="1.5"
         android:scaleY="1.5"
         android:src="@drawable/icon_speedometer"
-        android:tint="@color/white"
         app:layout_constraintBottom_toBottomOf="@+id/textView"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toEndOf="@+id/textView"
-        app:layout_constraintTop_toTopOf="@+id/textView" />
+        app:layout_constraintTop_toTopOf="@+id/textView"
+        app:tint="@color/white" />
 
-    <ProgressBar
-        android:id="@+id/progressBar"
-        style="?android:attr/progressBarStyleHorizontal"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginEnd="8dp"
-        android:indeterminateOnly="true"
-        android:indeterminateTint="@color/end_color"
-        android:progressTint="@color/start_color"
-        android:secondaryProgressTint="@color/start_color"
-        app:layout_constraintBottom_toTopOf="@+id/card_upload"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView"
-        app:layout_constraintVertical_bias="0.69" />
 </androidx.constraintlayout.widget.ConstraintLayout>

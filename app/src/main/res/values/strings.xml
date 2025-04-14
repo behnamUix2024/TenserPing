@@ -1,6 +1,9 @@
 <resources>
-    <string name="app_name">TenserPingX</string>
+    <string name="app_name">TenserPing</string>
     <string name="str_block_net">کاربر عزیز اینترنت شما متصل نیست لطفا بعد از پیگیری های لازم بر روی دکمه زیر کلیک کنید</string>
     <string name="str_btn_block">تلاش مجدد</string>
+    <string name="splash_app_name">تنسر پینگ</string>
+    <string name="splash">splash</string>
+    <string name="splash_tv_version">v 1.1.1 (alpha)</string>
 
 </resources>

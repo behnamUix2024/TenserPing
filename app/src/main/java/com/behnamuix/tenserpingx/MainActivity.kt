@@ -31,7 +31,6 @@ import kotlinx.coroutines.withContext
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
-    private lateinit var et_addr: EditText
     private lateinit var lav_info: LottieAnimationView
     private lateinit var tv_speed_download: TextView
     private lateinit var tv_speed_upload: TextView
@@ -82,7 +81,6 @@ class MainActivity : AppCompatActivity() {
         registerReceiver(networkReceiver, IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION))
         lav_info=binding.lavInfo
         networkTester = InternetSpeedTester(this)
-        et_addr = binding.etAddr
         tv_speed_upload = binding.tvSpeedUpload
         tv_speed_download = binding.tvSpeedDownload
         vw_start = binding.vwStart
@@ -117,17 +115,12 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun testStart() {
-        val website = et_addr.text.toString()
-        if(!website.startsWith("https://")){
-            Toast.makeText(this,"لطفا ادرس اینترنتی را با https:// شروع کنید",Toast.LENGTH_SHORT).show()
-            et_addr.requestFocus()
-        }else{
             val uploadUrl = "https://httpbin.org/post" // آدرس سرور آپلود خود را اینجا قرار دهید
 
             CoroutineScope(Dispatchers.Main).launch {
-                tv_speed_download.text = "در حال تست دانلود..."
-                tv_speed_upload.text = "در حال تست آپلود..."
-                tv_status_ping.text = "در حال گرفتن پینگ ..."
+                tv_speed_download.text = "..."
+                tv_speed_upload.text = "..."
+                tv_status_ping.text = "در حال محاسبه پینگ ..."
                 val pingResult = withContext(Dispatchers.IO) {
                     networkTester.ping()
                 }
@@ -135,7 +128,7 @@ class MainActivity : AppCompatActivity() {
                 tv_status_ping.text = "پینگ"
 
                 val downloadSpeed = withContext(Dispatchers.IO) {
-                    networkTester.getDownloadSpeed(website,3000000)
+                    networkTester.getDownloadSpeed("https://httpbin.org/",3000000)
                 }
                 tv_speed_download.text = if (downloadSpeed != null) " ${
                     String.format(
@@ -157,7 +150,7 @@ class MainActivity : AppCompatActivity() {
                 // pingTextView.text = "قابلیت پینگ با okhttp به طور مستقیم وجود ندارد."
         }
 
-        }
+
     }
 
     private fun showNoInternetDialog() {
