@@ -17,7 +17,7 @@ import kotlin.random.Random
 
 class InternetSpeedTester(private val ctx: Context) {
     private val client = OkHttpClient()
-    suspend fun ping(host: String = "8.8.8.8", count: Int = 4): Long? = withContext(Dispatchers.IO) {
+    suspend fun getPingSpeed(host: String = "216.239.38.120", count: Int = 4): Long? = withContext(Dispatchers.IO) {
         try {
             val startTime = System.currentTimeMillis()
             val inetAddress = InetAddress.getByName(host)

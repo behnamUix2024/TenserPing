@@ -235,7 +235,7 @@ class MainActivity : AppCompatActivity() {
             tv_status_ping.text = "پینگ"
 
             val downloadSpeed = withContext(Dispatchers.IO) {
-                networkTester.getDownloadSpeed(Url,3000000)
+                networkTester.getDownloadSpeed("216.239.38.120")
             }
             tv_speed_download.text = if (downloadSpeed != null) " ${
                 String.format(
