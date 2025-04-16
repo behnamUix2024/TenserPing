@@ -39,6 +39,7 @@ android {
 }
 
 dependencies {
+    implementation("com.github.bumptech.glide:glide:4.16.0")
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
@@ -49,9 +50,8 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
-    implementation("com.squareup.okhttp3:okhttp:4.12.0")
-    implementation("com.airbnb.android:lottie:6.6.6")
-//    implementation("com.google.android.gms:play-services-location:22.0.1") // جدیدترین نسخه را بررسی کنید
+    implementation(libs.okhttp)
+    implementation(libs.lottie)
 
 
 }

@@ -2,12 +2,33 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/frameLayout3"
+    android:id="@+id/img_"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@drawable/bg">
+    android:layout_height="match_parent">
 
     <!-- TODO: Update blank fragment layout -->
+
+    <ImageView
+        android:id="@+id/img_bg"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/bg2" />
+
+    <ImageView
+        android:id="@+id/img_hist"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/icon_clock_history"
+        app:layout_constraintBottom_toBottomOf="@+id/textView"
+        app:layout_constraintEnd_toEndOf="@+id/linearLayout3"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toEndOf="@+id/textView"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="1.0" />
 
     <TextView
         android:id="@+id/tv_ip"
@@ -29,24 +50,22 @@
         android:id="@+id/imageView7"
         android:layout_width="70dp"
         android:layout_height="70dp"
-        android:layout_marginStart="32dp"
-        android:tint="#E57373"
         app:layout_constraintBottom_toBottomOf="@+id/lav_info"
         app:layout_constraintEnd_toStartOf="@+id/lav_info"
         app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintStart_toStartOf="@+id/linearLayout3"
         app:layout_constraintTop_toTopOf="@+id/lav_info"
-        app:srcCompat="@drawable/icon_escape" />
+        app:srcCompat="@drawable/icon_escape"
+        app:tint="#E57373" />
 
     <com.airbnb.lottie.LottieAnimationView
         android:id="@+id/lav_info"
         android:layout_width="80dp"
         android:layout_height="80dp"
-        android:layout_marginEnd="32dp"
         android:layout_marginBottom="32dp"
         android:tint="@color/white"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintEnd_toEndOf="@+id/linearLayout3"
         app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/vw_start"
@@ -298,7 +317,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
                 android:layout_gravity="center"
-                app:srcCompat="@drawable/icon_geo" />
+                app:srcCompat="@drawable/icon_ethernet" />
 
             <TextView
                 android:id="@+id/textView3"
@@ -306,16 +325,16 @@
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/vazir_fd_wol"
                 android:gravity="center"
-                android:text="موقعیت"
+                android:text="نوع شبکه"
                 android:textColor="@color/white"
                 android:textSize="@dimen/small1" />
 
             <TextView
-                android:id="@+id/tv_city"
+                android:id="@+id/tv_type"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center"
-                android:text="Null"
+                android:text="-----"
                 android:textColor="#87FFFFFF"
                 android:textSize="@dimen/h6" />
         </LinearLayout>
