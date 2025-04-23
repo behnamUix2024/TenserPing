@@ -1,6 +1,7 @@
 package com.behnamuix.tenserpingx
 
 import android.Manifest
+import android.app.Dialog
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.DialogInterface
@@ -26,6 +27,7 @@ import androidx.core.view.WindowCompat
 import androidx.lifecycle.lifecycleScope
 import com.airbnb.lottie.LottieAnimationView
 import com.behnamuix.tenserping.Network.NetworkCheck
+import com.behnamuix.tenserpingx.Dialog.HistoryDialogFragment
 import com.behnamuix.tenserpingx.Network.InternetSpeedTester
 import com.behnamuix.tenserpingx.Network.Location.UserLocationProvider
 import com.behnamuix.tenserpingx.databinding.ActivityMainBinding
@@ -42,6 +44,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var lav_info: LottieAnimationView
     private lateinit var tv_speed_download: TextView
     private lateinit var img_bg: ImageView
+    private lateinit var img_comment: ImageView
     private lateinit var img_hist: ImageView
     private lateinit var tv_ip: TextView
     private lateinit var tv_type: TextView
@@ -84,6 +87,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun config() {
+        img_comment=binding.imgComment
         registerReceiver(networkReceiver, IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION))
         img_bg = binding.imgBg
         img_hist = binding.imgHist
@@ -97,27 +101,31 @@ class MainActivity : AppCompatActivity() {
         tv_speed_upload = binding.tvSpeedUpload
         tv_speed_download = binding.tvSpeedDownload
         vw_start = binding.vwStart
+        img_comment.setOnClickListener(){
+            val intent=Intent(this,CommentActivity::class.java)
+            startActivity(intent)
+        }
         img_hist.setOnClickListener() {
-            val pay = false
+            val pay = true
             if (pay) {
                 showHistDialog()
 
             } else {
                 val payAlert = AlertDialog.Builder(this, R.style.cardAlertDialog)
-                payAlert.setTitle("توجه")
+                payAlert.setTitle(R.string.pay_alert_title)
                 payAlert.setIcon(R.drawable.icon_pro)
-                payAlert.setMessage("برای استفاده از ویژگی تاریخچه شما کاربر عزیز میتوانید از قسمت پایین اشتراک خریداری کنید")
-                payAlert.setPositiveButton("خریداری اشتراک", null)
-                payAlert.setNegativeButton("بی خیال", null)
+                payAlert.setMessage(R.string.pay_alert_msg)
+                payAlert.setPositiveButton(R.string.pay_alert_btn_positive_text, null)
+                payAlert.setNegativeButton(R.string.pay_alert_btn_negative_text, null)
                 payAlert.show()
             }
         }
         lav_info.setOnClickListener() {
 
 
-            val dialog = AlertDialog.Builder(this, R.style.cardAlertDialog)
-            dialog.setMessage("تَنسَر  روحانی زردشتی در اواخرِ عصرِ اشکانی و از نزدیکان و حامیان اردشیر بابکان بود. تنسر پس از قدرت  گیری اردشیر بابکان به او پیوست و سمت هیربدانْ هیربد را — که بالاترین مقام در میان هیربدان بود — داشت. او نویسندهٔ نامهٔ تنسر به گشنسب است که اصل آن به زبان فارسی میانه بود.")
-            dialog.setTitle("تنسر چه کسی بود؟")
+            val dialog = AlertDialog.Builder(this,R.style.cardAlertDialog)
+            dialog.setMessage(R.string.info_dialog_msg)
+            dialog.setTitle(R.string.info_dialog_title)
             dialog.setNegativeButton("باشه", DialogInterface.OnClickListener { dialog, id ->
                 dialog.dismiss()
             })
@@ -126,7 +134,7 @@ class MainActivity : AppCompatActivity() {
                 DialogInterface.OnClickListener { dialog, id ->
                     val intent = Intent(
                         "android.intent.action.VIEW",
-                        Uri.parse("https://behnamuix2024.com/letter.html")
+                        Uri.parse("https://behnamuix2024.com/policies/policy_tenser.html")
                     )
                     val b = Bundle()
                     b.putBoolean("new_window", true) //sets new window
@@ -134,7 +142,7 @@ class MainActivity : AppCompatActivity() {
                     startActivity(intent)
                 })
             dialog.setNeutralButton(
-                "بیوگرافی توسعه دهنده",
+                "درباره ما",
                 DialogInterface.OnClickListener { dialog, id ->
                     val intent = Intent(
                         "android.intent.action.VIEW",
@@ -158,25 +166,9 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun showHistDialog() {
-        val builder = AlertDialog.Builder(this).setView(R.layout.hist_dialog)
-        // ... تنظیمات دیگر دیالوگ
-        val dialog = builder.create()
-
-// دسترسی به Window شیء دیالوگ
-        val window = dialog.window
-        if (window != null) {
-            // تنظیم عرض دیالوگ (به عنوان مثال، 80% عرض صفحه)
-            val width = (resources.displayMetrics.widthPixels * 0.8).toInt()
-            window.setLayout(width, WindowManager.LayoutParams.WRAP_CONTENT)
-
-            // تنظیم موقعیت دیالوگ (به عنوان مثال، در مرکز صفحه - پیش‌فرض)
-            window.setGravity(Gravity.BOTTOM)
-
-            // تنظیم انیمیشن ورود و خروج (اختیاری)
-            // window.attributes.windowAnimations = R.style.DialogAnimation
+        val dialog = HistoryDialogFragment().apply {
         }
-
-        dialog.show()
+        dialog.show(supportFragmentManager, "History")
     }
 
     private fun ipDetect() {
@@ -187,7 +179,7 @@ class MainActivity : AppCompatActivity() {
                 tv_ip.text = ip
             } else {
                 Log.w("LocationInfo", "Failed to get IP address.")
-                tv_ip.text = "متاسفانه IP پیدا نشد"
+                tv_ip.text = resources.getString(R.string.ip_detect_no_value)
             }
             if (ActivityCompat.checkSelfPermission(
                     applicationContext, Manifest.permission.READ_PHONE_STATE
@@ -211,11 +203,11 @@ class MainActivity : AppCompatActivity() {
                 this@MainActivity, Manifest.permission.READ_PHONE_STATE
             )
         ) {
-            AlertDialog.Builder(this).setTitle("درخواست مجوز")
-                .setMessage("برای تشخیص نوع شبکه لطفا به تنسرپینگ دسترسی بدهید").setPositiveButton(
-                    "دسترسی میدم"
+            AlertDialog.Builder(this).setTitle(R.string.dialog_req_perm_title)
+                .setMessage(R.string.pay_alert_msg).setPositiveButton(
+                    R.string.pay_alert_btn_positive_text
                 ) { dialogInterface, i -> req() }.setNegativeButton(
-                    "لغو"
+                    R.string.dialog_req_perm_negative_btn
                 ) { dialogInterface, i -> dialogInterface.dismiss() }.create().show()
         } else {
             req()
@@ -227,7 +219,7 @@ class MainActivity : AppCompatActivity() {
         CoroutineScope(Dispatchers.Main).launch {
             tv_speed_download.text = "..."
             tv_speed_upload.text = "..."
-            tv_status_ping.text = "در حال محاسبه سرعت پینگ ..."
+            tv_status_ping.text = resources.getString(R.string.ping_test_status)
             val pingResult = withContext(Dispatchers.IO) {
                 networkTester.getPingSpeed()
             }
@@ -235,7 +227,7 @@ class MainActivity : AppCompatActivity() {
             tv_status_ping.text = "پینگ"
 
             val downloadSpeed = withContext(Dispatchers.IO) {
-                networkTester.getDownloadSpeed("216.239.38.120")
+                networkTester.getDownloadSpeed(Url)
             }
             tv_speed_download.text = if (downloadSpeed != null) " ${
                 String.format(
@@ -244,7 +236,7 @@ class MainActivity : AppCompatActivity() {
             } " else "خطا "
             Log.i("tenser", downloadSpeed.toString())
             val uploadSpeed = withContext(Dispatchers.IO) {
-                networkTester.getUploadSpeed(Url)
+                networkTester.getUploadSpeed("https://httpbin.org/post")
             }
             tv_speed_upload.text = if (uploadSpeed != null) " ${
                 String.format(

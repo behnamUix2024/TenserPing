@@ -6,4 +6,24 @@
     <string name="splash">splash</string>
     <string name="splash_tv_version">v 1.1.1 (alpha)</string>
 
+
+    <string name="info_dialog_title">تنسر چه کسی بود؟</string>
+    <string name="info_dialog_msg"> تَنسَر  روحانی زردشتی در اواخرِ عصرِ اشکانی و از نزدیکان و حامیان اردشیر بابکان بود. تنسر پس از قدرت  گیری اردشیر بابکان به او پیوست و سمت هیربدانْ هیربد را — که بالاترین مقام در میان هیربدان بود — داشت. او نویسندهٔ نامهٔ تنسر به گشنسب است که اصل آن به زبان فارسی میانه بود.</string>
+
+    <string name="pay_alert_title">توجه</string>
+    <string name="pay_alert_msg">برای استفاده از ویژگی تاریخچه شما کاربر عزیز میتوانید از قسمت پایین اشتراک خریداری کنید</string>
+    <string name="pay_alert_btn_positive_text">خریداری اشتراک</string>
+    <string name="pay_alert_btn_negative_text">بی خیال</string>
+
+
+    <string name="ip_detect_no_value">متاسفانه IP پیدا نشد</string>
+    <string name="dialog_req_perm_title">درخواست مجوز</string>
+    <string name="dialog_req_perm_msg">برای تشخیص نوع شبکه لطفا به تنسرپینگ دسترسی بدهید</string>
+    <string name="dialog_req_perm_posetive_btn">دسترسی میدم</string>
+    <string name="dialog_req_perm_negative_btn">لغو</string>
+    <string name="ping_test_status">در حال محاسبه سرعت پینگ ...</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+
+
 </resources>

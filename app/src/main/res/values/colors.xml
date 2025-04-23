@@ -14,5 +14,6 @@
     <color name="end_color">#3498db</color>
     <color name="transparent">#00000000</color>
     <color name="black_mat">#424242</color>
+    <color name="stripped">#EEEEEE</color>
 
 </resources>

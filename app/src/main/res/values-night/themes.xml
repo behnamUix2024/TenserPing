@@ -8,4 +8,14 @@
     <style name="CustomAlertDialog" parent="Theme.AppCompat.Light.Dialog.Alert">
         <item name="android:windowBackground">@android:color/transparent</item>
     </style>
+    <style name="CustomDialog" parent="Theme.AppCompat.Light.Dialog">
+        <item name="android:windowBackground">@android:color/transparent</item>
+    </style>
+    <style name="cardAlertDialog" parent="Theme.AppCompat.Light.Dialog.Alert">
+        <item name="backgroundColor">@android:color/transparent</item>
+        <item name="cornerRadius">10dp</item>
+        <item name="elevation">4dp</item>
+        <item name="textFillColor">@color/black_mat</item>
+        <item name="fontFamily">@font/vazir_fd_wol</item>
+    </style>
 </resources>
