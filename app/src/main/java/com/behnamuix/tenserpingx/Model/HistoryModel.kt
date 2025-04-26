@@ -1,8 +1,8 @@
 package com.behnamuix.tenserpingx.Model
 
 data class HistoryModel(
-    val date:String,
-    val ip:String,
-    val type:String,
-    val ping:String
+    val hist_date:String,
+    val hist_ip:String,
+    val hist_type:String,
+    val hist_ping:String
 )

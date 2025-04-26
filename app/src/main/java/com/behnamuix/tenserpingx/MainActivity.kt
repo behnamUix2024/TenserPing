@@ -1,7 +1,7 @@
 package com.behnamuix.tenserpingx
 
 import android.Manifest
-import android.app.Dialog
+import android.app.ProgressDialog
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.DialogInterface
@@ -11,9 +11,8 @@ import android.content.pm.PackageManager
 import android.net.ConnectivityManager
 import android.net.Uri
 import android.os.Bundle
+import android.os.CountDownTimer
 import android.util.Log
-import android.view.Gravity
-import android.view.WindowManager
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
@@ -30,19 +29,39 @@ import com.behnamuix.tenserping.Network.NetworkCheck
 import com.behnamuix.tenserpingx.Dialog.HistoryDialogFragment
 import com.behnamuix.tenserpingx.Network.InternetSpeedTester
 import com.behnamuix.tenserpingx.Network.Location.UserLocationProvider
+import com.behnamuix.tenserpingx.Retrofit.ApiResponse
+import com.behnamuix.tenserpingx.Retrofit.ApiService
 import com.behnamuix.tenserpingx.databinding.ActivityMainBinding
+import com.google.android.material.button.MaterialButton
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Locale
+import java.util.TimeZone
 
 
 class MainActivity : AppCompatActivity() {
+    var DATE = ""
+    var IP = ""
+    var NET_TYPE = ""
+    var PING_SPEED = ""
+    var DOWN_SPEED = ""
+    var UP_SPEED = ""
+    private val URL = "https://behnamuix2024.com/api/"
     private val PHONE_STATUS_REQUEST_CODE = 1
     private lateinit var binding: ActivityMainBinding
-
     private lateinit var lav_info: LottieAnimationView
     private lateinit var tv_speed_download: TextView
+    private lateinit var btn_save_hist: MaterialButton
+    private lateinit var retrofit: Retrofit
     private lateinit var img_bg: ImageView
     private lateinit var img_comment: ImageView
     private lateinit var img_hist: ImageView
@@ -87,7 +106,12 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun config() {
-        img_comment=binding.imgComment
+
+        retrofit =
+            Retrofit.Builder().baseUrl(URL).addConverterFactory(GsonConverterFactory.create())
+                .build()
+        btn_save_hist = binding.btnSaveHist
+        img_comment = binding.imgComment
         registerReceiver(networkReceiver, IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION))
         img_bg = binding.imgBg
         img_hist = binding.imgHist
@@ -101,8 +125,8 @@ class MainActivity : AppCompatActivity() {
         tv_speed_upload = binding.tvSpeedUpload
         tv_speed_download = binding.tvSpeedDownload
         vw_start = binding.vwStart
-        img_comment.setOnClickListener(){
-            val intent=Intent(this,CommentActivity::class.java)
+        img_comment.setOnClickListener() {
+            val intent = Intent(this, CommentActivity::class.java)
             startActivity(intent)
         }
         img_hist.setOnClickListener() {
@@ -123,18 +147,17 @@ class MainActivity : AppCompatActivity() {
         lav_info.setOnClickListener() {
 
 
-            val dialog = AlertDialog.Builder(this,R.style.cardAlertDialog)
+            val dialog = AlertDialog.Builder(this, R.style.cardAlertDialog)
             dialog.setMessage(R.string.info_dialog_msg)
             dialog.setTitle(R.string.info_dialog_title)
             dialog.setNegativeButton("باشه", DialogInterface.OnClickListener { dialog, id ->
                 dialog.dismiss()
             })
             dialog.setPositiveButton(
-                "سیاست های حفظ حریم خصوصی",
-                DialogInterface.OnClickListener { dialog, id ->
+                "سیاست های حفظ حریم خصوصی", DialogInterface.OnClickListener { dialog, id ->
                     val intent = Intent(
                         "android.intent.action.VIEW",
-                        Uri.parse("https://behnamuix2024.com/policies/policy_tenser.html")
+                        Uri.parse("https://behnamuix2024.com/api/policy.html")
                     )
                     val b = Bundle()
                     b.putBoolean("new_window", true) //sets new window
@@ -142,11 +165,10 @@ class MainActivity : AppCompatActivity() {
                     startActivity(intent)
                 })
             dialog.setNeutralButton(
-                "درباره ما",
-                DialogInterface.OnClickListener { dialog, id ->
+                "درباره ما", DialogInterface.OnClickListener { dialog, id ->
                     val intent = Intent(
                         "android.intent.action.VIEW",
-                        Uri.parse("https://behnamuix2024.com/bio.html")
+                        Uri.parse("https://behnamuix2024.com/api/bio.html")
                     )
                     val b = Bundle()
                     b.putBoolean("new_window", true) //sets new window
@@ -158,16 +180,100 @@ class MainActivity : AppCompatActivity() {
         vw_start.setOnClickListener() {
             testStart()
             ipDetect()
+            DATE = getDate()
 
+
+        }
+        btn_save_hist.setOnClickListener() {
+            if (PING_SPEED != "") {
+                getHistData()
+
+            } else {
+                Toast.makeText(
+                    this,
+                    "داده ها بارگزاری نشده اند لطفا بر روی شروع ضربه بزنید!",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
 
         }
 
 
     }
 
+
+    private fun getHistData() {
+        DATE = getDate()
+        val builder1 = AlertDialog.Builder(this, R.style.cardAlertDialog)
+        builder1.setMessage("آیا شما میخواهید داده ها در تاریخچه ذخیره شود؟")
+        builder1.setCancelable(true)
+
+        builder1.setPositiveButton(
+            "بله"
+        ) { dialog, id -> insertToHistDb(DATE, IP, NET_TYPE, PING_SPEED) }
+
+        builder1.setNegativeButton(
+            "خیر"
+        ) { dialog, id -> dialog.cancel() }
+
+        val alert11 = builder1.create()
+        alert11.show()
+
+    }
+
+    private fun insertToHistDb(date: String, ip: String, netType: String, pingSpeed: String) {
+        Log.d("ALPHA", "$date$ip/$netType/$pingSpeed / $DOWN_SPEED ")
+
+        val apiService = retrofit.create(ApiService::class.java)
+        val call = apiService.sendHist(
+            date, netType, ip, pingSpeed
+        )
+        call.enqueue(object : Callback<ApiResponse> {
+            override fun onResponse(call: Call<ApiResponse>, response: Response<ApiResponse>) {
+                if (response.isSuccessful) {
+                    val apiResponse = response.body()
+                    if (response.body()?.status.toString() == "success") {
+                        Toast.makeText(
+                            applicationContext,
+                            "داده ها در قسمت تاریخچه ذخیره شدند",
+                            Toast.LENGTH_LONG
+                        ).show()
+
+
+                    } else {
+                        Toast.makeText(
+                            applicationContext, apiResponse.toString(), Toast.LENGTH_LONG
+                        ).show()
+
+                    }
+
+                } else {
+                    Toast.makeText(applicationContext, "خطا!", Toast.LENGTH_LONG).show()
+
+                }
+            }
+
+            override fun onFailure(call: Call<ApiResponse>, t: Throwable) {
+                Toast.makeText(applicationContext, t.message.toString(), Toast.LENGTH_LONG).show()
+                Log.d("ALPHA", t.message.toString())
+
+            }
+
+        })
+
+
+    }
+
+
+    private fun getDate(): String {
+        val dte = Calendar.getInstance(TimeZone.getTimeZone("Asia/Tehran")).time
+        val formatter = SimpleDateFormat("yyyy/MM/dd  HH:mm:ss", Locale.getDefault())
+        val date = formatter.format(dte)
+        return date
+    }
+
     private fun showHistDialog() {
-        val dialog = HistoryDialogFragment().apply {
-        }
+        val dialog = HistoryDialogFragment().apply {}
         dialog.show(supportFragmentManager, "History")
     }
 
@@ -177,6 +283,7 @@ class MainActivity : AppCompatActivity() {
             val ip = locationProvider.getUserIPAddress()
             if (ip != null) {
                 tv_ip.text = ip
+                IP = ip
             } else {
                 Log.w("LocationInfo", "Failed to get IP address.")
                 tv_ip.text = resources.getString(R.string.ip_detect_no_value)
@@ -191,11 +298,13 @@ class MainActivity : AppCompatActivity() {
             } else {
                 val netType = locationProvider.getNetworkType()
                 tv_type.text = netType
+                NET_TYPE = netType
 
             }
 
 
         }
+
     }
 
     private fun reqPerm() {
@@ -223,26 +332,35 @@ class MainActivity : AppCompatActivity() {
             val pingResult = withContext(Dispatchers.IO) {
                 networkTester.getPingSpeed()
             }
-            tv_ping.text = if (pingResult != null) " ${pingResult} " else "خطا "
+            tv_ping.text = if (pingResult != null) " ${pingResult} " else "خطا"
+            var p = pingResult.toString()
+            PING_SPEED = "$p M/s"
             tv_status_ping.text = "پینگ"
 
             val downloadSpeed = withContext(Dispatchers.IO) {
                 networkTester.getDownloadSpeed(Url)
             }
+
             tv_speed_download.text = if (downloadSpeed != null) " ${
                 String.format(
                     "%.2f", downloadSpeed
                 )
-            } " else "خطا "
+            } " else "خطا"
             Log.i("tenser", downloadSpeed.toString())
             val uploadSpeed = withContext(Dispatchers.IO) {
-                networkTester.getUploadSpeed("https://httpbin.org/post")
+                networkTester.getUploadSpeed("https://httpbin.org/")
             }
             tv_speed_upload.text = if (uploadSpeed != null) " ${
                 String.format(
                     "%.2f", uploadSpeed
                 )
-            } " else "خطا "
+            } " else "خطا"
+            DOWN_SPEED = String.format(
+                "%.2f", downloadSpeed
+            )
+            UP_SPEED = String.format(
+                "%.2f", uploadSpeed
+            )
         }
 
 
@@ -302,6 +420,7 @@ class MainActivity : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
         unregisterReceiver(networkReceiver) // حذف ثبت Receiver
+
 
     }
 }

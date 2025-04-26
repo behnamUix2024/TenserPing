@@ -36,10 +36,10 @@ class HistoryDialogAdapter(val listModel:List<HistoryModel>, val context: Contex
                 holder.card_bg_hist.setCardBackgroundColor(holder.card_bg_hist.context.getColor(R.color.stripped))
 
             }
-            holder.tv_date.text = currentItem.date
-            holder.tv_type.text = currentItem.type
-            holder.tv_ip.text = currentItem.ip
-            holder.tv_ping.text = currentItem.ping
+            holder.tv_date.text = currentItem.hist_date
+            holder.tv_type.text = currentItem.hist_type
+            holder.tv_ip.text = currentItem.hist_ip
+            holder.tv_ping.text = currentItem.hist_ping
         }
 
     private fun getEven(position: Int): Boolean {

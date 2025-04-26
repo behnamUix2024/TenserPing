@@ -48,6 +48,7 @@ class InternetSpeedTester(private val ctx: Context) {
      * اندازه‌گیری سرعت دانلود از یک URL مشخص و برگرداندن سرعت در مگابیت بر ثانیه (Mbps).
      * در صورت بروز خطا، null برمی‌گرداند.
      */
+
     suspend fun getDownloadSpeed(url: String, fileSizeIInByte: Long = 10 * 1024 * 1024): Double? =
         withContext(Dispatchers.IO) {
             val req = Request.Builder().url(url).build()
@@ -82,7 +83,7 @@ class InternetSpeedTester(private val ctx: Context) {
 
     suspend fun getUploadSpeed(
         uploadUrl: String,
-        fileSizeInBytes: Long = 1 * 1024 * 1024
+        fileSizeInBytes: Long = 10 * 1024 * 1024
     ): Double? = withContext(Dispatchers.IO) {
         val randomBytes = ByteArray(fileSizeInBytes.toInt())
         Random.Default.nextBytes(randomBytes)
