@@ -9,9 +9,10 @@ import retrofit2.http.Query
 
 interface ApiService {
     @POST("get_hist.php")
-
     fun getHist(): Call<ApiResponseJson>
 
+    @POST("get_ping.php")
+    suspend fun getPing():ApiJsonPingResponse
 
     @GET("send_hist.php")
     fun sendHist(

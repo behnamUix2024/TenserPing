@@ -43,21 +43,7 @@
         app:layout_constraintTop_toTopOf="@+id/img_hist"
         app:layout_constraintVertical_bias="1.0" />
 
-    <TextView
-        android:id="@+id/tv_ip"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="32dp"
-        android:fontFamily="@font/sprint"
-        android:gravity="center"
-        android:text="000.000.000.000"
-        android:textColor="@color/color_block"
-        android:textSize="@dimen/h5"
-        app:layout_constraintBottom_toTopOf="@+id/linearLayout3"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView"
-        app:layout_constraintVertical_bias="0.32999998" />
+
 
     <ImageView
         android:id="@+id/imageView7"
@@ -409,6 +395,21 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.050000012" />
+    <TextView
+        android:id="@+id/tv_ip"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        android:fontFamily="@font/sprint"
+        android:gravity="center"
+        android:text="000.000.000.000"
+        android:textColor="@color/color_block"
+        android:textSize="@dimen/h5"
+        app:layout_constraintBottom_toTopOf="@+id/linearLayout3"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView"
+        app:layout_constraintVertical_bias="0.32999998" />
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btn_save_hist"
@@ -425,22 +426,6 @@
         app:layout_constraintBottom_toTopOf="@+id/vw_start"
         app:layout_constraintEnd_toStartOf="@+id/constraintLayout"
         app:layout_constraintStart_toStartOf="@+id/linearLayout3"
-        app:layout_constraintTop_toBottomOf="@+id/linearLayout3" />
-
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/btn_save_hist2"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:backgroundTint="@color/black"
-        android:drawableTop="@drawable/icon_clock_history"
-        android:fontFamily="@font/vazir_medium"
-        android:text="خروجی Excel بگیر"
-        android:textColor="@color/white"
-        android:textSize="@dimen/small2"
-        app:cornerRadius="8dp"
-        app:layout_constraintBottom_toTopOf="@+id/vw_start"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/constraintLayout"
         app:layout_constraintTop_toBottomOf="@+id/linearLayout3" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

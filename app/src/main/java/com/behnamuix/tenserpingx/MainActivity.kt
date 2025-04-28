@@ -1,28 +1,32 @@
 package com.behnamuix.tenserpingx
 
 import android.Manifest
-import android.app.ProgressDialog
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
+import android.graphics.Color
 import android.net.ConnectivityManager
 import android.net.Uri
 import android.os.Bundle
-import android.os.CountDownTimer
 import android.util.Log
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.WindowCompat
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.lifecycleScope
 import com.airbnb.lottie.LottieAnimationView
 import com.behnamuix.tenserping.Network.NetworkCheck
@@ -32,6 +36,10 @@ import com.behnamuix.tenserpingx.Network.Location.UserLocationProvider
 import com.behnamuix.tenserpingx.Retrofit.ApiResponse
 import com.behnamuix.tenserpingx.Retrofit.ApiService
 import com.behnamuix.tenserpingx.databinding.ActivityMainBinding
+import com.github.mikephil.charting.charts.LineChart
+import com.github.mikephil.charting.data.Entry
+import com.github.mikephil.charting.data.LineData
+import com.github.mikephil.charting.data.LineDataSet
 import com.google.android.material.button.MaterialButton
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -49,6 +57,9 @@ import java.util.TimeZone
 
 
 class MainActivity : AppCompatActivity() {
+
+
+    private lateinit var motoast: MoToast
     var DATE = ""
     var IP = ""
     var NET_TYPE = ""
@@ -106,7 +117,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun config() {
-
+        motoast = MoToast(this)
         retrofit =
             Retrofit.Builder().baseUrl(URL).addConverterFactory(GsonConverterFactory.create())
                 .build()
@@ -189,11 +200,7 @@ class MainActivity : AppCompatActivity() {
                 getHistData()
 
             } else {
-                Toast.makeText(
-                    this,
-                    "داده ها بارگزاری نشده اند لطفا بر روی شروع ضربه بزنید!",
-                    Toast.LENGTH_SHORT
-                ).show()
+                motoast.MoWarning(msg = " داده ها بارگزاری نشده اند لطفا بر روی شروع ضربه بزنید!")
             }
 
         }
@@ -222,6 +229,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun insertToHistDb(date: String, ip: String, netType: String, pingSpeed: String) {
+
         Log.d("ALPHA", "$date$ip/$netType/$pingSpeed / $DOWN_SPEED ")
 
         val apiService = retrofit.create(ApiService::class.java)
@@ -232,30 +240,26 @@ class MainActivity : AppCompatActivity() {
             override fun onResponse(call: Call<ApiResponse>, response: Response<ApiResponse>) {
                 if (response.isSuccessful) {
                     val apiResponse = response.body()
-                    if (response.body()?.status.toString() == "success") {
-                        Toast.makeText(
-                            applicationContext,
-                            "داده ها در قسمت تاریخچه ذخیره شدند",
-                            Toast.LENGTH_LONG
-                        ).show()
+                    if (apiResponse?.status.toString() == "success") {
+
+                        motoast.MoSuccess(msg = "داده ها در قسمت تاریخچه ذخیره شدند")
 
 
                     } else {
-                        Toast.makeText(
-                            applicationContext, apiResponse.toString(), Toast.LENGTH_LONG
-                        ).show()
+                        motoast.MoError(msg = "مشکلی در دریافت اطلاعات وجود دارد")
+
 
                     }
 
                 } else {
-                    Toast.makeText(applicationContext, "خطا!", Toast.LENGTH_LONG).show()
+                    motoast.MoError(msg = "مشکلی در دریافت اطلاعات وجود دارد")
 
                 }
             }
 
             override fun onFailure(call: Call<ApiResponse>, t: Throwable) {
-                Toast.makeText(applicationContext, t.message.toString(), Toast.LENGTH_LONG).show()
-                Log.d("ALPHA", t.message.toString())
+                motoast.MoError(msg = "مشکلی در دریافت اطلاعات وجود دارد")
+
 
             }
 
@@ -403,13 +407,13 @@ class MainActivity : AppCompatActivity() {
 
             if (grantResults.size > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
 
-                Toast.makeText(this, "مجوز تایید شد", Toast.LENGTH_SHORT).show();
+                motoast.MoSuccess(msg = "مجوز تایید شد")
                 ipDetect()
 
             } else {
 
-                Toast.makeText(this, "مجوز رد شد نوع شبکه قابل دسترسی نیست", Toast.LENGTH_SHORT)
-                    .show();
+                motoast.MoError(msg = "مجوز رد شد نوع شبکه قابل دسترسی نیست")
+
 
             }
 
