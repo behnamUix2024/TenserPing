@@ -1,13 +1,15 @@
 package com.behnamuix.tenserpingx.Dialog
 
 import android.graphics.Color
-import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
 import android.widget.Button
+import android.widget.Spinner
 import android.widget.Toast
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.fragment.app.DialogFragment
@@ -15,11 +17,12 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.behnamuix.tenserpingx.Adapter.HistoryDialogAdapter
-import com.behnamuix.tenserpingx.MoToast
+import com.behnamuix.tenserpingx.MyTools.MoToast
 import com.behnamuix.tenserpingx.R
 import com.behnamuix.tenserpingx.Retrofit.ApiResponseJson
 import com.behnamuix.tenserpingx.Retrofit.RetrofitClient
 import com.behnamuix.tenserpingx.databinding.FragHistDialogBinding
+import com.github.mikephil.charting.animation.Easing
 import com.github.mikephil.charting.charts.LineChart
 import com.github.mikephil.charting.components.XAxis
 import com.github.mikephil.charting.data.Entry
@@ -31,12 +34,15 @@ import kotlinx.coroutines.launch
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import androidx.core.graphics.toColorInt
+import androidx.core.graphics.drawable.toDrawable
 
 class HistoryDialogFragment : DialogFragment() {
-
+    private var currentCurveMode = LineDataSet.Mode.CUBIC_BEZIER
     private lateinit var chart: LineChart
-    private lateinit var cl_show_chart: ConstraintLayout
-    private lateinit var cl_show_list: ConstraintLayout
+    private lateinit var sp_type: Spinner
+    private lateinit var btn_show_chart: MaterialButton
+    private lateinit var btn_show_list: MaterialButton
     private lateinit var hist_list: ConstraintLayout
     private lateinit var hist_chart: ConstraintLayout
     private lateinit var pingChart: LineChart
@@ -51,43 +57,84 @@ class HistoryDialogFragment : DialogFragment() {
 
         _binding = FragHistDialogBinding.inflate(inflater, container, false)
         config()
+        setupCurveModeSpinner()
+
 
 
         return binding.root
         // Inflate the layout for this fragment
     }
 
+    private fun setupCurveModeSpinner() {
+        // ایجاد لیست گزینه‌ها
+        val modes = listOf(
+            "منحنی نرم" to LineDataSet.Mode.CUBIC_BEZIER,
+            "خط مستقیم" to LineDataSet.Mode.LINEAR,
+            "سیگنالی" to LineDataSet.Mode.STEPPED
+        )
+
+        // تنظیم آداپتر برای اسپینر
+        val adapter = ArrayAdapter(
+            requireActivity(),
+            android.R.layout.simple_spinner_item,
+            modes.map { it.first }
+        ).apply {
+            setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        }
+
+        sp_type.adapter = adapter
+
+        // مدیریت انتخاب کاربر
+        sp_type.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
+                currentCurveMode = modes[position].second
+                updateChartCurveMode()
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>) {}
+        }
+
+
+    }
+    private fun updateChartCurveMode() {
+        chart.data?.dataSets?.firstOrNull()?.let { dataSet ->
+            (dataSet as LineDataSet).mode = currentCurveMode
+            chart.invalidate()
+        }
+    }
+
     private fun config() {
-        cl_show_list = binding.clShowList
-        cl_show_chart = binding.clShowChart
+        sp_type = binding.spType
+        btn_show_list = binding.btnShowList
+        btn_show_chart = binding.btnShowChart
         chart = binding.pingChart
         pingChart = binding.pingChart
         hist_list = binding.listHist
         hist_chart = binding.histChart
         motoast = MoToast(requireActivity())
         rec_hist = binding.recHist
-        cl_show_chart.setOnClickListener() {
+        getHist()
+        btn_show_chart.setOnClickListener {
             showChart()
 
         }
-        cl_show_list.setOnClickListener() {
+        btn_show_list.setOnClickListener {
             getHist()
 
         }
-
     }
 
     private fun showChart() {
         hist_list.visibility = View.GONE
         hist_chart.visibility = View.VISIBLE
-        cl_show_list.visibility = View.VISIBLE
-        cl_show_chart.visibility = View.GONE
+        btn_show_list.visibility = View.VISIBLE
+        btn_show_chart.visibility = View.GONE
 
         lifecycleScope.launch {
             try {
                 val response = RetrofitClient.apiService.getPing()
                 if (response.status == "success") {
-                    setupChart(response.data)
+                    configChart(response.data)
                 }
             } catch (e: Exception) {
                 Toast.makeText(context, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
@@ -99,11 +146,10 @@ class HistoryDialogFragment : DialogFragment() {
     private fun getHist() {
         hist_chart.visibility = View.GONE
         hist_list.visibility = View.VISIBLE
-        cl_show_list.visibility = View.GONE
-        cl_show_chart.visibility = View.VISIBLE
-
-        motoast.MoInfo(msg = "در حال دریافت داده ها از سرور...")
+        btn_show_list.visibility = View.GONE
+        btn_show_chart.visibility = View.VISIBLE
         lifecycleScope.launch {
+            motoast.MoInfo(msg = "در حال دریافت داده ها از سرور...")
             try {
                 val call = RetrofitClient.apiService.getHist()
                 call.enqueue(object : Callback<ApiResponseJson> {
@@ -113,7 +159,7 @@ class HistoryDialogFragment : DialogFragment() {
                     ) {
                         if (response.isSuccessful) {
                             val apiresp = response.body()
-                            if (apiresp?.status == "success" && apiresp.data != null) {
+                            if (apiresp?.status == "success") {
                                 rec_hist.layoutManager =
                                     LinearLayoutManager(
                                         context,
@@ -121,7 +167,7 @@ class HistoryDialogFragment : DialogFragment() {
                                         false
                                     )
                                 val adapter = HistoryDialogAdapter(apiresp.data, requireContext())
-                                rec_hist?.adapter = adapter
+                                rec_hist.adapter = adapter
                             }
                         } else {
                             motoast.MoError(msg = "داده ای دریافت نشد")
@@ -142,58 +188,88 @@ class HistoryDialogFragment : DialogFragment() {
 
     }
 
-    private fun setupChart(data: List<String>) {
-        // تبدیل داده‌ها
+    private fun configChart(data: List<String>) {
+        // تبدیل داده‌های رشته‌ای به مقادیر عددی
+// مثال: "97 M/s" → 97.0f
         val values = data.map { it.replace(" M/s", "").toFloat() }
+
+// ایجاد نقاط نمودار (Entry) با اندیس به عنوان X و مقدار به عنوان Y
         val entries = values.mapIndexed { index, value ->
             Entry(index.toFloat(), value)
         }
 
-        // تنظیمات XAxis
+// تنظیمات مجموعه داده‌های خطی
+        val dataSet = LineDataSet(entries, "سرعت (مگابیت بر ثانیه)").apply {
+            color = Color.rgb(67, 153, 226)  // رنگ خط آبی آسمانی
+            valueTextColor = Color.WHITE      // رنگ متن مقادیر سفید
+            valueTextSize = 12f               // سایز متن مقادیر 12 پیکسل
+            lineWidth = 2f                    // ضخامت خط 2 پیکسل
+            setCircleColor("#E27E43".toColorInt())  // رنگ نقاط قرمز
+            circleRadius = 10f
+            fillColor = "#AF4399E2".toColorInt()    // رنگ پرکردن زیر خط با شفافیت
+            setDrawFilled(true)               // فعال کردن پرکردن زیر خط
+            mode = currentCurveMode // استفاده از حالت انتخاب شده
+
+        }
+
+// تنظیمات محور X (افقی)
         chart.xAxis.apply {
-            position = XAxis.XAxisPosition.BOTTOM
-            granularity = 1f
-            setDrawGridLines(false)
-            axisMinimum = 0f // حداقل مقدار محور X
-            axisMaximum = (data.size - 1).toFloat() // حداکثر مقدار محور X
-            labelCount = data.size // تعداد لیبل‌ها
+            position = XAxis.XAxisPosition.BOTTOM  // نمایش محور در پایین
+            textColor = Color.WHITE                // رنگ متن سفید
+            setDrawGridLines(true)                 // نمایش خطوط راهنما
+            gridColor = "#3DFFFFFF".toColorInt() // رنگ خطوط راهنما با شفافیت
+            axisLineColor = Color.WHITE            // رنگ خط محور سفید
+            axisLineWidth = 2f                     // ضخامت خط محور
+            granularity = 1f                       // فاصله بین مقادیر
+            // فرمت دهنده متن‌های محور X
             valueFormatter = object : ValueFormatter() {
                 override fun getFormattedValue(value: Float): String {
                     return when (value.toInt()) {
-                        0 -> "First Value"
-                        1 -> "Second Value"
+                        0 -> "اندازه‌گیری اول"
+                        1 -> "اندازه‌گیری دوم"
                         else -> ""
                     }
                 }
             }
+
         }
 
-        // تنظیمات YAxis
+// تنظیمات محور Y (عمودی)
         chart.axisLeft.apply {
-            axisMinimum = 0f
-            axisMaximum = values.maxOrNull()?.times(1.1f) ?: 100f // 10% بیشتر از حداکثر مقدار
-            granularity = 100f
+            textColor = Color.WHITE                // رنگ متن سفید
+            setDrawGridLines(true)                 // نمایش خطوط راهنما
+            gridColor = "#3DFFFFFF".toColorInt() // رنگ خطوط راهنما
+            axisLineColor = Color.WHITE            // رنگ خط محور سفید
+            axisLineWidth = 1f                     // ضخامت خط محور
+            granularity = 50f                      // فاصله بین مقادیر 50 واحد
         }
 
-        // غیرفعال کردن محور سمت راست
+// غیرفعال کردن محور Y سمت راست
         chart.axisRight.isEnabled = false
 
-        // تنظیم داده‌ها
-        val dataSet = LineDataSet(entries, "Speed (M/s)").apply {
-            color = Color.BLUE
-            valueTextColor = Color.BLACK
-            lineWidth = 2f
+// تنظیمات کلی نمودار
+        chart.apply {
+            this.data = LineData(dataSet)  // اتصال داده‌ها به نمودار
+            description.text = "نمودار دقیق سرعت پینگ شبکه شما (بر اساس M/s)"
+            description.textColor = Color.WHITE  // رنگ توضیحات سفید
+            setNoDataText("در حال دریافت داده...")  // متن هنگام عدم وجود داده
+            setNoDataTextColor(Color.WHITE)      // رنگ متن بدون داده
+            legend.textColor = Color.WHITE       // رنگ راهنما سفید
+            setDrawGridBackground(false)        // غیرفعال کردن پس‌زمینه شبکه
+            setDrawBorders(true)                // فعال کردن حاشیه
+            setTouchEnabled(true)               // فعال کردن لمسی
+            isDragEnabled = true                // فعال کردن کشیدن
+            setScaleEnabled(true)               // فعال کردن زوم
+            setPinchZoom(true)                  // فعال کردن زوم دو انگشتی
+            setBackgroundColor(Color.TRANSPARENT) // پس‌زمینه شفاف
+            animateX(1500, Easing.EaseInOutQuad) // انیمیشن1   ثانیه‌ای
+            invalidate()  // بروزرسانی نمودار
         }
-
-        chart.data = LineData(dataSet)
-        chart.description.text = "Server Speed Data"
-        chart.invalidate() // رفرش نمودار
     }
-
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        dialog?.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+        dialog?.window?.setBackgroundDrawable(Color.TRANSPARENT.toDrawable())
         dialog?.setCancelable(true)
         val win = dialog?.window
         if (win != null) {
@@ -204,7 +280,7 @@ class HistoryDialogFragment : DialogFragment() {
 
         }
 
-        view.findViewById<Button>(R.id.btn_hist_remove).setOnClickListener() {
+        view.findViewById<Button>(R.id.btn_hist_remove).setOnClickListener {
             removeAllHist()
             dismiss()
         }

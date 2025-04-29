@@ -6,14 +6,11 @@ import android.webkit.WebViewClient
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.behnamuix.tenserpingx.databinding.ActivityCommentBinding
-import com.behnamuix.tenserpingx.databinding.ActivityMainBinding
 
 
-class CommentActivity : AppCompatActivity() {
+class CommentWebViewActivity : AppCompatActivity() {
     private lateinit var binding: ActivityCommentBinding
     private var URL="https://behnamuix2024.com/comment.php"
     private lateinit var webView:WebView

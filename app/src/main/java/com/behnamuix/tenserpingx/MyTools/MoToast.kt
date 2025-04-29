@@ -1,6 +1,7 @@
-package com.behnamuix.tenserpingx
+package com.behnamuix.tenserpingx.MyTools
 import android.app.Activity
 import androidx.core.content.res.ResourcesCompat
+import com.behnamuix.tenserpingx.R
 import www.sanju.motiontoast.MotionToast
 import www.sanju.motiontoast.MotionToastStyle
 
@@ -13,7 +14,7 @@ class MoToast(private val activity: Activity) {
             msg,
             MotionToastStyle.SUCCESS,
             MotionToast.GRAVITY_BOTTOM,
-            MotionToast.LONG_DURATION,
+            MotionToast.SHORT_DURATION,
             ResourcesCompat.getFont(activity, R.font.vazir_fd_wol)
         )
     }
@@ -38,7 +39,7 @@ class MoToast(private val activity: Activity) {
             msg,
             MotionToastStyle.INFO,
             MotionToast.GRAVITY_BOTTOM,
-            MotionToast.LONG_DURATION,
+            MotionToast.SHORT_DURATION,
             ResourcesCompat.getFont(activity, R.font.vazir_fd_wol)
         )
 

@@ -4,84 +4,127 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:layout_gravity="center"
+    android:foregroundGravity="center"
     android:layoutDirection="rtl"
     android:textDirection="rtl"
     app:cardBackgroundColor="@color/black_mat"
     app:cardCornerRadius="8dp"
-    app:cardElevation="4dp">
+    app:cardElevation="4dp"
+    app:layout_anchorGravity="center">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
-
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/cl_show_list"
-            android:layout_width="0dp"
-            android:layout_height="70dp"
-            android:layout_marginStart="8dp"
-            android:layout_marginTop="8dp"
-            android:layout_marginEnd="8dp"
-            android:background="@color/black"
-            android:fontFamily="@font/vazir_medium"
-            android:scaleType="fitXY"
-            android:visibility="invisible"
-            app:cornerRadius="8dp"
+        <!--Create a TextInputLayout and choose the style,
+               for now we are choosing the OutlinedBox ExposedDropdownMenu   -->
+        <androidx.appcompat.widget.AppCompatSpinner
+            android:id="@+id/sp_type"
+            android:layout_width="160dp"
+            android:layout_height="45dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="18dp"
+            android:background="@drawable/bg_spinner"
+            android:dropDownWidth="160dp"
+            android:elevation="4dp"
+            android:layoutDirection="rtl"
+            android:popupBackground="@drawable/bg_spinner"
+            android:spinnerMode="dropdown"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.0" />
 
-            <TextView
-                android:id="@+id/textView78"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:fontFamily="@font/vazir_fd_wol"
-                android:text="نمایش لیست"
-                android:textColor="@color/white"
-                android:textSize="@dimen/body"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
-        </androidx.constraintlayout.widget.ConstraintLayout>
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_show_list"
 
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/cl_show_chart"
-            android:layout_width="0dp"
-            android:layout_height="70dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
-            android:layout_marginTop="8dp"
-            android:layout_marginEnd="8dp"
-            android:background="@drawable/btn_chart"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="16dp"
+            android:drawableRight="@drawable/icon_list"
             android:fontFamily="@font/vazir_medium"
-            android:scaleType="fitXY"
+
+            android:text="نمایش لیست"
+            android:textColor="@color/black"
+            android:textSize="@dimen/small1"
             android:visibility="visible"
+            app:backgroundTint="@color/white"
             app:cornerRadius="8dp"
+            app:elevation="6dp"
+            app:iconGravity="textStart"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="1.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.0" />
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/hist_chart"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_marginTop="8dp"
+            android:padding="10dp"
+            android:visibility="visible"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
+            app:layout_constraintTop_toBottomOf="@+id/btn_show_list">
 
-            <TextView
-                android:id="@+id/textView8"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:fontFamily="@font/vazir_fd_wol"
-                android:text="نمایش نمودار"
-                android:textColor="@color/white"
-                android:textSize="@dimen/body"
+            <com.github.mikephil.charting.charts.LineChart
+                android:id="@+id/pingChart"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_marginBottom="32dp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
         </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_show_chart"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="16dp"
+            android:drawableRight="@drawable/icon_graph_sec"
+            android:drawableTint="@color/black"
+            android:fontFamily="@font/vazir_medium"
+            android:foregroundGravity="center"
+            android:gravity="center"
+            android:text="نمایش نمودار"
+            android:textColor="@color/black"
+            android:textSize="@dimen/small1"
+            android:visibility="gone"
+            app:backgroundTint="@color/white"
+            app:cornerRadius="8dp"
+            app:elevation="6dp"
+            app:iconGravity="textStart"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="1.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.0">
+
+
+        </com.google.android.material.button.MaterialButton>
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/list_hist"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:visibility="visible"
+            android:visibility="gone"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent">
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/btn_show_chart">
 
             <LinearLayout
                 android:id="@+id/linearLayout"
@@ -99,7 +142,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="6dp"
-                    android:layout_marginTop="24dp"
+                    android:layout_marginTop="16dp"
                     android:layout_marginEnd="6dp"
                     android:layoutDirection="rtl"
                     android:orientation="horizontal">
@@ -166,6 +209,7 @@
                 android:layout_margin="24dp"
                 android:layout_marginStart="16dp"
                 android:layout_marginBottom="32dp"
+                android:alpha="0.5"
                 android:backgroundTint="@color/white"
                 android:drawableRight="@drawable/icon_trash"
                 android:drawableTint="#EF5350"
@@ -184,24 +228,6 @@
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintVertical_bias="1.0" />
 
-        </androidx.constraintlayout.widget.ConstraintLayout>
-
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/hist_chart"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:visibility="gone"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent">
-
-            <com.github.mikephil.charting.charts.LineChart
-                android:id="@+id/pingChart"
-                android:layout_width="0dp"
-                android:layout_height="0dp"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent" />
         </androidx.constraintlayout.widget.ConstraintLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>

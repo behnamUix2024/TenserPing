@@ -7,7 +7,6 @@ import android.content.DialogInterface
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
-import android.graphics.Color
 import android.net.ConnectivityManager
 import android.net.Uri
 import android.os.Bundle
@@ -16,30 +15,22 @@ import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
-import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.WindowCompat
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.lifecycleScope
 import com.airbnb.lottie.LottieAnimationView
 import com.behnamuix.tenserping.Network.NetworkCheck
 import com.behnamuix.tenserpingx.Dialog.HistoryDialogFragment
+import com.behnamuix.tenserpingx.MyTools.MoToast
 import com.behnamuix.tenserpingx.Network.InternetSpeedTester
 import com.behnamuix.tenserpingx.Network.Location.UserLocationProvider
 import com.behnamuix.tenserpingx.Retrofit.ApiResponse
-import com.behnamuix.tenserpingx.Retrofit.ApiService
+import com.behnamuix.tenserpingx.Retrofit.RetrofitClient
 import com.behnamuix.tenserpingx.databinding.ActivityMainBinding
-import com.github.mikephil.charting.charts.LineChart
-import com.github.mikephil.charting.data.Entry
-import com.github.mikephil.charting.data.LineData
-import com.github.mikephil.charting.data.LineDataSet
 import com.google.android.material.button.MaterialButton
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -48,31 +39,26 @@ import kotlinx.coroutines.withContext
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
 import java.util.TimeZone
+import androidx.core.net.toUri
 
 
 class MainActivity : AppCompatActivity() {
-
-
     private lateinit var motoast: MoToast
-    var DATE = ""
-    var IP = ""
-    var NET_TYPE = ""
-    var PING_SPEED = ""
-    var DOWN_SPEED = ""
-    var UP_SPEED = ""
-    private val URL = "https://behnamuix2024.com/api/"
+    private var DATE = ""
+    private var IP = ""
+    private var NET_TYPE = ""
+    private var PING_SPEED = ""
+    private var DOWN_SPEED = ""
+    private var UP_SPEED = ""
     private val PHONE_STATUS_REQUEST_CODE = 1
     private lateinit var binding: ActivityMainBinding
     private lateinit var lav_info: LottieAnimationView
     private lateinit var tv_speed_download: TextView
     private lateinit var btn_save_hist: MaterialButton
-    private lateinit var retrofit: Retrofit
     private lateinit var img_bg: ImageView
     private lateinit var img_comment: ImageView
     private lateinit var img_hist: ImageView
@@ -113,14 +99,12 @@ class MainActivity : AppCompatActivity() {
         // تغییر رنگ پس‌زمینه نوار ناوبری
         val navigationBarColor = ContextCompat.getColor(this, R.color.transparent)
         window.navigationBarColor = navigationBarColor
-        windowInsetsController?.isAppearanceLightNavigationBars = false
+        windowInsetsController.isAppearanceLightNavigationBars = false
     }
+
 
     private fun config() {
         motoast = MoToast(this)
-        retrofit =
-            Retrofit.Builder().baseUrl(URL).addConverterFactory(GsonConverterFactory.create())
-                .build()
         btn_save_hist = binding.btnSaveHist
         img_comment = binding.imgComment
         registerReceiver(networkReceiver, IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION))
@@ -136,11 +120,11 @@ class MainActivity : AppCompatActivity() {
         tv_speed_upload = binding.tvSpeedUpload
         tv_speed_download = binding.tvSpeedDownload
         vw_start = binding.vwStart
-        img_comment.setOnClickListener() {
-            val intent = Intent(this, CommentActivity::class.java)
+        img_comment.setOnClickListener {
+            val intent = Intent(this, CommentWebViewActivity::class.java)
             startActivity(intent)
         }
-        img_hist.setOnClickListener() {
+        img_hist.setOnClickListener {
             val pay = true
             if (pay) {
                 showHistDialog()
@@ -155,47 +139,49 @@ class MainActivity : AppCompatActivity() {
                 payAlert.show()
             }
         }
-        lav_info.setOnClickListener() {
+        lav_info.setOnClickListener {
 
 
             val dialog = AlertDialog.Builder(this, R.style.cardAlertDialog)
             dialog.setMessage(R.string.info_dialog_msg)
             dialog.setTitle(R.string.info_dialog_title)
-            dialog.setNegativeButton("باشه", DialogInterface.OnClickListener { dialog, id ->
+            dialog.setNegativeButton("باشه") { dialog, _ ->
                 dialog.dismiss()
-            })
+            }
             dialog.setPositiveButton(
-                "سیاست های حفظ حریم خصوصی", DialogInterface.OnClickListener { dialog, id ->
-                    val intent = Intent(
-                        "android.intent.action.VIEW",
-                        Uri.parse("https://behnamuix2024.com/api/policy.html")
-                    )
-                    val b = Bundle()
-                    b.putBoolean("new_window", true) //sets new window
-                    intent.putExtras(b)
-                    startActivity(intent)
-                })
+                "سیاست های حفظ حریم خصوصی"
+            ) { _, _ ->
+                val intent = Intent(
+                    "android.intent.action.VIEW",
+                    "https://behnamuix2024.com/api/policy.html".toUri()
+                )
+                val b = Bundle()
+                b.putBoolean("new_window", true) //sets new window
+                intent.putExtras(b)
+                startActivity(intent)
+            }
             dialog.setNeutralButton(
-                "درباره ما", DialogInterface.OnClickListener { dialog, id ->
-                    val intent = Intent(
-                        "android.intent.action.VIEW",
-                        Uri.parse("https://behnamuix2024.com/api/bio.html")
-                    )
-                    val b = Bundle()
-                    b.putBoolean("new_window", true) //sets new window
-                    intent.putExtras(b)
-                    startActivity(intent)
-                })
+                "درباره ما"
+            ) { _, _ ->
+                val intent = Intent(
+                    "android.intent.action.VIEW",
+                    "https://behnamuix2024.com/api/bio.html".toUri()
+                )
+                val b = Bundle()
+                b.putBoolean("new_window", true) //sets new window
+                intent.putExtras(b)
+                startActivity(intent)
+            }
             dialog.show()
         }
-        vw_start.setOnClickListener() {
+        vw_start.setOnClickListener {
             testStart()
             ipDetect()
             DATE = getDate()
 
 
         }
-        btn_save_hist.setOnClickListener() {
+        btn_save_hist.setOnClickListener {
             if (PING_SPEED != "") {
                 getHistData()
 
@@ -217,11 +203,11 @@ class MainActivity : AppCompatActivity() {
 
         builder1.setPositiveButton(
             "بله"
-        ) { dialog, id -> insertToHistDb(DATE, IP, NET_TYPE, PING_SPEED) }
+        ) { _, _ -> insertToHistDb(DATE, IP, NET_TYPE, PING_SPEED) }
 
         builder1.setNegativeButton(
             "خیر"
-        ) { dialog, id -> dialog.cancel() }
+        ) { dialog, _ -> dialog.cancel() }
 
         val alert11 = builder1.create()
         alert11.show()
@@ -231,9 +217,7 @@ class MainActivity : AppCompatActivity() {
     private fun insertToHistDb(date: String, ip: String, netType: String, pingSpeed: String) {
 
         Log.d("ALPHA", "$date$ip/$netType/$pingSpeed / $DOWN_SPEED ")
-
-        val apiService = retrofit.create(ApiService::class.java)
-        val call = apiService.sendHist(
+        val call = RetrofitClient.apiService.sendHist(
             date, netType, ip, pingSpeed
         )
         call.enqueue(object : Callback<ApiResponse> {
@@ -297,7 +281,7 @@ class MainActivity : AppCompatActivity() {
                 ) !== PackageManager.PERMISSION_GRANTED
             ) {
 
-                reqPerm();
+                reqPerm()
 
             } else {
                 val netType = locationProvider.getNetworkType()
@@ -319,16 +303,16 @@ class MainActivity : AppCompatActivity() {
             AlertDialog.Builder(this).setTitle(R.string.dialog_req_perm_title)
                 .setMessage(R.string.pay_alert_msg).setPositiveButton(
                     R.string.pay_alert_btn_positive_text
-                ) { dialogInterface, i -> req() }.setNegativeButton(
+                ) { _, _ -> req() }.setNegativeButton(
                     R.string.dialog_req_perm_negative_btn
-                ) { dialogInterface, i -> dialogInterface.dismiss() }.create().show()
+                ) { dialogInterface, _ -> dialogInterface.dismiss() }.create().show()
         } else {
             req()
         }
     }
 
     private fun testStart() {
-        val Url = "https://httpbin.org/" // آدرس سرور آپلود خود را اینجا قرار دهید
+        val url = "https://httpbin.org/" // آدرس سرور آپلود خود را اینجا قرار دهید
         CoroutineScope(Dispatchers.Main).launch {
             tv_speed_download.text = "..."
             tv_speed_upload.text = "..."
@@ -336,13 +320,13 @@ class MainActivity : AppCompatActivity() {
             val pingResult = withContext(Dispatchers.IO) {
                 networkTester.getPingSpeed()
             }
-            tv_ping.text = if (pingResult != null) " ${pingResult} " else "خطا"
-            var p = pingResult.toString()
+            tv_ping.text = if (pingResult != null) " $pingResult " else "خطا"
+            val p = pingResult.toString()
             PING_SPEED = "$p M/s"
             tv_status_ping.text = "پینگ"
 
             val downloadSpeed = withContext(Dispatchers.IO) {
-                networkTester.getDownloadSpeed(Url)
+                networkTester.getDownloadSpeed(url)
             }
 
             tv_speed_download.text = if (downloadSpeed != null) " ${
@@ -395,7 +379,7 @@ class MainActivity : AppCompatActivity() {
 
         ActivityCompat.requestPermissions(
             this@MainActivity,
-            arrayOf<String>(Manifest.permission.READ_PHONE_STATE),
+            arrayOf(Manifest.permission.READ_PHONE_STATE),
             PHONE_STATUS_REQUEST_CODE
         )
     }
@@ -405,7 +389,7 @@ class MainActivity : AppCompatActivity() {
     ) {
         if (requestCode == PHONE_STATUS_REQUEST_CODE) {
 
-            if (grantResults.size > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
 
                 motoast.MoSuccess(msg = "مجوز تایید شد")
                 ipDetect()
