@@ -56,6 +56,8 @@ dependencies {
     androidTestImplementation(libs.androidx.espresso.core)
     implementation(libs.okhttp)
     implementation(libs.lottie)
+    implementation ("com.github.myketstore:myket-billing-client:1.6")
+
 
 
 }
