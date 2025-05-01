@@ -4,11 +4,25 @@ plugins {
 }
 
 android {
+    defaultConfig {
+        val marketApplicationId = "ir.mservices.market"
+        val marketBindAddress = "ir.mservices.market.InAppBillingService.BIND"
+        manifestPlaceholders.apply {
+            this["marketApplicationId"] = marketApplicationId
+            this["marketBindAddress"] = marketBindAddress
+            this["marketPermission"] = "${marketApplicationId}.BILLING"
+        }
+        buildConfigField(
+            "String",
+            "IAB_PUBLIC_KEY",
+            "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCwwsFIXlqefMxrOUl3//fNAvng3lKqfw4kCGbdeDXbp2oRg8z3PZ+Fvr0INk0mcZ3WMptSW/0a+rHv1PLB/zNxDn6vPbd1TR3bc4bCFi96xHEPVhlPCyss2u26yvBB+EMvEKzZZ96lANUFU4Y1mR7j7icF5XKYA99UVJO68cgPFQIDAQAB"
+        )
+    }
     namespace = "com.behnamuix.tenserpingx"
     compileSdk = 35
     buildFeatures {
         viewBinding = true
-
+        buildConfig = true
     }
     defaultConfig {
         applicationId = "com.behnamuix.tenserpingx"
