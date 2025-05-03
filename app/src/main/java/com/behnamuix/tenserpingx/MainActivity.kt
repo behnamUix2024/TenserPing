@@ -3,12 +3,11 @@ package com.behnamuix.tenserpingx
 import android.Manifest
 import android.content.BroadcastReceiver
 import android.content.Context
-import android.content.DialogInterface
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.net.ConnectivityManager
-import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.widget.ImageView
@@ -20,6 +19,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.core.net.toUri
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.lifecycleScope
 import com.airbnb.lottie.LottieAnimationView
@@ -31,7 +31,10 @@ import com.behnamuix.tenserpingx.Network.Location.UserLocationProvider
 import com.behnamuix.tenserpingx.Retrofit.ApiResponse
 import com.behnamuix.tenserpingx.Retrofit.RetrofitClient
 import com.behnamuix.tenserpingx.databinding.ActivityMainBinding
+import com.behnamuix.tenserpingx.util.IabHelper
 import com.google.android.material.button.MaterialButton
+import ir.myket.billingclient.util.IabResult
+import ir.myket.billingclient.util.Purchase
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -43,13 +46,15 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
 import java.util.TimeZone
-import androidx.core.net.toUri
-import ir.myket.billingclient.BuildConfig
-import ir.myket.billingclient.IabHelper
-import ir.myket.billingclient.util.IabResult
-
 
 class MainActivity : AppCompatActivity() {
+    val SKU_PREMIUM: String = "hist_chart_prem"
+    val RC_REQUEST: Int = 10001
+    lateinit var mHelper: IabHelper
+    val base64EncodedPublicKey =
+        "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCwwsFIXlqefMxrOUl3//fNAvng3lKqfw4kCGbdeDXbp2oRg8z3PZ+Fvr0INk0mcZ3WMptSW/0a+rHv1PLB/zNxDn6vPbd1TR3bc4bCFi96xHEPVhlPCyss2u26yvBB+EMvEKzZZ96lANUFU4Y1mR7j7icF5XKYA99UVJO68cgPFQIDAQAB"
+    //------------------------------------------------------------
+
     var perm: Boolean = false
     private lateinit var motoast: MoToast
     private var DATE = ""
@@ -103,13 +108,15 @@ class MainActivity : AppCompatActivity() {
 
         // تغییر رنگ پس‌زمینه نوار ناوبری
         val navigationBarColor = ContextCompat.getColor(this, R.color.transparent)
-        window.navigationBarColor = navigationBarColor
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            window.navigationBarColor = navigationBarColor
+        }
         windowInsetsController.isAppearanceLightNavigationBars = false
     }
 
 
     private fun config() {
-    btn_export_pdf=binding.btnExportPdf
+        btn_export_pdf = binding.btnExportPdf
         motoast = MoToast(this)
         btn_save_hist = binding.btnSaveHist
         img_comment = binding.imgComment
@@ -126,7 +133,7 @@ class MainActivity : AppCompatActivity() {
         tv_speed_upload = binding.tvSpeedUpload
         tv_speed_download = binding.tvSpeedDownload
         vw_start = binding.vwStart
-        btn_export_pdf.setOnClickListener{
+        btn_export_pdf.setOnClickListener {
             exportToPDF()
         }
         img_comment.setOnClickListener {
@@ -144,7 +151,7 @@ class MainActivity : AppCompatActivity() {
                 payAlert.setIcon(R.drawable.icon_pro)
                 payAlert.setMessage(R.string.pay_alert_msg)
                 payAlert.setPositiveButton(R.string.pay_alert_btn_positive_text) { _, _ ->
-                    pay()
+                    payConfig()
                 }
                 payAlert.setNegativeButton(R.string.pay_alert_btn_negative_text, null)
                 payAlert.show()
@@ -175,8 +182,7 @@ class MainActivity : AppCompatActivity() {
                 "درباره ما"
             ) { _, _ ->
                 val intent = Intent(
-                    "android.intent.action.VIEW",
-                    "https://behnamuix2024.com/api/bio.html".toUri()
+                    "android.intent.action.VIEW", "https://behnamuix2024.com/api/bio.html".toUri()
                 )
                 val b = Bundle()
                 b.putBoolean("new_window", true) //sets new window
@@ -205,17 +211,48 @@ class MainActivity : AppCompatActivity() {
 
     }
 
+    private fun payConfig() {
+        mHelper = IabHelper(this, base64EncodedPublicKey)
+        mHelper.enableDebugLogging(true)
+        mHelper.startSetup(object : IabHelper.OnIabSetupFinishedListener {
+            override fun onIabSetupFinished(result: IabResult?) {
+                if (result != null) {
+                    if (!result.isSuccess) {
+                        Log.e("TAG", "Problem setting up in-app billing: " + result);
+                        return;
+                    } else {
+                        Log.d("TAG", "In-app billing setup successful")
+                        payIntent()
+
+
+                    }
+
+                }
+            }
+
+        })
+
+
+    }
+
+    private fun payIntent() {
+        mHelper.launchPurchaseFlow(
+            this@MainActivity,
+            SKU_PREMIUM,
+            RC_REQUEST,
+            object : IabHelper.OnIabPurchaseFinishedListener {
+                override fun onIabPurchaseFinished(
+                    result: IabResult?, info: Purchase?
+                ) {
+                    Toast.makeText(this@MainActivity, "$result/$info", Toast.LENGTH_SHORT).show()
+                }
+
+            })
+    }
+
     private fun exportToPDF() {
-        TODO("Not yet implemented")
-    }
-
-    private fun pay() {
-
-
 
     }
-
-
 
     private fun getHistData() {
         DATE = getDate()
@@ -273,7 +310,6 @@ class MainActivity : AppCompatActivity() {
 
 
     }
-
 
     private fun getDate(): String {
         val dte = Calendar.getInstance(TimeZone.getTimeZone("Asia/Tehran")).time
@@ -407,7 +443,10 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onRequestPermissionsResult(
-        requestCode: Int, permissions: Array<out String>, grantResults: IntArray, deviceId: Int
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray,
+        deviceId: Int
     ) {
         if (requestCode == PHONE_STATUS_REQUEST_CODE) {
 
@@ -430,9 +469,10 @@ class MainActivity : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
         unregisterReceiver(networkReceiver) // حذف ثبت Receiver
-
+        mHelper.dispose();
 
     }
+
 
 }
 
