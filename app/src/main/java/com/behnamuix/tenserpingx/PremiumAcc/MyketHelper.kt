@@ -15,11 +15,12 @@ class MyketHelper(private val ctx: Context) {
         const val SKU_PREM_ACC = "android.test.purchased"
 
         const val BASE64_KEY =
-            "\"MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCwwsFIXlqefMxrOUl3//fNAvng3lKqfw4kCGbdeDXbp2oRg8z3PZ+Fvr0INk0mcZ3WMptSW/0a+rHv1PLB/zNxDn6vPbd1TR3bc4bCFi96xHEPVhlPCyss2u26yvBB+EMvEKzZZ96lANUFU4Y1mR7j7icF5XKYA99UVJO68cgPFQIDAQAB\""
+            "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCwwsFIXlqefMxrOUl3//fNAvng3lKqfw4kCGbdeDXbp2oRg8z3PZ+Fvr0INk0mcZ3WMptSW/0a+rHv1PLB/zNxDn6vPbd1TR3bc4bCFi96xHEPVhlPCyss2u26yvBB+EMvEKzZZ96lANUFU4Y1mR7j7icF5XKYA99UVJO68cgPFQIDAQAB"
     }
 
     fun setupBiling(setupCompleted: (Boolean) -> Unit) {
         iabHelper = IabHelper(ctx, BASE64_KEY)
+        iabHelper.enableDebugLogging(true)
         iabHelper.startSetup { result ->
             if (result.isSuccess) {
                 isServiceConnected = true
@@ -35,6 +36,7 @@ class MyketHelper(private val ctx: Context) {
 
     fun purchasedItem(activity: Activity, sku: String, callback: (Boolean) -> Unit) {
         if (!isServiceConnected) {
+            Log.d("kir","error")
             callback(false)
             return
         }
@@ -45,11 +47,14 @@ class MyketHelper(private val ctx: Context) {
             { result, purchase ->
                 if (result.isSuccess &&
                      purchase!= null
+
                 ) {
+                    Log.d("kir","ok")
                     //پرداخت موفق
                     verifyAndConsumePurchase(purchase, callback)
                 } else {
                     //پرداخت ناموفق
+                    Log.d("kir","error2")
                     callback(false)
                 }
             }, "payload-${System.currentTimeMillis()}"
@@ -58,7 +63,16 @@ class MyketHelper(private val ctx: Context) {
 
     fun verifyAndConsumePurchase(purchase: Purchase, callback: (Boolean) -> Unit) {
         iabHelper.consumeAsync(purchase) { result, _ ->
-            callback(true)
+           try{
+               val success=when{
+                   result::class.java.getMethod("isSuccess").invoke(result) as Boolean->true
+                   else->false
+               }
+               callback(success)
+           }catch (e:Exception){
+               Log.e("kir","error in data usage!")
+               callback(false)
+           }
         }
     }
 

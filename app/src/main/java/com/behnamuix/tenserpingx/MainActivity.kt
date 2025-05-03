@@ -204,22 +204,33 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun pay() {
+       if(configMyketHelperCheck()){
+           myketHelper.purchasedItem(this, MyketHelper.SKU_PREM_ACC) { success ->
+               if (success) {
+                   showHistDialog()
+
+               } else {
+                   motoast.MoWarning(msg = "خرید انجام نشد!")
+               }
+           }
+       }
+
+
+    }
+
+    private fun configMyketHelperCheck(): Boolean {
+        var b:Boolean=false
         myketHelper.setupBiling { success ->
             motoast.MoSuccess(msg = "سرویس متصل است")
+            b=true
+
             if (!success) {
                 motoast.MoError(msg = "سرویس متصل نیست")
+                b=false
+
             }
         }
-        myketHelper.purchasedItem(this, MyketHelper.SKU_PREM_ACC) { success ->
-            if (success) {
-                perm = true
-                recreate()
-
-            } else {
-                motoast.MoWarning(msg = "خرید انجام نشد!")
-            }
-        }
-
+        return b
     }
 
     private fun getHistData() {
