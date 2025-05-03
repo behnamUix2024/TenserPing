@@ -11,7 +11,9 @@ class MyketHelper(private val ctx: Context) {
     private var isServiceConnected = false
 
     companion object {
-        const val SKU_PREM_ACC = "Hist_chart"
+        //const val SKU_PREM_ACC = "Hist_chart"
+        const val SKU_PREM_ACC = "android.test.purchased"
+
         const val BASE64_KEY =
             "\"MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCwwsFIXlqefMxrOUl3//fNAvng3lKqfw4kCGbdeDXbp2oRg8z3PZ+Fvr0INk0mcZ3WMptSW/0a+rHv1PLB/zNxDn6vPbd1TR3bc4bCFi96xHEPVhlPCyss2u26yvBB+EMvEKzZZ96lANUFU4Y1mR7j7icF5XKYA99UVJO68cgPFQIDAQAB\""
     }
@@ -42,7 +44,7 @@ class MyketHelper(private val ctx: Context) {
             "1001",
             { result, purchase ->
                 if (result.isSuccess &&
-                    purchase != null
+                     purchase!= null
                 ) {
                     //پرداخت موفق
                     verifyAndConsumePurchase(purchase, callback)
