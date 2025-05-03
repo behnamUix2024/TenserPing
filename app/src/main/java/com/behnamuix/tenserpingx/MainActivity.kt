@@ -44,14 +44,12 @@ import java.util.Calendar
 import java.util.Locale
 import java.util.TimeZone
 import androidx.core.net.toUri
-import com.behnamuix.tenserpingx.PremiumAcc.MyketHelper
 import ir.myket.billingclient.BuildConfig
 import ir.myket.billingclient.IabHelper
 import ir.myket.billingclient.util.IabResult
 
 
 class MainActivity : AppCompatActivity() {
-    private lateinit var myketHelper: MyketHelper
     var perm: Boolean = false
     private lateinit var motoast: MoToast
     private var DATE = ""
@@ -65,6 +63,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var lav_info: LottieAnimationView
     private lateinit var tv_speed_download: TextView
     private lateinit var btn_save_hist: MaterialButton
+    private lateinit var btn_export_pdf: MaterialButton
     private lateinit var img_bg: ImageView
     private lateinit var img_comment: ImageView
     private lateinit var img_hist: ImageView
@@ -110,7 +109,7 @@ class MainActivity : AppCompatActivity() {
 
 
     private fun config() {
-        myketHelper = MyketHelper(this)
+    btn_export_pdf=binding.btnExportPdf
         motoast = MoToast(this)
         btn_save_hist = binding.btnSaveHist
         img_comment = binding.imgComment
@@ -127,6 +126,9 @@ class MainActivity : AppCompatActivity() {
         tv_speed_upload = binding.tvSpeedUpload
         tv_speed_download = binding.tvSpeedDownload
         vw_start = binding.vwStart
+        btn_export_pdf.setOnClickListener{
+            exportToPDF()
+        }
         img_comment.setOnClickListener {
             val intent = Intent(this, CommentWebViewActivity::class.java)
             startActivity(intent)
@@ -203,35 +205,17 @@ class MainActivity : AppCompatActivity() {
 
     }
 
+    private fun exportToPDF() {
+        TODO("Not yet implemented")
+    }
+
     private fun pay() {
-       if(configMyketHelperCheck()){
-           myketHelper.purchasedItem(this, MyketHelper.SKU_PREM_ACC) { success ->
-               if (success) {
-                   showHistDialog()
 
-               } else {
-                   motoast.MoWarning(msg = "خرید انجام نشد!")
-               }
-           }
-       }
 
 
     }
 
-    private fun configMyketHelperCheck(): Boolean {
-        var b:Boolean=false
-        myketHelper.setupBiling { success ->
-            motoast.MoSuccess(msg = "سرویس متصل است")
-            b=true
 
-            if (!success) {
-                motoast.MoError(msg = "سرویس متصل نیست")
-                b=false
-
-            }
-        }
-        return b
-    }
 
     private fun getHistData() {
         DATE = getDate()
@@ -446,7 +430,6 @@ class MainActivity : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
         unregisterReceiver(networkReceiver) // حذف ثبت Receiver
-        myketHelper.dispose()
 
 
     }

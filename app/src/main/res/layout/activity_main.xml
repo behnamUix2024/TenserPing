@@ -428,4 +428,20 @@
         app:layout_constraintStart_toStartOf="@+id/linearLayout3"
         app:layout_constraintTop_toBottomOf="@+id/linearLayout3" />
 
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btn_export_pdf"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:backgroundTint="@color/white"
+        android:drawableTop="@drawable/icon_file_earmark_pdf"
+        android:fontFamily="@font/vazir_medium"
+        android:text="خروجی فایل PDF"
+        android:textColor="@color/black"
+        android:textSize="@dimen/small2"
+        app:cornerRadius="8dp"
+        app:layout_constraintBottom_toTopOf="@+id/vw_start"
+        app:layout_constraintEnd_toEndOf="@+id/linearLayout3"
+        app:layout_constraintStart_toEndOf="@+id/constraintLayout"
+        app:layout_constraintTop_toBottomOf="@+id/linearLayout3" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>
