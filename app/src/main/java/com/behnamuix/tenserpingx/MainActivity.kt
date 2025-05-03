@@ -44,13 +44,15 @@ import java.util.Calendar
 import java.util.Locale
 import java.util.TimeZone
 import androidx.core.net.toUri
+import com.behnamuix.tenserpingx.PremiumAcc.MyketHelper
 import ir.myket.billingclient.BuildConfig
 import ir.myket.billingclient.IabHelper
 import ir.myket.billingclient.util.IabResult
 
 
 class MainActivity : AppCompatActivity() {
-    val mHelper =  IabHelper(this, BuildConfig.IAB_PUBLIC_KEY);
+    private lateinit var myketHelper: MyketHelper
+    var perm: Boolean = false
     private lateinit var motoast: MoToast
     private var DATE = ""
     private var IP = ""
@@ -108,6 +110,7 @@ class MainActivity : AppCompatActivity() {
 
 
     private fun config() {
+        myketHelper = MyketHelper(this)
         motoast = MoToast(this)
         btn_save_hist = binding.btnSaveHist
         img_comment = binding.imgComment
@@ -129,8 +132,8 @@ class MainActivity : AppCompatActivity() {
             startActivity(intent)
         }
         img_hist.setOnClickListener {
-            val pay = true
-            if (pay) {
+
+            if (perm) {
                 showHistDialog()
 
             } else {
@@ -138,8 +141,8 @@ class MainActivity : AppCompatActivity() {
                 payAlert.setTitle(R.string.pay_alert_title)
                 payAlert.setIcon(R.drawable.icon_pro)
                 payAlert.setMessage(R.string.pay_alert_msg)
-                payAlert.setPositiveButton(R.string.pay_alert_btn_positive_text){
-                    _,_->pay()
+                payAlert.setPositiveButton(R.string.pay_alert_btn_positive_text) { _, _ ->
+                    pay()
                 }
                 payAlert.setNegativeButton(R.string.pay_alert_btn_negative_text, null)
                 payAlert.show()
@@ -187,7 +190,8 @@ class MainActivity : AppCompatActivity() {
 
 
         }
-        btn_save_hist.setOnClickListener { if (PING_SPEED != "") {
+        btn_save_hist.setOnClickListener {
+            if (PING_SPEED != "") {
                 getHistData()
 
             } else {
@@ -199,16 +203,25 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-    private fun pay(){
-        mHelper.enableDebugLogging(true);
-        mHelper.startSetup(object : IabHelper.OnIabSetupFinishedListener {
-
-
-            override fun onIabSetupFinished(result: IabResult?) {
-
+    private fun pay() {
+        myketHelper.setupBiling { success ->
+            motoast.MoSuccess(msg = "سرویس متصل است")
+            if (!success) {
+                motoast.MoError(msg = "سرویس متصل نیست")
             }
-        })
+        }
+        myketHelper.purchasedItem(this, MyketHelper.SKU_PREM_ACC) { success ->
+            if (success) {
+                perm = true
+                recreate()
+
+            } else {
+                motoast.MoWarning(msg = "خرید انجام نشد!")
+            }
+        }
+
     }
+
     private fun getHistData() {
         DATE = getDate()
         val builder1 = AlertDialog.Builder(this, R.style.cardAlertDialog)
@@ -422,7 +435,10 @@ class MainActivity : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
         unregisterReceiver(networkReceiver) // حذف ثبت Receiver
+        myketHelper.dispose()
 
 
     }
+
 }
+
