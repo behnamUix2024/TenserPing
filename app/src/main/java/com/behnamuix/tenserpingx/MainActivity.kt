@@ -50,7 +50,7 @@ import ir.myket.billingclient.util.IabResult
 
 
 class MainActivity : AppCompatActivity() {
-    val mHelper =  IabHelper(this, BuildConfig.IAB_PUBLIC_KEY);
+
     private lateinit var motoast: MoToast
     private var DATE = ""
     private var IP = ""
@@ -108,6 +108,7 @@ class MainActivity : AppCompatActivity() {
 
 
     private fun config() {
+
         motoast = MoToast(this)
         btn_save_hist = binding.btnSaveHist
         img_comment = binding.imgComment
@@ -129,7 +130,7 @@ class MainActivity : AppCompatActivity() {
             startActivity(intent)
         }
         img_hist.setOnClickListener {
-            val pay = true
+            val pay = false
             if (pay) {
                 showHistDialog()
 
@@ -200,14 +201,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun pay(){
-        mHelper.enableDebugLogging(true);
-        mHelper.startSetup(object : IabHelper.OnIabSetupFinishedListener {
 
-
-            override fun onIabSetupFinished(result: IabResult?) {
-
-            }
-        })
     }
     private fun getHistData() {
         DATE = getDate()
