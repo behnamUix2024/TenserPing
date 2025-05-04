@@ -21,4 +21,6 @@ interface ApiService {
         @Query("hist_ip") ip:String,
         @Query("hist_ping") ping:String
     ):Call<ApiResponse>
+    @GET("gen.php")
+    fun getKey():Call<ApiResponseJson>
 }

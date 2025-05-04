@@ -29,6 +29,7 @@ import com.behnamuix.tenserpingx.MyTools.MoToast
 import com.behnamuix.tenserpingx.Network.InternetSpeedTester
 import com.behnamuix.tenserpingx.Network.Location.UserLocationProvider
 import com.behnamuix.tenserpingx.Retrofit.ApiResponse
+import com.behnamuix.tenserpingx.Retrofit.ApiResponseJson
 import com.behnamuix.tenserpingx.Retrofit.RetrofitClient
 import com.behnamuix.tenserpingx.databinding.ActivityMainBinding
 import com.behnamuix.tenserpingx.util.IabHelper
@@ -51,10 +52,7 @@ class MainActivity : AppCompatActivity() {
     val SKU_PREMIUM: String = "hist_chart_prem"
     val RC_REQUEST: Int = 10001
     lateinit var mHelper: IabHelper
-    val base64EncodedPublicKey =
-        "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCwwsFIXlqefMxrOUl3//fNAvng3lKqfw4kCGbdeDXbp2oRg8z3PZ+Fvr0INk0mcZ3WMptSW/0a+rHv1PLB/zNxDn6vPbd1TR3bc4bCFi96xHEPVhlPCyss2u26yvBB+EMvEKzZZ96lANUFU4Y1mR7j7icF5XKYA99UVJO68cgPFQIDAQAB"
-    //------------------------------------------------------------
-
+    var base64EncodedPublicKey =""
     var perm: Boolean = false
     private lateinit var motoast: MoToast
     private var DATE = ""
@@ -116,6 +114,7 @@ class MainActivity : AppCompatActivity() {
 
 
     private fun config() {
+        getKey()
         btn_export_pdf = binding.btnExportPdf
         motoast = MoToast(this)
         btn_save_hist = binding.btnSaveHist
@@ -211,7 +210,39 @@ class MainActivity : AppCompatActivity() {
 
     }
 
+    private fun getKey() {
+            try{
+                val call=RetrofitClient.apiService.getKey()
+                call.enqueue(object:Callback<ApiResponseJson>{
+                    override fun onResponse(
+                        call: Call<ApiResponseJson>,
+                        response: Response<ApiResponseJson>
+                    ) {
+                        val data=response.body()
+                        if (data != null) {
+                            if(data.status=="success"){
+                                val key=data.data.toString()
+                                base64EncodedPublicKey=key
+
+
+                            }
+                        }
+                    }
+
+                    override fun onFailure(call: Call<ApiResponseJson>, t: Throwable) {
+
+                    }
+
+                })
+            }catch (e:Exception){
+                e.printStackTrace()
+            }
+
+    }
+
     private fun payConfig() {
+        getKey()
+        Log.i("TAG","Key from server ==>$base64EncodedPublicKey")
         mHelper = IabHelper(this, base64EncodedPublicKey)
         mHelper.enableDebugLogging(true)
         mHelper.startSetup(object : IabHelper.OnIabSetupFinishedListener {
