@@ -52,7 +52,7 @@ class MainActivity : AppCompatActivity() {
     val SKU_PREMIUM: String = "hist_chart_prem"
     val RC_REQUEST: Int = 10001
     lateinit var mHelper: IabHelper
-    var base64EncodedPublicKey =""
+    var base64EncodedPublicKey = ""
     var perm: Boolean = false
     private lateinit var motoast: MoToast
     private var DATE = ""
@@ -114,7 +114,7 @@ class MainActivity : AppCompatActivity() {
 
 
     private fun config() {
-        getKey()
+
         btn_export_pdf = binding.btnExportPdf
         motoast = MoToast(this)
         btn_save_hist = binding.btnSaveHist
@@ -211,38 +211,38 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun getKey() {
-            try{
-                val call=RetrofitClient.apiService.getKey()
-                call.enqueue(object:Callback<ApiResponseJson>{
-                    override fun onResponse(
-                        call: Call<ApiResponseJson>,
-                        response: Response<ApiResponseJson>
-                    ) {
-                        val data=response.body()
-                        if (data != null) {
-                            if(data.status=="success"){
-                                val key=data.data.toString()
-                                base64EncodedPublicKey=key
+        try {
+            val call = RetrofitClient.apiService.getKey()
+            call.enqueue(object : Callback<ApiResponseJson> {
+                override fun onResponse(
+                    call: Call<ApiResponseJson>,
+                    response: Response<ApiResponseJson>
+                ) {
+                    val data = response.body()
+                    if (data != null) {
+                        if (data.status == "success") {
+                            val key = data.data.toString()
+                            base64EncodedPublicKey = key
 
 
-                            }
                         }
                     }
+                }
 
-                    override fun onFailure(call: Call<ApiResponseJson>, t: Throwable) {
+                override fun onFailure(call: Call<ApiResponseJson>, t: Throwable) {
+                    motoast.MoError(msg = "Error From Key Genenrator!")
 
-                    }
+                }
 
-                })
-            }catch (e:Exception){
-                e.printStackTrace()
-            }
+            })
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
 
     }
 
     private fun payConfig() {
         getKey()
-        Log.i("TAG","Key from server ==>$base64EncodedPublicKey")
         mHelper = IabHelper(this, base64EncodedPublicKey)
         mHelper.enableDebugLogging(true)
         mHelper.startSetup(object : IabHelper.OnIabSetupFinishedListener {
@@ -252,6 +252,7 @@ class MainActivity : AppCompatActivity() {
                         Log.e("TAG", "Problem setting up in-app billing: " + result);
                         return;
                     } else {
+
                         Log.d("TAG", "In-app billing setup successful")
                         payIntent()
 
@@ -275,11 +276,13 @@ class MainActivity : AppCompatActivity() {
                 override fun onIabPurchaseFinished(
                     result: IabResult?, info: Purchase?
                 ) {
+
                     Toast.makeText(this@MainActivity, "$result/$info", Toast.LENGTH_SHORT).show()
                 }
 
             })
     }
+
 
     private fun exportToPDF() {
 
@@ -504,6 +507,26 @@ class MainActivity : AppCompatActivity() {
 
     }
 
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        Log.d("TAG", "onActivityResult(" + requestCode + "," + resultCode + "," + data);
+        if (mHelper == null) return;
 
+        // Pass on the activity result to the helper for handling
+        if (!mHelper.handleActivityResult(requestCode, resultCode, data)) {
+            // not handled, so handle it ourselves (here's where you'd
+            // perform any handling of activity results not related to in-app
+            // billing...
+            if(requestCode==RC_REQUEST){
+                Log.d("TAG", "OK");
+
+            }
+            super.onActivityResult(requestCode, resultCode, data);
+        }
+        else {
+            Log.d("TAG", "onActivityResult handled by IABUtil.");
+        }
+    }
 }
+
 
