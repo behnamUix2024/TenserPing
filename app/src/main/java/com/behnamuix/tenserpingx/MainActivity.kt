@@ -7,6 +7,7 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.net.ConnectivityManager
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -38,6 +39,7 @@ import ir.myket.billingclient.util.IabResult
 import ir.myket.billingclient.util.Purchase
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import retrofit2.Call
@@ -96,8 +98,42 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
         changeNavbarStyle()
         config()
+        lifecycleScope.launch {
+            delay(60 * 3000) // 1 دقیقه بعد
+            showRateDialog()
+        }
 
+    }
 
+    private fun showRateDialog() {
+        val builder = AlertDialog.Builder(this, R.style.cardAlertDialog)
+        builder.setTitle("آیا به ما امتیاز می‌دهید؟")
+        builder.setPositiveButton("بله، امتیاز می‌دهم") { _, _ ->
+            openMyketForRating()
+        }
+        builder.setNegativeButton("بی‌خیال") { dialog, _ ->
+            dialog.dismiss()
+        }
+        builder.show()
+    }
+
+    private fun openMyketForRating() {
+        val packageName = packageName
+        val intent = Intent(Intent.ACTION_VIEW).apply {
+            data = Uri.parse("myket://comment?id=$packageName")
+            setPackage("ir.mservices.market")
+        }
+
+        if (intent.resolveActivity(packageManager) != null) {
+            startActivity(intent)
+        } else {
+            startActivity(
+                Intent(
+                    Intent.ACTION_VIEW,
+                    Uri.parse("https://myket.ir/app/$packageName")
+                )
+            )
+        }
     }
 
     private fun changeNavbarStyle() {
@@ -114,7 +150,7 @@ class MainActivity : AppCompatActivity() {
 
 
     private fun config() {
-
+        getKey()
         btn_export_pdf = binding.btnExportPdf
         motoast = MoToast(this)
         btn_save_hist = binding.btnSaveHist
@@ -230,7 +266,6 @@ class MainActivity : AppCompatActivity() {
                 }
 
                 override fun onFailure(call: Call<ApiResponseJson>, t: Throwable) {
-                    motoast.MoError(msg = "Error From Key Genenrator!")
 
                 }
 
@@ -243,6 +278,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun payConfig() {
         getKey()
+        Log.i("TAG", "Key from server ==>$base64EncodedPublicKey")
         mHelper = IabHelper(this, base64EncodedPublicKey)
         mHelper.enableDebugLogging(true)
         mHelper.startSetup(object : IabHelper.OnIabSetupFinishedListener {
@@ -252,7 +288,6 @@ class MainActivity : AppCompatActivity() {
                         Log.e("TAG", "Problem setting up in-app billing: " + result);
                         return;
                     } else {
-
                         Log.d("TAG", "In-app billing setup successful")
                         payIntent()
 
@@ -276,13 +311,11 @@ class MainActivity : AppCompatActivity() {
                 override fun onIabPurchaseFinished(
                     result: IabResult?, info: Purchase?
                 ) {
-
                     Toast.makeText(this@MainActivity, "$result/$info", Toast.LENGTH_SHORT).show()
                 }
 
             })
     }
-
 
     private fun exportToPDF() {
 
@@ -506,27 +539,7 @@ class MainActivity : AppCompatActivity() {
         mHelper.dispose();
 
     }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        Log.d("TAG", "onActivityResult(" + requestCode + "," + resultCode + "," + data);
-        if (mHelper == null) return;
-
-        // Pass on the activity result to the helper for handling
-        if (!mHelper.handleActivityResult(requestCode, resultCode, data)) {
-            // not handled, so handle it ourselves (here's where you'd
-            // perform any handling of activity results not related to in-app
-            // billing...
-            if(requestCode==RC_REQUEST){
-                Log.d("TAG", "OK");
-
-            }
-            super.onActivityResult(requestCode, resultCode, data);
-        }
-        else {
-            Log.d("TAG", "onActivityResult handled by IABUtil.");
-        }
-    }
 }
+
 
 
