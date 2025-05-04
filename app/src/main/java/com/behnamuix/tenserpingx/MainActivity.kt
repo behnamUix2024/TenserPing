@@ -39,6 +39,7 @@ import ir.myket.billingclient.util.IabResult
 import ir.myket.billingclient.util.Purchase
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import retrofit2.Call
@@ -97,14 +98,16 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
         changeNavbarStyle()
         config()
-        showRateDialog()
+        lifecycleScope.launch {
+            delay(60 * 3000) // 1 دقیقه بعد
+            showRateDialog()
+        }
 
     }
 
     private fun showRateDialog() {
         val builder = AlertDialog.Builder(this, R.style.cardAlertDialog)
         builder.setTitle("آیا به ما امتیاز می‌دهید؟")
-        builder.setMessage("با امتیاز دادن از ما حمایت کنید.")
         builder.setPositiveButton("بله، امتیاز می‌دهم") { _, _ ->
             openMyketForRating()
         }
