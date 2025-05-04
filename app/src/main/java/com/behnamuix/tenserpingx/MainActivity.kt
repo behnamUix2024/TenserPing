@@ -7,6 +7,7 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.net.ConnectivityManager
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -52,7 +53,7 @@ class MainActivity : AppCompatActivity() {
     val SKU_PREMIUM: String = "hist_chart_prem"
     val RC_REQUEST: Int = 10001
     lateinit var mHelper: IabHelper
-    var base64EncodedPublicKey =""
+    var base64EncodedPublicKey = ""
     var perm: Boolean = false
     private lateinit var motoast: MoToast
     private var DATE = ""
@@ -96,8 +97,40 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
         changeNavbarStyle()
         config()
+        showRateDialog()
 
+    }
 
+    private fun showRateDialog() {
+        val builder = AlertDialog.Builder(this, R.style.cardAlertDialog)
+        builder.setTitle("آیا به ما امتیاز می‌دهید؟")
+        builder.setMessage("با امتیاز دادن از ما حمایت کنید.")
+        builder.setPositiveButton("بله، امتیاز می‌دهم") { _, _ ->
+            openMyketForRating()
+        }
+        builder.setNegativeButton("بی‌خیال") { dialog, _ ->
+            dialog.dismiss()
+        }
+        builder.show()
+    }
+
+    private fun openMyketForRating() {
+        val packageName = packageName
+        val intent = Intent(Intent.ACTION_VIEW).apply {
+            data = Uri.parse("myket://comment?id=$packageName")
+            setPackage("ir.mservices.market")
+        }
+
+        if (intent.resolveActivity(packageManager) != null) {
+            startActivity(intent)
+        } else {
+            startActivity(
+                Intent(
+                    Intent.ACTION_VIEW,
+                    Uri.parse("https://myket.ir/app/$packageName")
+                )
+            )
+        }
     }
 
     private fun changeNavbarStyle() {
@@ -211,38 +244,38 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun getKey() {
-            try{
-                val call=RetrofitClient.apiService.getKey()
-                call.enqueue(object:Callback<ApiResponseJson>{
-                    override fun onResponse(
-                        call: Call<ApiResponseJson>,
-                        response: Response<ApiResponseJson>
-                    ) {
-                        val data=response.body()
-                        if (data != null) {
-                            if(data.status=="success"){
-                                val key=data.data.toString()
-                                base64EncodedPublicKey=key
+        try {
+            val call = RetrofitClient.apiService.getKey()
+            call.enqueue(object : Callback<ApiResponseJson> {
+                override fun onResponse(
+                    call: Call<ApiResponseJson>,
+                    response: Response<ApiResponseJson>
+                ) {
+                    val data = response.body()
+                    if (data != null) {
+                        if (data.status == "success") {
+                            val key = data.data.toString()
+                            base64EncodedPublicKey = key
 
 
-                            }
                         }
                     }
+                }
 
-                    override fun onFailure(call: Call<ApiResponseJson>, t: Throwable) {
+                override fun onFailure(call: Call<ApiResponseJson>, t: Throwable) {
 
-                    }
+                }
 
-                })
-            }catch (e:Exception){
-                e.printStackTrace()
-            }
+            })
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
 
     }
 
     private fun payConfig() {
         getKey()
-        Log.i("TAG","Key from server ==>$base64EncodedPublicKey")
+        Log.i("TAG", "Key from server ==>$base64EncodedPublicKey")
         mHelper = IabHelper(this, base64EncodedPublicKey)
         mHelper.enableDebugLogging(true)
         mHelper.startSetup(object : IabHelper.OnIabSetupFinishedListener {
@@ -503,7 +536,7 @@ class MainActivity : AppCompatActivity() {
         mHelper.dispose();
 
     }
-
-
 }
+
+
 
