@@ -1,5 +1,5 @@
 package com.behnamuix.tenserpingx
-//reyhaneا
+//reyhane
 
 import android.Manifest
 import android.content.BroadcastReceiver
