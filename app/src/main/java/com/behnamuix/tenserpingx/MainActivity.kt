@@ -1,4 +1,5 @@
 package com.behnamuix.tenserpingx
+//Behnam
 
 import android.Manifest
 import android.content.BroadcastReceiver
@@ -30,12 +31,12 @@ import com.behnamuix.tenserpingx.MyTools.MoToast
 import com.behnamuix.tenserpingx.Network.InternetSpeedTester
 import com.behnamuix.tenserpingx.Network.Location.UserLocationProvider
 import com.behnamuix.tenserpingx.Retrofit.ApiResponse
-import com.behnamuix.tenserpingx.Retrofit.ApiResponseJson
 import com.behnamuix.tenserpingx.Retrofit.RetrofitClient
 import com.behnamuix.tenserpingx.databinding.ActivityMainBinding
 import com.behnamuix.tenserpingx.util.IabHelper
 import com.google.android.material.button.MaterialButton
 import ir.myket.billingclient.util.IabResult
+import ir.myket.billingclient.util.Inventory
 import ir.myket.billingclient.util.Purchase
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -51,10 +52,11 @@ import java.util.Locale
 import java.util.TimeZone
 
 class MainActivity : AppCompatActivity() {
+    private  val KEY_FIRST_LAUNCH = "first_launch"
     val SKU_PREMIUM: String = "hist_chart_prem"
     val RC_REQUEST: Int = 10001
     lateinit var mHelper: IabHelper
-    var base64EncodedPublicKey = ""
+    var k = "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCwwsFIXlqefMxrOUl3//fNAvng3lKqfw4kCGbdeDXbp2oRg8z3PZ+Fvr0INk0mcZ3WMptSW/0a+rHv1PLB/zNxDn6vPbd1TR3bc4bCFi96xHEPVhlPCyss2u26yvBB+EMvEKzZZ96lANUFU4Y1mR7j7icF5XKYA99UVJO68cgPFQIDAQAB"
     var perm: Boolean = false
     private lateinit var motoast: MoToast
     private var DATE = ""
@@ -99,7 +101,7 @@ class MainActivity : AppCompatActivity() {
         changeNavbarStyle()
         config()
         lifecycleScope.launch {
-            delay(60 * 3000) // 1 دقیقه بعد
+            delay(60000 * 2) // 1 دقیقه بعد
             showRateDialog()
         }
 
@@ -148,9 +150,20 @@ class MainActivity : AppCompatActivity() {
         windowInsetsController.isAppearanceLightNavigationBars = false
     }
 
+    private val sharedPreferences by lazy {
+        getSharedPreferences("my", Context.MODE_PRIVATE)
+    }
+    fun setFirstLaunchStatus(isFirstLaunch: Boolean) {
+        sharedPreferences.edit()
+            .putBoolean(KEY_FIRST_LAUNCH, isFirstLaunch)
+            .apply() // یا commit() برای اعمال تغییرات به صورت همزمان
+    }
+
+    fun checkValidPerm(): Boolean {
+        return sharedPreferences.getBoolean(KEY_FIRST_LAUNCH, false) // مقدار پیش‌فرض true است اگر کلید وجود نداشته باشد.
+    }
 
     private fun config() {
-        getKey()
         btn_export_pdf = binding.btnExportPdf
         motoast = MoToast(this)
         btn_save_hist = binding.btnSaveHist
@@ -177,7 +190,7 @@ class MainActivity : AppCompatActivity() {
         }
         img_hist.setOnClickListener {
 
-            if (perm) {
+            if (checkValidPerm()) {
                 showHistDialog()
 
             } else {
@@ -246,47 +259,16 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-    private fun getKey() {
-        try {
-            val call = RetrofitClient.apiService.getKey()
-            call.enqueue(object : Callback<ApiResponseJson> {
-                override fun onResponse(
-                    call: Call<ApiResponseJson>,
-                    response: Response<ApiResponseJson>
-                ) {
-                    val data = response.body()
-                    if (data != null) {
-                        if (data.status == "success") {
-                            val key = data.data.toString()
-                            base64EncodedPublicKey = key
-
-
-                        }
-                    }
-                }
-
-                override fun onFailure(call: Call<ApiResponseJson>, t: Throwable) {
-
-                }
-
-            })
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-
-    }
-
     private fun payConfig() {
-        getKey()
-        Log.i("TAG", "Key from server ==>$base64EncodedPublicKey")
-        mHelper = IabHelper(this, base64EncodedPublicKey)
+        Log.i("TAG", "Key from server ==>$k")
+        mHelper = IabHelper(this,k)
         mHelper.enableDebugLogging(true)
         mHelper.startSetup(object : IabHelper.OnIabSetupFinishedListener {
             override fun onIabSetupFinished(result: IabResult?) {
                 if (result != null) {
                     if (!result.isSuccess) {
                         Log.e("TAG", "Problem setting up in-app billing: " + result);
-                        return;
+                        return
                     } else {
                         Log.d("TAG", "In-app billing setup successful")
                         payIntent()
@@ -303,18 +285,106 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun payIntent() {
-        mHelper.launchPurchaseFlow(
-            this@MainActivity,
-            SKU_PREMIUM,
-            RC_REQUEST,
-            object : IabHelper.OnIabPurchaseFinishedListener {
-                override fun onIabPurchaseFinished(
-                    result: IabResult?, info: Purchase?
-                ) {
-                    Toast.makeText(this@MainActivity, "$result/$info", Toast.LENGTH_SHORT).show()
+        if (mHelper == null) {
+            Log.e("TAG", "IAB Helper is not initialized!")
+            return
+        }
+
+        val consumeFinishedListener = object : IabHelper.OnConsumeFinishedListener {
+            override fun onConsumeFinished(purchase: Purchase?, result: IabResult?) {
+                Log.d("TAG", "Consumption finished. Purchase: $purchase, result: $result")
+                if (mHelper == null) return
+
+                if (result?.isSuccess == true) {
+                    Log.d("TAG", "Consumption successful. Provisioning.")
+                } else {
+                    Log.e("TAG", "Error while consuming: $result")
+                }
+            }
+        }
+
+        val gotInventoryListener = object : IabHelper.QueryInventoryFinishedListener {
+            override fun onQueryInventoryFinished(result: IabResult?, inv: Inventory?) {
+                Log.d("TAG", "Query inventory finished.")
+                if (mHelper == null) return
+
+                if (result?.isFailure == true) {
+                    Log.e("TAG", "Failed to query inventory: $result")
+                    return
                 }
 
-            })
+                Log.d("TAG", "Query inventory was successful.")
+                val purchase = inv?.getPurchase(SKU_PREMIUM)
+
+                if (purchase != null) {
+                    // کاربر قبلاً این محصول را خریداری کرده است.
+                    Log.d("TAG", "User already owns $SKU_PREMIUM")
+                    val isPayloadValid = developerPayload(purchase)
+                    if (isPayloadValid) {
+                        // اگر هنوز مصرف نشده، آن را مصرف کنید.
+                        mHelper.consumeAsync(purchase, consumeFinishedListener)
+                    } else {
+                        Log.e("TAG", "Error: Invalid developer payload for owned item.")
+                        // در صورت لزوم، می‌توانید در اینجا اقدام دیگری انجام دهید، مثلاً اطلاع به کاربر.
+                    }
+                } else {
+                    // کاربر این محصول را خریداری نکرده است، فرآیند خرید را آغاز کنید.
+                    Log.d("TAG", "Initiating purchase flow for $SKU_PREMIUM")
+                    mHelper.launchPurchaseFlow(
+                        this@MainActivity,
+                        SKU_PREMIUM,
+                        RC_REQUEST,
+                        object : IabHelper.OnIabPurchaseFinishedListener {
+                            override fun onIabPurchaseFinished(
+                                result: IabResult?,
+                                info: Purchase?
+                            ) {
+                                if (mHelper == null) return
+
+                                if (result?.isFailure == true) {
+                                    Log.e("TAG", "Error purchasing: $result")
+                                    return
+                                }
+
+                                if (info == null || !developerPayload(info)) {
+                                    Log.e(
+                                        "TAG",
+                                        "Error purchasing. Authenticity verification failed."
+                                    )
+                                    return
+                                }
+
+                                Log.d("TAG", "Purchase successful: ${info.sku}")
+
+                                if (info.sku == SKU_PREMIUM) {
+                                    Log.d(
+                                        "TAG",
+                                        "Purchase is premium upgrade. Congratulating user."
+                                    )
+                                    Log.d("TAG", "Thank you for upgrading to premium!")
+                                    setFirstLaunchStatus(true)
+                                    showHistDialog()
+                                    // پس از خرید موفقیت‌آمیز، محصول را مصرف کنید تا بتواند دوباره خریداری شود (اگر قابل مصرف است).
+                                    mHelper.consumeAsync(info, consumeFinishedListener)
+                                }
+                            }
+                        },
+                        "" // developerPayload برای خرید جدید نیازی نیست.
+                    )
+                }
+            }
+        }
+
+        // ابتدا بررسی کنید که آیا کاربر قبلاً محصول را خریداری کرده است یا خیر.
+        mHelper.queryInventoryAsync(true, null, gotInventoryListener)
+    }
+
+    private fun developerPayload(purchase: Purchase): Boolean {
+        var payload = purchase.developerPayload
+        Log.d("TAG", payload.toString())
+        return true
+
+
     }
 
     private fun exportToPDF() {
@@ -538,6 +608,21 @@ class MainActivity : AppCompatActivity() {
         unregisterReceiver(networkReceiver) // حذف ثبت Receiver
         mHelper.dispose();
 
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        Log.d("TAG", "onActivityResult($requestCode,$resultCode,$data")
+        if (mHelper == null) return
+
+        // Pass on the activity result to the helper for handling
+        if (!mHelper.handleActivityResult(requestCode, resultCode, data)) {
+            // not handled, so handle it ourselves (here's where you'd
+            // perform any handling of activity results not related to in-app
+            // billing...
+            super.onActivityResult(requestCode, resultCode, data)
+        } else {
+
+        }
     }
 }
 
