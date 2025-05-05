@@ -1,5 +1,5 @@
 package com.behnamuix.tenserpingx
-//Behnam
+
 
 import android.Manifest
 import android.content.BroadcastReceiver
