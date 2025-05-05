@@ -1,5 +1,5 @@
 package com.behnamuix.tenserpingx
-//Behnam
+//reyhane
 
 import android.Manifest
 import android.content.BroadcastReceiver
@@ -57,7 +57,7 @@ class MainActivity : AppCompatActivity() {
     val RC_REQUEST: Int = 10001
     lateinit var mHelper: IabHelper
     var k = "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCwwsFIXlqefMxrOUl3//fNAvng3lKqfw4kCGbdeDXbp2oRg8z3PZ+Fvr0INk0mcZ3WMptSW/0a+rHv1PLB/zNxDn6vPbd1TR3bc4bCFi96xHEPVhlPCyss2u26yvBB+EMvEKzZZ96lANUFU4Y1mR7j7icF5XKYA99UVJO68cgPFQIDAQAB"
-    var perm: Boolean = false
+
     private lateinit var motoast: MoToast
     private var DATE = ""
     private var IP = ""
