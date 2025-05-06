@@ -1,6 +1,5 @@
 package com.behnamuix.tenserpingx
 //reyhane
-
 import android.Manifest
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -43,6 +42,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import okhttp3.internal.http2.Settings
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -52,13 +52,15 @@ import java.util.Locale
 import java.util.TimeZone
 
 class MainActivity : AppCompatActivity() {
-    private  val KEY_FIRST_LAUNCH = "first_launch"
+    private val KEY_FIRST_LAUNCH = "first_launch"
     val SKU_PREMIUM: String = "hist_chart_prem"
     val RC_REQUEST: Int = 10001
     lateinit var mHelper: IabHelper
-    var k = "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCwwsFIXlqefMxrOUl3//fNAvng3lKqfw4kCGbdeDXbp2oRg8z3PZ+Fvr0INk0mcZ3WMptSW/0a+rHv1PLB/zNxDn6vPbd1TR3bc4bCFi96xHEPVhlPCyss2u26yvBB+EMvEKzZZ96lANUFU4Y1mR7j7icF5XKYA99UVJO68cgPFQIDAQAB"
+    var k =
+        "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCwwsFIXlqefMxrOUl3//fNAvng3lKqfw4kCGbdeDXbp2oRg8z3PZ+Fvr0INk0mcZ3WMptSW/0a+rHv1PLB/zNxDn6vPbd1TR3bc4bCFi96xHEPVhlPCyss2u26yvBB+EMvEKzZZ96lANUFU4Y1mR7j7icF5XKYA99UVJO68cgPFQIDAQAB"
 
     private lateinit var motoast: MoToast
+    private var MAC = ""
     private var DATE = ""
     private var IP = ""
     private var NET_TYPE = ""
@@ -153,6 +155,7 @@ class MainActivity : AppCompatActivity() {
     private val sharedPreferences by lazy {
         getSharedPreferences("my", Context.MODE_PRIVATE)
     }
+
     fun setFirstLaunchStatus(isFirstLaunch: Boolean) {
         sharedPreferences.edit()
             .putBoolean(KEY_FIRST_LAUNCH, isFirstLaunch)
@@ -160,10 +163,14 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun checkValidPerm(): Boolean {
-        return sharedPreferences.getBoolean(KEY_FIRST_LAUNCH, false) // مقدار پیش‌فرض true است اگر کلید وجود نداشته باشد.
+        return sharedPreferences.getBoolean(
+            KEY_FIRST_LAUNCH,
+            false
+        ) // مقدار پیش‌فرض true است اگر کلید وجود نداشته باشد.
     }
 
     private fun config() {
+        mHelper = IabHelper(this, k)
         btn_export_pdf = binding.btnExportPdf
         motoast = MoToast(this)
         btn_save_hist = binding.btnSaveHist
@@ -201,6 +208,7 @@ class MainActivity : AppCompatActivity() {
                 payAlert.setPositiveButton(R.string.pay_alert_btn_positive_text) { _, _ ->
                     payConfig()
                 }
+                payAlert.setPositiveButtonIcon(getDrawable(R.drawable.icon_buy))
                 payAlert.setNegativeButton(R.string.pay_alert_btn_negative_text, null)
                 payAlert.show()
             }
@@ -260,131 +268,127 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun payConfig() {
-        Log.i("TAG", "Key from server ==>$k")
-        mHelper = IabHelper(this,k)
-        mHelper.enableDebugLogging(true)
+        mHelper.enableDebugLogging(false)
         mHelper.startSetup(object : IabHelper.OnIabSetupFinishedListener {
             override fun onIabSetupFinished(result: IabResult?) {
                 if (result != null) {
-                    if (!result.isSuccess) {
-                        Log.e("TAG", "Problem setting up in-app billing: " + result);
-                        return
-                    } else {
-                        Log.d("TAG", "In-app billing setup successful")
-                        payIntent()
-
-
-                    }
-
+                    payIntent()
                 }
             }
-
         })
 
 
     }
 
     private fun payIntent() {
+        // 1. بررسی وجود mHelper (آبجکت مدیریت خرید درون‌برنامه‌ای)
         if (mHelper == null) {
             Log.e("TAG", "IAB Helper is not initialized!")
             return
         }
 
-        val consumeFinishedListener = object : IabHelper.OnConsumeFinishedListener {
-            override fun onConsumeFinished(purchase: Purchase?, result: IabResult?) {
-                Log.d("TAG", "Consumption finished. Purchase: $purchase, result: $result")
-                if (mHelper == null) return
+        // 2. تعریف لیسنر برای رویداد مصرف (consume) محصول
+        val consumeListener = IabHelper.OnConsumeFinishedListener { purchase, result ->
+            when {
+                // 2-1. اگر mHelper نال بود عملیات متوقف می‌شود
+                mHelper == null -> return@OnConsumeFinishedListener
 
-                if (result?.isSuccess == true) {
-                    Log.d("TAG", "Consumption successful. Provisioning.")
-                } else {
-                    Log.e("TAG", "Error while consuming: $result")
-                }
+                // 2-2. اگر مصرف موفقیت‌آمیز بود
+                result?.isSuccess == true -> Log.d("TAG", "Consumption successful. Provisioning.")
+
+                // 2-3. در صورت خطا در مصرف محصول
+                else -> Log.e("TAG", "Error while consuming: $result")
             }
         }
 
-        val gotInventoryListener = object : IabHelper.QueryInventoryFinishedListener {
-            override fun onQueryInventoryFinished(result: IabResult?, inv: Inventory?) {
-                Log.d("TAG", "Query inventory finished.")
-                if (mHelper == null) return
-
-                if (result?.isFailure == true) {
+        // 3. تعریف لیسنر برای بررسی موجودی محصولات
+        val inventoryListener = IabHelper.QueryInventoryFinishedListener { result, inv ->
+            when {
+                // 3-1. اگر خطا در دریافت لیست محصولات
+                result?.isFailure == true -> {
                     Log.e("TAG", "Failed to query inventory: $result")
-                    return
+                    return@QueryInventoryFinishedListener
                 }
 
-                Log.d("TAG", "Query inventory was successful.")
-                val purchase = inv?.getPurchase(SKU_PREMIUM)
-
-                if (purchase != null) {
-                    // کاربر قبلاً این محصول را خریداری کرده است.
-                    Log.d("TAG", "User already owns $SKU_PREMIUM")
-                    val isPayloadValid = developerPayload(purchase)
-                    if (isPayloadValid) {
-                        // اگر هنوز مصرف نشده، آن را مصرف کنید.
-                        mHelper.consumeAsync(purchase, consumeFinishedListener)
-                    } else {
-                        Log.e("TAG", "Error: Invalid developer payload for owned item.")
-                        // در صورت لزوم، می‌توانید در اینجا اقدام دیگری انجام دهید، مثلاً اطلاع به کاربر.
+                // 3-2. اگر محصول مورد نظر قبلا خریداری شده
+                inv?.getPurchase(SKU_PREMIUM) != null -> {
+                    inv.getPurchase(SKU_PREMIUM)?.let { purchase ->
+                        if (developerPayload(purchase) == true) {
+                            // محصول قبلاً خریداری شده و payload معتبر است.
+                            // برای محصولات مصرف نشدنی، نیازی به مصرف نیست.
+                            Log.d("TAG", "User already owns the non-consumable item: $SKU_PREMIUM")
+                            // در اینجا می‌توانید وضعیت پریمیوم کاربر را فعال کنید
+                            setFirstLaunchStatus(true) // فرض بر اینکه 'perm' وضعیت پریمیوم را نگه می‌دارد
+                            showHistDialog() // اگر کاربر قبلاً خریده، ممکن است بخواهید مستقیماً محتوای پریمیوم را نمایش دهید
+                            return@QueryInventoryFinishedListener
+                        } else {
+                            // payload نامعتبر است
+                            Log.e("TAG", "Error: Invalid payload for owned item")
+                            return@QueryInventoryFinishedListener
+                        }
                     }
-                } else {
-                    // کاربر این محصول را خریداری نکرده است، فرآیند خرید را آغاز کنید.
-                    Log.d("TAG", "Initiating purchase flow for $SKU_PREMIUM")
-                    mHelper.launchPurchaseFlow(
-                        this@MainActivity,
-                        SKU_PREMIUM,
-                        RC_REQUEST,
-                        object : IabHelper.OnIabPurchaseFinishedListener {
-                            override fun onIabPurchaseFinished(
-                                result: IabResult?,
-                                info: Purchase?
-                            ) {
-                                if (mHelper == null) return
+                }
 
-                                if (result?.isFailure == true) {
-                                    Log.e("TAG", "Error purchasing: $result")
-                                    return
-                                }
-
-                                if (info == null || !developerPayload(info)) {
-                                    Log.e(
-                                        "TAG",
-                                        "Error purchasing. Authenticity verification failed."
-                                    )
-                                    return
-                                }
-
-                                Log.d("TAG", "Purchase successful: ${info.sku}")
-
-                                if (info.sku == SKU_PREMIUM) {
-                                    Log.d(
-                                        "TAG",
-                                        "Purchase is premium upgrade. Congratulating user."
-                                    )
-                                    Log.d("TAG", "Thank you for upgrading to premium!")
-                                    setFirstLaunchStatus(true)
-                                    showHistDialog()
-                                    // پس از خرید موفقیت‌آمیز، محصول را مصرف کنید تا بتواند دوباره خریداری شود (اگر قابل مصرف است).
-                                    mHelper.consumeAsync(info, consumeFinishedListener)
-                                }
-                            }
-                        },
-                        "" // developerPayload برای خرید جدید نیازی نیست.
-                    )
+                // 3-3. اگر محصول خریداری نشده بود
+                else -> {
+                    startPurchaseFlow()
                 }
             }
         }
 
-        // ابتدا بررسی کنید که آیا کاربر قبلاً محصول را خریداری کرده است یا خیر.
-        mHelper.queryInventoryAsync(true, null, gotInventoryListener)
+        // 4. شروع فرآیند بررسی موجودی
+        mHelper.queryInventoryAsync(inventoryListener)
+    }
+
+    // 5. تابع شروع فرآیند خرید
+    private fun startPurchaseFlow() {
+        mHelper.launchPurchaseFlow(
+            this,
+            SKU_PREMIUM, // شناسه محصول
+            RC_REQUEST, // کد درخواست
+            IabHelper.OnIabPurchaseFinishedListener { result, info ->
+                when {
+                    // 5-1. اگر mHelper نال بود
+                    mHelper == null -> return@OnIabPurchaseFinishedListener
+
+                    // 5-2. اگر خطا در فرآیند خرید
+                    result?.isFailure == true -> Log.e("TAG", "Error purchasing: $result")
+
+                    // 5-3. اگر اطلاعات خرید نامعتبر
+                    info == null || !developerPayload(info) -> {
+                        Log.e("TAG", "Purchase authenticity failed")
+                    }
+
+                    // 5-4. اگر خرید محصول پریمیوم موفق بود
+                    info.sku == SKU_PREMIUM -> handleSuccessfulPurchase(info)
+                }
+            },
+            "" // developerPayload
+        )
+    }
+
+    // 6. تابع مدیریت خرید موفق
+    private fun handleSuccessfulPurchase(purchase: Purchase) {
+        Log.d("TAG", "Premium upgrade purchased")
+        // 6-1. ذخیره وضعیت خرید
+        setFirstLaunchStatus(true)
+
+        // 6-2. نمایش دیالوگ تاریخچه
+        showHistDialog()
+        motoast.MoInfo(msg = "تبریک , نسخه پرمیوم برای همیشه برای شما فعال شد")
+
+        // 6-3. مصرف محصول برای امکان خرید مجدد
+        mHelper?.consumeAsync(purchase) { _, result ->
+            if (result?.isFailure == true) {
+                Log.e("TAG", "Consumption failed: $result")
+            }
+        }
     }
 
     private fun developerPayload(purchase: Purchase): Boolean {
         var payload = purchase.developerPayload
         Log.d("TAG", payload.toString())
         return true
-
-
     }
 
     private fun exportToPDF() {
@@ -393,13 +397,14 @@ class MainActivity : AppCompatActivity() {
 
     private fun getHistData() {
         DATE = getDate()
+        MAC=getMac(this)
         val builder1 = AlertDialog.Builder(this, R.style.cardAlertDialog)
         builder1.setMessage("آیا شما میخواهید داده ها در تاریخچه ذخیره شود؟")
         builder1.setCancelable(true)
 
         builder1.setPositiveButton(
             "بله"
-        ) { _, _ -> insertToHistDb(DATE, IP, NET_TYPE, PING_SPEED) }
+        ) { _, _ -> insertToHistDb(MAC,DATE, IP, NET_TYPE, PING_SPEED) }
 
         builder1.setNegativeButton(
             "خیر"
@@ -410,10 +415,18 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-    private fun insertToHistDb(date: String, ip: String, netType: String, pingSpeed: String) {
+    private fun getMac(ctx:Context): String {
+        return android.provider.Settings.Secure.getString(
+            ctx.contentResolver,
+            android.provider.Settings.Secure.ANDROID_ID
+        ) ?: "unknown"
+
+    }
+
+    private fun insertToHistDb(mac:String,date: String, ip: String, netType: String, pingSpeed: String) {
 
         Log.d("ALPHA", "$date$ip/$netType/$pingSpeed / $DOWN_SPEED ")
-        val call = RetrofitClient.apiService.sendHist(
+        val call = RetrofitClient.apiService.sendHist(mac,
             date, netType, ip, pingSpeed
         )
         call.enqueue(object : Callback<ApiResponse> {

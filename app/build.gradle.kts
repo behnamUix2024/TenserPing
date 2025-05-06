@@ -11,6 +11,7 @@ android {
         viewBinding = true
         buildConfig = true
     }
+
     defaultConfig {
         applicationId = "com.behnamuix.tenserpingx"
         minSdk = 24
@@ -26,6 +27,7 @@ android {
             this["marketBindAddress"] = marketBindAddress
             this["marketPermission"] = "${marketApplicationId}.BILLING"
         }
+
         buildConfigField(
             "String",
             "IAB_PUBLIC_KEY",

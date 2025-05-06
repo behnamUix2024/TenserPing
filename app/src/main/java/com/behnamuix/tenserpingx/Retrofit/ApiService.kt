@@ -16,6 +16,7 @@ interface ApiService {
 
     @GET("send_hist.php")
     fun sendHist(
+        @Query("hist_mac") mac:String,
         @Query("hist_date") date:String,
         @Query("hist_type") type:String,
         @Query("hist_ip") ip:String,

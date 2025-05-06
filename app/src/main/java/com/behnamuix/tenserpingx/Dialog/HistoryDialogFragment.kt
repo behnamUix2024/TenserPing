@@ -36,6 +36,7 @@ import retrofit2.Callback
 import retrofit2.Response
 import androidx.core.graphics.toColorInt
 import androidx.core.graphics.drawable.toDrawable
+import kotlinx.coroutines.delay
 
 class HistoryDialogFragment : DialogFragment() {
     private var currentCurveMode = LineDataSet.Mode.CUBIC_BEZIER
@@ -115,7 +116,13 @@ class HistoryDialogFragment : DialogFragment() {
         rec_hist = binding.recHist
         getHist()
         btn_show_chart.setOnClickListener {
-            showChart()
+            lifecycleScope.launch {
+                btn_show_chart.text="⌛"
+                delay(2000)
+                showChart()
+
+
+            }
 
         }
         btn_show_list.setOnClickListener {
@@ -125,6 +132,7 @@ class HistoryDialogFragment : DialogFragment() {
     }
 
     private fun showChart() {
+        btn_show_chart.text="نمایش نمودار"
         hist_list.visibility = View.GONE
         hist_chart.visibility = View.VISIBLE
         btn_show_list.visibility = View.VISIBLE
@@ -149,8 +157,10 @@ class HistoryDialogFragment : DialogFragment() {
         btn_show_list.visibility = View.GONE
         btn_show_chart.visibility = View.VISIBLE
         lifecycleScope.launch {
-            motoast.MoInfo(msg = "در حال دریافت داده ها از سرور...")
+            motoast.MoInfo(msg = "در حال دریافت داده ها ...")
+
             try {
+
                 val call = RetrofitClient.apiService.getHist()
                 call.enqueue(object : Callback<ApiResponseJson> {
                     override fun onResponse(
@@ -204,8 +214,8 @@ class HistoryDialogFragment : DialogFragment() {
             valueTextColor = Color.WHITE      // رنگ متن مقادیر سفید
             valueTextSize = 12f               // سایز متن مقادیر 12 پیکسل
             lineWidth = 2f                    // ضخامت خط 2 پیکسل
-            setCircleColor("#E27E43".toColorInt())  // رنگ نقاط قرمز
-            circleRadius = 10f
+            setCircleColor("#000000".toColorInt())  // رنگ نقاط قرمز
+            circleRadius = 5f
             fillColor = "#AF4399E2".toColorInt()    // رنگ پرکردن زیر خط با شفافیت
             setDrawFilled(true)               // فعال کردن پرکردن زیر خط
             mode = currentCurveMode // استفاده از حالت انتخاب شده
@@ -262,7 +272,7 @@ class HistoryDialogFragment : DialogFragment() {
             setScaleEnabled(true)               // فعال کردن زوم
             setPinchZoom(true)                  // فعال کردن زوم دو انگشتی
             setBackgroundColor(Color.TRANSPARENT) // پس‌زمینه شفاف
-            animateX(1500, Easing.EaseInOutQuad) // انیمیشن1   ثانیه‌ای
+            animateX(1800, Easing.EaseInOutQuad) // انیمیشن1   ثانیه‌ای
             invalidate()  // بروزرسانی نمودار
         }
     }
