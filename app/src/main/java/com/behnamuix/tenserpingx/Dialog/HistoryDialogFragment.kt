@@ -1,7 +1,11 @@
 package com.behnamuix.tenserpingx.Dialog
 
+import android.annotation.SuppressLint
+import android.content.Context
 import android.graphics.Color
 import android.os.Bundle
+import android.provider.Settings
+import android.util.Log
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
@@ -39,6 +43,8 @@ import androidx.core.graphics.drawable.toDrawable
 import kotlinx.coroutines.delay
 
 class HistoryDialogFragment : DialogFragment() {
+
+    private var ANDROID_IDS=""
     private var currentCurveMode = LineDataSet.Mode.CUBIC_BEZIER
     private lateinit var chart: LineChart
     private lateinit var sp_type: Spinner
@@ -105,6 +111,7 @@ class HistoryDialogFragment : DialogFragment() {
     }
 
     private fun config() {
+        ANDROID_IDS=getDeviceId()
         sp_type = binding.spType
         btn_show_list = binding.btnShowList
         btn_show_chart = binding.btnShowChart
@@ -140,17 +147,28 @@ class HistoryDialogFragment : DialogFragment() {
 
         lifecycleScope.launch {
             try {
-                val response = RetrofitClient.apiService.getPing()
+                val response = RetrofitClient.apiService.getPing(ANDROID_IDS)
+
                 if (response.status == "success") {
-                    configChart(response.data)
+                    response.data?.let { configChart(it) }
                 }
             } catch (e: Exception) {
+                Log.d("err","${e.message}")
                 Toast.makeText(context, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
             }
         }
 
     }
-
+    private fun getDeviceId(): String {
+        return try {
+            Settings.Secure.getString(
+                requireContext().contentResolver,
+                Settings.Secure.ANDROID_ID
+            ) ?: "unknown"
+        } catch (e: Exception) {
+            "unknown"
+        }
+    }
     private fun getHist() {
         hist_chart.visibility = View.GONE
         hist_list.visibility = View.VISIBLE
@@ -160,8 +178,7 @@ class HistoryDialogFragment : DialogFragment() {
             motoast.MoInfo(msg = "در حال دریافت داده ها ...")
 
             try {
-
-                val call = RetrofitClient.apiService.getHist()
+                val call = RetrofitClient.apiService.getHist(ANDROID_IDS)
                 call.enqueue(object : Callback<ApiResponseJson> {
                     override fun onResponse(
                         call: Call<ApiResponseJson>,

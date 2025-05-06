@@ -1,6 +1,7 @@
 package com.behnamuix.tenserpingx
 //reyhane
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -35,7 +36,6 @@ import com.behnamuix.tenserpingx.databinding.ActivityMainBinding
 import com.behnamuix.tenserpingx.util.IabHelper
 import com.google.android.material.button.MaterialButton
 import ir.myket.billingclient.util.IabResult
-import ir.myket.billingclient.util.Inventory
 import ir.myket.billingclient.util.Purchase
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -50,6 +50,7 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
 import java.util.TimeZone
+import java.util.UUID
 
 class MainActivity : AppCompatActivity() {
     private val KEY_FIRST_LAUNCH = "first_launch"
@@ -397,7 +398,8 @@ class MainActivity : AppCompatActivity() {
 
     private fun getHistData() {
         DATE = getDate()
-        MAC=getMac(this)
+        MAC=getAndroidId(applicationContext)
+        Toast.makeText(this,MAC,Toast.LENGTH_LONG).show()
         val builder1 = AlertDialog.Builder(this, R.style.cardAlertDialog)
         builder1.setMessage("آیا شما میخواهید داده ها در تاریخچه ذخیره شود؟")
         builder1.setCancelable(true)
@@ -415,17 +417,26 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-    private fun getMac(ctx:Context): String {
-        return android.provider.Settings.Secure.getString(
-            ctx.contentResolver,
-            android.provider.Settings.Secure.ANDROID_ID
-        ) ?: "unknown"
-
+    /**
+     * دریافت Android ID دستگاه
+     * (منحصر به فرد برای هر دستگاه + اپلیکیشن)
+     */
+    @SuppressLint("HardwareIds")
+    private fun getAndroidId(context: Context): String {
+        return try {
+            android.provider.Settings.
+            Secure.getString(
+                context.contentResolver,
+                android.provider.Settings.Secure.ANDROID_ID
+            ) ?: "unknown"
+        } catch (e: Exception) {
+            Log.e("DeviceUtils", "Error getting Android ID", e)
+            "unknown"
+        }
     }
-
     private fun insertToHistDb(mac:String,date: String, ip: String, netType: String, pingSpeed: String) {
 
-        Log.d("ALPHA", "$date$ip/$netType/$pingSpeed / $DOWN_SPEED ")
+        Log.d("ALPHA", "$mac/$date/$ip/$netType/$pingSpeed / $DOWN_SPEED ")
         val call = RetrofitClient.apiService.sendHist(mac,
             date, netType, ip, pingSpeed
         )
