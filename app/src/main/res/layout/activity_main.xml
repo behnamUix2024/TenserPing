@@ -3,20 +3,10 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/img_"
+    android:background="@drawable/bg2"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <!-- TODO: Update blank fragment layout -->
-
-    <ImageView
-        android:id="@+id/img_bg"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/bg2" />
 
     <ImageView
         android:id="@+id/img_hist"
@@ -42,7 +32,6 @@
         app:layout_constraintStart_toEndOf="@+id/textView"
         app:layout_constraintTop_toTopOf="@+id/img_hist"
         app:layout_constraintVertical_bias="1.0" />
-
 
 
     <ImageView
@@ -160,7 +149,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
                 android:layout_marginEnd="8dp"
-                android:layout_weight="1.5"
+                android:layout_weight="1.4"
                 android:background="@drawable/bg_card"
                 android:orientation="vertical"
                 android:padding="4dp">
@@ -342,11 +331,11 @@
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout
+        android:background="@drawable/btn_start"
         android:id="@+id/vw_start"
         android:layout_width="218dp"
         android:layout_height="218dp"
         android:layout_marginTop="16dp"
-        android:background="@drawable/progress"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="@+id/linearLayout3"
         app:layout_constraintStart_toStartOf="@+id/linearLayout3"
@@ -366,17 +355,6 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <ImageView
-            android:id="@+id/imageView5"
-            android:layout_width="20dp"
-            android:layout_height="20dp"
-            android:layout_marginTop="24dp"
-            android:layout_marginBottom="64dp"
-            android:src="@drawable/ball"
-            app:layout_constraintBottom_toTopOf="@+id/tv_status"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <TextView
@@ -395,6 +373,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.050000012" />
+
     <TextView
         android:id="@+id/tv_ip"
         android:layout_width="wrap_content"
@@ -415,6 +394,7 @@
         android:id="@+id/btn_save_hist"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
         android:layout_marginEnd="8dp"
         android:backgroundTint="@color/black"
         android:drawableTop="@drawable/icon_clock_history"
@@ -425,13 +405,15 @@
         app:cornerRadius="8dp"
         app:layout_constraintBottom_toTopOf="@+id/vw_start"
         app:layout_constraintEnd_toStartOf="@+id/constraintLayout"
-        app:layout_constraintStart_toStartOf="@+id/linearLayout3"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/linearLayout3" />
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btn_export_pdf"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
         android:backgroundTint="@color/white"
         android:drawableTop="@drawable/icon_file_earmark_pdf"
         android:fontFamily="@font/vazir_medium"
@@ -440,7 +422,7 @@
         android:textSize="@dimen/small2"
         app:cornerRadius="8dp"
         app:layout_constraintBottom_toTopOf="@+id/vw_start"
-        app:layout_constraintEnd_toEndOf="@+id/linearLayout3"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/constraintLayout"
         app:layout_constraintTop_toBottomOf="@+id/linearLayout3" />
 
