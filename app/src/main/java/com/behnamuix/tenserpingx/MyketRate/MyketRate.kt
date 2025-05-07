@@ -2,7 +2,6 @@ package com.behnamuix.tenserpingx.MyketRate
 
 import android.content.Context
 import android.content.Intent
-import android.net.Uri
 import androidx.appcompat.app.AlertDialog
 import com.behnamuix.tenserpingx.R
 import androidx.core.net.toUri
