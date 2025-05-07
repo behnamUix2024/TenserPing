@@ -82,7 +82,6 @@ class MainActivity : AppCompatActivity() {
     private lateinit var tv_status: TextView
     private lateinit var vw_start: ConstraintLayout
     private lateinit var networkTester: InternetSpeedTester
-    private var isDialogShowing = false
     private val networkReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             if (context != null && !NetworkCheck.isInternetAvailable(context)) {
