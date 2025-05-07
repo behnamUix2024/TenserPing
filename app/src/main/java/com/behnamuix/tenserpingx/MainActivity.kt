@@ -28,6 +28,7 @@ import com.airbnb.lottie.LottieAnimationView
 import com.behnamuix.tenserping.Network.NetworkCheck
 import com.behnamuix.tenserpingx.Dialog.HistoryDialogFragment
 import com.behnamuix.tenserpingx.MyTools.MoToast
+import com.behnamuix.tenserpingx.MyketRate.MyketRate
 import com.behnamuix.tenserpingx.Network.InternetSpeedTester
 import com.behnamuix.tenserpingx.Network.Location.UserLocationProvider
 import com.behnamuix.tenserpingx.Retrofit.ApiResponse
@@ -37,6 +38,7 @@ import com.behnamuix.tenserpingx.util.IabHelper
 import com.google.android.material.button.MaterialButton
 import ir.myket.billingclient.util.IabResult
 import ir.myket.billingclient.util.Purchase
+import ir.myket.billingclient.util.Security
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -50,16 +52,14 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
 import java.util.TimeZone
-import java.util.UUID
 
 class MainActivity : AppCompatActivity() {
     private val KEY_FIRST_LAUNCH = "first_launch"
     val SKU_PREMIUM: String = "hist_chart_prem"
     val RC_REQUEST: Int = 10001
     lateinit var mHelper: IabHelper
-    var k =
-        "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCwwsFIXlqefMxrOUl3//fNAvng3lKqfw4kCGbdeDXbp2oRg8z3PZ+Fvr0INk0mcZ3WMptSW/0a+rHv1PLB/zNxDn6vPbd1TR3bc4bCFi96xHEPVhlPCyss2u26yvBB+EMvEKzZZ96lANUFU4Y1mR7j7icF5XKYA99UVJO68cgPFQIDAQAB"
 
+    private lateinit var myketrate: MyketRate
     private lateinit var motoast: MoToast
     private var MAC = ""
     private var DATE = ""
@@ -101,77 +101,26 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         enableEdgeToEdge()
         setContentView(binding.root)
+        main()
+    }
+
+    private fun main() {
         changeNavbarStyle()
         config()
+        rateOnScreen()
+
+    }
+
+    private fun rateOnScreen() {
         lifecycleScope.launch {
             delay(60000 * 2) // 1 دقیقه بعد
-            showRateDialog()
-        }
-
-    }
-
-    private fun showRateDialog() {
-        val builder = AlertDialog.Builder(this, R.style.cardAlertDialog)
-        builder.setTitle("آیا به ما امتیاز می‌دهید؟")
-        builder.setPositiveButton("بله، امتیاز می‌دهم") { _, _ ->
-            openMyketForRating()
-        }
-        builder.setNegativeButton("بی‌خیال") { dialog, _ ->
-            dialog.dismiss()
-        }
-        builder.show()
-    }
-
-    private fun openMyketForRating() {
-        val packageName = packageName
-        val intent = Intent(Intent.ACTION_VIEW).apply {
-            data = Uri.parse("myket://comment?id=$packageName")
-            setPackage("ir.mservices.market")
-        }
-
-        if (intent.resolveActivity(packageManager) != null) {
-            startActivity(intent)
-        } else {
-            startActivity(
-                Intent(
-                    Intent.ACTION_VIEW,
-                    Uri.parse("https://myket.ir/app/$packageName")
-                )
-            )
+            myketrate.showRateDialog()
         }
     }
 
-    private fun changeNavbarStyle() {
-        val window = window
-        val windowInsetsController = WindowCompat.getInsetsController(window, window.decorView)
-
-        // تغییر رنگ پس‌زمینه نوار ناوبری
-        val navigationBarColor = ContextCompat.getColor(this, R.color.transparent)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            window.navigationBarColor = navigationBarColor
-        }
-        windowInsetsController.isAppearanceLightNavigationBars = false
-    }
-
-    private val sharedPreferences by lazy {
-        getSharedPreferences("my", Context.MODE_PRIVATE)
-    }
-
-    fun setFirstLaunchStatus(isFirstLaunch: Boolean) {
-        sharedPreferences.edit()
-            .putBoolean(KEY_FIRST_LAUNCH, isFirstLaunch)
-            .apply() // یا commit() برای اعمال تغییرات به صورت همزمان
-    }
-
-    fun checkValidPerm(): Boolean {
-        return sharedPreferences.getBoolean(
-            KEY_FIRST_LAUNCH,
-            false
-        ) // مقدار پیش‌فرض true است اگر کلید وجود نداشته باشد.
-    }
 
     private fun config() {
-        mHelper = IabHelper(this, k)
+        myketrate = MyketRate(this)
         btn_export_pdf = binding.btnExportPdf
         motoast = MoToast(this)
         btn_save_hist = binding.btnSaveHist
@@ -268,7 +217,39 @@ class MainActivity : AppCompatActivity() {
 
     }
 
+    private fun changeNavbarStyle() {
+        val window = window
+        val windowInsetsController = WindowCompat.getInsetsController(window, window.decorView)
+
+        // تغییر رنگ پس‌زمینه نوار ناوبری
+        val navigationBarColor = ContextCompat.getColor(this, R.color.transparent)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            window.navigationBarColor = navigationBarColor
+        }
+        windowInsetsController.isAppearanceLightNavigationBars = false
+    }
+
+
+    private val sharedPreferences by lazy {
+        getSharedPreferences("my", Context.MODE_PRIVATE)
+    }
+
+    fun setFirstLaunchStatus(isFirstLaunch: Boolean) {
+        sharedPreferences.edit()
+            .putBoolean(KEY_FIRST_LAUNCH, isFirstLaunch)
+            .apply() // یا commit() برای اعمال تغییرات به صورت همزمان
+    }
+
+
+    fun checkValidPerm(): Boolean {
+        return sharedPreferences.getBoolean(
+            KEY_FIRST_LAUNCH,
+            false
+        ) // مقدار پیش‌فرض true است اگر کلید وجود نداشته باشد.
+    }
+
     private fun payConfig() {
+        mHelper = IabHelper(this, BuildConfig.IAB_PUBLIC_KEY)
         mHelper.enableDebugLogging(false)
         mHelper.startSetup(object : IabHelper.OnIabSetupFinishedListener {
             override fun onIabSetupFinished(result: IabResult?) {
@@ -387,26 +368,27 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun developerPayload(purchase: Purchase): Boolean {
-        var payload = purchase.developerPayload
-        Log.d("TAG", payload.toString())
-        return true
+        return try {
+            val sig = purchase.signature
+            val date = purchase.originalJson
+            Security.verifyPurchase(BuildConfig.IAB_PUBLIC_KEY, date, sig)
+        } catch (e: Exception) {
+            false
+        }
     }
 
-    private fun exportToPDF() {
-
-    }
 
     private fun getHistData() {
         DATE = getDate()
-        MAC=getAndroidId(applicationContext)
-        Toast.makeText(this,MAC,Toast.LENGTH_LONG).show()
+        MAC = getAndroidId(applicationContext)
+        Toast.makeText(this, MAC, Toast.LENGTH_LONG).show()
         val builder1 = AlertDialog.Builder(this, R.style.cardAlertDialog)
         builder1.setMessage("آیا شما میخواهید داده ها در تاریخچه ذخیره شود؟")
         builder1.setCancelable(true)
 
         builder1.setPositiveButton(
             "بله"
-        ) { _, _ -> insertToHistDb(MAC,DATE, IP, NET_TYPE, PING_SPEED) }
+        ) { _, _ -> insertToHistDb(MAC, DATE, IP, NET_TYPE, PING_SPEED) }
 
         builder1.setNegativeButton(
             "خیر"
@@ -424,8 +406,7 @@ class MainActivity : AppCompatActivity() {
     @SuppressLint("HardwareIds")
     private fun getAndroidId(context: Context): String {
         return try {
-            android.provider.Settings.
-            Secure.getString(
+            android.provider.Settings.Secure.getString(
                 context.contentResolver,
                 android.provider.Settings.Secure.ANDROID_ID
             ) ?: "unknown"
@@ -434,10 +415,18 @@ class MainActivity : AppCompatActivity() {
             "unknown"
         }
     }
-    private fun insertToHistDb(mac:String,date: String, ip: String, netType: String, pingSpeed: String) {
+
+    private fun insertToHistDb(
+        mac: String,
+        date: String,
+        ip: String,
+        netType: String,
+        pingSpeed: String
+    ) {
 
         Log.d("ALPHA", "$mac/$date/$ip/$netType/$pingSpeed / $DOWN_SPEED ")
-        val call = RetrofitClient.apiService.sendHist(mac,
+        val call = RetrofitClient.apiService.sendHist(
+            mac,
             date, netType, ip, pingSpeed
         )
         call.enqueue(object : Callback<ApiResponse> {
@@ -514,22 +503,6 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-    private fun reqPerm() {
-        if (ActivityCompat.shouldShowRequestPermissionRationale(
-                this@MainActivity, Manifest.permission.READ_PHONE_STATE
-            )
-        ) {
-            AlertDialog.Builder(this).setTitle(R.string.dialog_req_perm_title)
-                .setMessage(R.string.pay_alert_msg).setPositiveButton(
-                    R.string.pay_alert_btn_positive_text
-                ) { _, _ -> req() }.setNegativeButton(
-                    R.string.dialog_req_perm_negative_btn
-                ) { dialogInterface, _ -> dialogInterface.dismiss() }.create().show()
-        } else {
-            req()
-        }
-    }
-
     private fun testStart() {
         val url = "https://httpbin.org/" // آدرس سرور آپلود خود را اینجا قرار دهید
         CoroutineScope(Dispatchers.Main).launch {
@@ -573,26 +546,6 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-    private fun showNoInternetDialog() {
-        if (!isDialogShowing) {
-            val dialog = NoInternetDialogFragment().apply {
-                setRetryListener {
-                    // اقدامات لازم برای تلاش مجدد (مثلاً رفرش صفحه)
-                    Toast.makeText(this@MainActivity, "تلاش مجدد...", Toast.LENGTH_SHORT).show()
-                }
-            }
-            dialog.show(supportFragmentManager, "NoInternetDialog")
-            Log.i("testing", "Show OffScreen!")
-            isDialogShowing = true
-        }
-    }
-
-    private fun dismissNoInternetDialog() {
-        supportFragmentManager.findFragmentByTag("NoInternetDialog")?.let {
-            (it as NoInternetDialogFragment).dismiss()
-            isDialogShowing = false
-        }
-    }
 
     private fun req() {
 
@@ -601,6 +554,22 @@ class MainActivity : AppCompatActivity() {
             arrayOf(Manifest.permission.READ_PHONE_STATE),
             PHONE_STATUS_REQUEST_CODE
         )
+    }
+
+    private fun reqPerm() {
+        if (ActivityCompat.shouldShowRequestPermissionRationale(
+                this@MainActivity, Manifest.permission.READ_PHONE_STATE
+            )
+        ) {
+            AlertDialog.Builder(this).setTitle(R.string.dialog_req_perm_title)
+                .setMessage(R.string.pay_alert_msg).setPositiveButton(
+                    R.string.pay_alert_btn_positive_text
+                ) { _, _ -> req() }.setNegativeButton(
+                    R.string.dialog_req_perm_negative_btn
+                ) { dialogInterface, _ -> dialogInterface.dismiss() }.create().show()
+        } else {
+            req()
+        }
     }
 
     override fun onRequestPermissionsResult(
@@ -627,12 +596,6 @@ class MainActivity : AppCompatActivity() {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults, deviceId)
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        unregisterReceiver(networkReceiver) // حذف ثبت Receiver
-        mHelper.dispose();
-
-    }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         Log.d("TAG", "onActivityResult($requestCode,$resultCode,$data")
@@ -648,7 +611,47 @@ class MainActivity : AppCompatActivity() {
 
         }
     }
-}
 
+    override fun onDestroy() {
+        super.onDestroy()
+        mHelper.dispose();
+
+    }
+
+    override fun onStop() {
+        super.onStop()
+        unregisterReceiver(networkReceiver) // حذف ثبت Receiver
+
+
+    }
+
+    private fun showNoInternetDialog() {
+        if (!isDialogShowing) {
+            val dialog = NoInternetDialogFragment().apply {
+                setRetryListener {
+                    // اقدامات لازم برای تلاش مجدد (مثلاً رفرش صفحه)
+                    Toast.makeText(this@MainActivity, "تلاش مجدد...", Toast.LENGTH_SHORT).show()
+                }
+            }
+            dialog.show(supportFragmentManager, "NoInternetDialog")
+            Log.i("testing", "Show OffScreen!")
+            isDialogShowing = true
+        }
+    }
+
+    private fun dismissNoInternetDialog() {
+        supportFragmentManager.findFragmentByTag("NoInternetDialog")?.let {
+            (it as NoInternetDialogFragment).dismiss()
+            isDialogShowing = false
+        }
+    }
+
+    private fun exportToPDF() {
+
+
+    }
+
+
+}
 
 

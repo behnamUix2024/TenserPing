@@ -13,6 +13,7 @@ android {
     }
 
     defaultConfig {
+
         applicationId = "com.behnamuix.tenserpingx"
         minSdk = 24
         targetSdk = 35

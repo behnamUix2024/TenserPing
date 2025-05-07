@@ -43,8 +43,7 @@ import androidx.core.graphics.drawable.toDrawable
 import kotlinx.coroutines.delay
 
 class HistoryDialogFragment : DialogFragment() {
-
-    private var ANDROID_IDS=""
+    private var ANDROID_IDS = ""
     private var currentCurveMode = LineDataSet.Mode.CUBIC_BEZIER
     private lateinit var chart: LineChart
     private lateinit var sp_type: Spinner
@@ -63,13 +62,15 @@ class HistoryDialogFragment : DialogFragment() {
     ): View? {
 
         _binding = FragHistDialogBinding.inflate(inflater, container, false)
-        config()
-        setupCurveModeSpinner()
-
-
+        main()
 
         return binding.root
         // Inflate the layout for this fragment
+    }
+
+    private fun main() {
+        config()
+        setupCurveModeSpinner()
     }
 
     private fun setupCurveModeSpinner() {
@@ -93,7 +94,12 @@ class HistoryDialogFragment : DialogFragment() {
 
         // مدیریت انتخاب کاربر
         sp_type.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
+            override fun onItemSelected(
+                parent: AdapterView<*>,
+                view: View?,
+                position: Int,
+                id: Long
+            ) {
                 currentCurveMode = modes[position].second
                 updateChartCurveMode()
             }
@@ -103,6 +109,7 @@ class HistoryDialogFragment : DialogFragment() {
 
 
     }
+
     private fun updateChartCurveMode() {
         chart.data?.dataSets?.firstOrNull()?.let { dataSet ->
             (dataSet as LineDataSet).mode = currentCurveMode
@@ -111,7 +118,7 @@ class HistoryDialogFragment : DialogFragment() {
     }
 
     private fun config() {
-        ANDROID_IDS=getDeviceId()
+        ANDROID_IDS = getDeviceId()
         sp_type = binding.spType
         btn_show_list = binding.btnShowList
         btn_show_chart = binding.btnShowChart
@@ -124,7 +131,7 @@ class HistoryDialogFragment : DialogFragment() {
         getHist()
         btn_show_chart.setOnClickListener {
             lifecycleScope.launch {
-                btn_show_chart.text="⌛"
+                btn_show_chart.text = "⌛"
                 delay(2000)
                 showChart()
 
@@ -139,7 +146,7 @@ class HistoryDialogFragment : DialogFragment() {
     }
 
     private fun showChart() {
-        btn_show_chart.text="نمایش نمودار"
+        btn_show_chart.text = "نمایش نمودار"
         hist_list.visibility = View.GONE
         hist_chart.visibility = View.VISIBLE
         btn_show_list.visibility = View.VISIBLE
@@ -153,12 +160,13 @@ class HistoryDialogFragment : DialogFragment() {
                     response.data?.let { configChart(it) }
                 }
             } catch (e: Exception) {
-                Log.d("err","${e.message}")
+                Log.d("err", "${e.message}")
                 Toast.makeText(context, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
             }
         }
 
     }
+
     private fun getDeviceId(): String {
         return try {
             Settings.Secure.getString(
@@ -169,6 +177,7 @@ class HistoryDialogFragment : DialogFragment() {
             "unknown"
         }
     }
+
     private fun getHist() {
         hist_chart.visibility = View.GONE
         hist_list.visibility = View.VISIBLE
