@@ -1,4 +1,5 @@
 package com.behnamuix.tenserpingx
+
 import android.Manifest
 import android.annotation.SuppressLint
 import android.content.BroadcastReceiver
@@ -9,6 +10,7 @@ import android.content.pm.PackageManager
 import android.net.ConnectivityManager
 import android.os.Bundle
 import android.util.Log
+import android.view.WindowManager
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
@@ -102,6 +104,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun main() {
         changeNavbarStyle()
+        keepScreenAwake(this, true)
         config()
         rateOnScreen()
 
@@ -212,6 +215,16 @@ class MainActivity : AppCompatActivity() {
 
     }
 
+    fun keepScreenAwake(activity: AppCompatActivity, keepScreenOn: Boolean) {
+        if (keepScreenOn) {
+            // افزودن FLAG_KEEP_SCREEN_ON به پنجره
+            activity.window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        } else {
+            // حذف FLAG_KEEP_SCREEN_ON از پنجره
+            activity.window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        }
+    }
+
     private fun changeNavbarStyle() {
         val window = window
         val windowInsetsController = WindowCompat.getInsetsController(window, window.decorView)
@@ -244,14 +257,13 @@ class MainActivity : AppCompatActivity() {
     private fun payConfig() {
         mHelper = IabHelper(this, BuildConfig.IAB_PUBLIC_KEY)
         mHelper.enableDebugLogging(false)
-        if(mHelper!=null){
+        if (mHelper != null) {
             mHelper.startSetup { result ->
                 if (result != null) {
                     payIntent()
                 }
             }
         }
-
 
 
     }
@@ -599,7 +611,7 @@ class MainActivity : AppCompatActivity() {
             // billing...
             super.onActivityResult(requestCode, resultCode, data)
         } else {
-            Log.d("TAG","Error!")
+            Log.d("TAG", "Error!")
 
         }
     }
