@@ -67,14 +67,15 @@
         android:id="@+id/linearLayout3"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginTop="42dp"
         android:layout_marginEnd="16dp"
         android:gravity="center"
         android:orientation="horizontal"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="@+id/textView"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.31">
+        app:layout_constraintTop_toBottomOf="@+id/tv_ip"
+        app:layout_constraintVertical_bias="0.04000002">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -281,12 +282,14 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="32dp"
+        android:layout_marginTop="24dp"
         android:layout_marginEnd="32dp"
         android:padding="10dp"
-        app:layout_constraintBottom_toTopOf="@+id/vw_start"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/linearLayout3">
+        app:layout_constraintTop_toBottomOf="@+id/linearLayout3"
+        app:layout_constraintVertical_bias="0.0">
 
         <LinearLayout
             android:id="@+id/geo_card"
@@ -331,16 +334,16 @@
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:background="@drawable/btn_start"
         android:id="@+id/vw_start"
         android:layout_width="218dp"
         android:layout_height="218dp"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="32dp"
+        android:background="@drawable/btn_start"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="@+id/linearLayout3"
         app:layout_constraintStart_toStartOf="@+id/linearLayout3"
-        app:layout_constraintTop_toBottomOf="@+id/linearLayout3"
-        app:layout_constraintVertical_bias="0.52">
+        app:layout_constraintTop_toBottomOf="@+id/constraintLayout"
+        app:layout_constraintVertical_bias="0.0">
 
         <TextView
             android:id="@+id/tv_status"
@@ -384,11 +387,11 @@
         android:text="000.000.000.000"
         android:textColor="@color/color_block"
         android:textSize="@dimen/h5"
-        app:layout_constraintBottom_toTopOf="@+id/linearLayout3"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textView"
-        app:layout_constraintVertical_bias="0.32999998" />
+        app:layout_constraintVertical_bias="0.01999998" />
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btn_save_hist"
