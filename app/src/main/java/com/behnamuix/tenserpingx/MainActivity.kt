@@ -122,7 +122,6 @@ class MainActivity : AppCompatActivity() {
         btn_save_hist = binding.btnSaveHist
         img_comment = binding.imgComment
         registerReceiver(networkReceiver, IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION))
-        img_bg = binding.imgBg
         img_hist = binding.imgHist
         tv_type = binding.tvType
         tv_ip = binding.tvIp
