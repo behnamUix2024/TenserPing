@@ -35,7 +35,6 @@ import com.behnamuix.tenserpingx.Retrofit.RetrofitClient
 import com.behnamuix.tenserpingx.databinding.ActivityMainBinding
 import com.behnamuix.tenserpingx.util.IabHelper
 import com.google.android.material.button.MaterialButton
-import ir.myket.billingclient.util.IabResult
 import ir.myket.billingclient.util.Purchase
 import ir.myket.billingclient.util.Security
 import kotlinx.coroutines.CoroutineScope
@@ -354,12 +353,13 @@ class MainActivity : AppCompatActivity() {
     // 6. تابع مدیریت خرید موفق
     private fun handleSuccessfulPurchase(purchase: Purchase) {
         Log.d("TAG", "Premium upgrade purchased")
+        motoast.MoSuccess(msg = "تبریک , نسخه پرمیوم برای همیشه برای شما فعال شد")
+
         // 6-1. ذخیره وضعیت خرید
         setFirstLaunchStatus(true)
 
         // 6-2. نمایش دیالوگ تاریخچه
         showHistDialog()
-        motoast.MoInfo(msg = "تبریک , نسخه پرمیوم برای همیشه برای شما فعال شد")
 
         // 6-3. مصرف محصول برای امکان خرید مجدد
         mHelper.consumeAsync(purchase) { _, result ->
@@ -611,7 +611,7 @@ class MainActivity : AppCompatActivity() {
             // billing...
             super.onActivityResult(requestCode, resultCode, data)
         } else {
-            Log.d("TAG", "Error!")
+            Log.d("TAG", "....")
 
         }
     }
@@ -624,7 +624,14 @@ class MainActivity : AppCompatActivity() {
 
     override fun onStop() {
         super.onStop()
-        unregisterReceiver(networkReceiver) // حذف ثبت Receiver
+        try {
+            if (networkReceiver != null) {
+                unregisterReceiver(networkReceiver)// حذف ثبت Receiver
+            }
+        } catch (e: IllegalArgumentException) {
+            // Receiver wasn't registered, ignore
+            e.printStackTrace()
+        }
 
 
     }

@@ -182,7 +182,7 @@ class HistoryDialogFragment : DialogFragment() {
         btn_show_list.visibility = View.GONE
         btn_show_chart.visibility = View.VISIBLE
         lifecycleScope.launch {
-            motoast.MoInfo(msg = "در حال دریافت داده ها ...")
+            motoast.MoWarning(msg = "در حال دریافت داده ها ...")
 
             try {
                 val call = RetrofitClient.apiService.getHist(ANDROID_IDS)
