@@ -8,7 +8,6 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.net.ConnectivityManager
-import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -44,7 +43,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import okhttp3.internal.http2.Settings
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -223,9 +221,7 @@ class MainActivity : AppCompatActivity() {
 
         // تغییر رنگ پس‌زمینه نوار ناوبری
         val navigationBarColor = ContextCompat.getColor(this, R.color.transparent)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            window.navigationBarColor = navigationBarColor
-        }
+        window.navigationBarColor = navigationBarColor
         windowInsetsController.isAppearanceLightNavigationBars = false
     }
 
@@ -264,16 +260,12 @@ class MainActivity : AppCompatActivity() {
 
     private fun payIntent() {
         // 1. بررسی وجود mHelper (آبجکت مدیریت خرید درون‌برنامه‌ای)
-        if (mHelper == null) {
-            Log.e("TAG", "IAB Helper is not initialized!")
-            return
-        }
 
         // 2. تعریف لیسنر برای رویداد مصرف (consume) محصول
-        val consumeListener = IabHelper.OnConsumeFinishedListener { purchase, result ->
+        IabHelper.OnConsumeFinishedListener { purchase, result ->
             when {
                 // 2-1. اگر mHelper نال بود عملیات متوقف می‌شود
-                mHelper == null -> return@OnConsumeFinishedListener
+                false -> return@OnConsumeFinishedListener
 
                 // 2-2. اگر مصرف موفقیت‌آمیز بود
                 result?.isSuccess == true -> Log.d("TAG", "Consumption successful. Provisioning.")
@@ -331,7 +323,7 @@ class MainActivity : AppCompatActivity() {
             IabHelper.OnIabPurchaseFinishedListener { result, info ->
                 when {
                     // 5-1. اگر mHelper نال بود
-                    mHelper == null -> return@OnIabPurchaseFinishedListener
+                    false -> return@OnIabPurchaseFinishedListener
 
                     // 5-2. اگر خطا در فرآیند خرید
                     result?.isFailure == true -> Log.e("TAG", "Error purchasing: $result")
@@ -360,7 +352,7 @@ class MainActivity : AppCompatActivity() {
         motoast.MoInfo(msg = "تبریک , نسخه پرمیوم برای همیشه برای شما فعال شد")
 
         // 6-3. مصرف محصول برای امکان خرید مجدد
-        mHelper?.consumeAsync(purchase) { _, result ->
+        mHelper.consumeAsync(purchase) { _, result ->
             if (result?.isFailure == true) {
                 Log.e("TAG", "Consumption failed: $result")
             }
@@ -599,7 +591,6 @@ class MainActivity : AppCompatActivity() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         Log.d("TAG", "onActivityResult($requestCode,$resultCode,$data")
-        if (mHelper == null) return
 
         // Pass on the activity result to the helper for handling
         if (!mHelper.handleActivityResult(requestCode, resultCode, data)) {
@@ -608,13 +599,14 @@ class MainActivity : AppCompatActivity() {
             // billing...
             super.onActivityResult(requestCode, resultCode, data)
         } else {
+            Log.d("TAG","Error!")
 
         }
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        mHelper.dispose();
+        mHelper.dispose()
 
     }
 

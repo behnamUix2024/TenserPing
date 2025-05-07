@@ -1,7 +1,5 @@
 package com.behnamuix.tenserpingx.Dialog
 
-import android.annotation.SuppressLint
-import android.content.Context
 import android.graphics.Color
 import android.os.Bundle
 import android.provider.Settings
@@ -59,7 +57,7 @@ class HistoryDialogFragment : DialogFragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
 
         _binding = FragHistDialogBinding.inflate(inflater, container, false)
         main()

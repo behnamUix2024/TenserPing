@@ -5,6 +5,7 @@ import android.content.Intent
 import android.net.Uri
 import androidx.appcompat.app.AlertDialog
 import com.behnamuix.tenserpingx.R
+import androidx.core.net.toUri
 
 class MyketRate(val ctx: Context){
      fun showRateDialog() {
@@ -22,7 +23,7 @@ class MyketRate(val ctx: Context){
      fun openMyketForRating() {
         val packageName = ctx.packageName
         val intent = Intent(Intent.ACTION_VIEW).apply {
-            data = Uri.parse("myket://comment?id=$packageName")
+            data = "myket://comment?id=$packageName".toUri()
             setPackage("ir.mservices.market")
         }
 
@@ -32,7 +33,7 @@ class MyketRate(val ctx: Context){
             ctx.startActivity(
                 Intent(
                     Intent.ACTION_VIEW,
-                    Uri.parse("https://myket.ir/app/$packageName")
+                    "https://myket.ir/app/$packageName".toUri()
                 )
             )
         }
