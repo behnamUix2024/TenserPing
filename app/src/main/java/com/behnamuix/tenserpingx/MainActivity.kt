@@ -1,5 +1,4 @@
 package com.behnamuix.tenserpingx
-//reyhane
 import android.Manifest
 import android.annotation.SuppressLint
 import android.content.BroadcastReceiver
@@ -56,6 +55,7 @@ class MainActivity : AppCompatActivity() {
     val RC_REQUEST: Int = 10001
     lateinit var mHelper: IabHelper
 
+    private var isDialogShowing = false
     private lateinit var myketrate: MyketRate
     private lateinit var motoast: MoToast
     private var MAC = ""
@@ -246,13 +246,14 @@ class MainActivity : AppCompatActivity() {
     private fun payConfig() {
         mHelper = IabHelper(this, BuildConfig.IAB_PUBLIC_KEY)
         mHelper.enableDebugLogging(false)
-        mHelper.startSetup(object : IabHelper.OnIabSetupFinishedListener {
-            override fun onIabSetupFinished(result: IabResult?) {
+        if(mHelper!=null){
+            mHelper.startSetup { result ->
                 if (result != null) {
                     payIntent()
                 }
             }
-        })
+        }
+
 
 
     }
@@ -460,8 +461,10 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun showHistDialog() {
-        val dialog = HistoryDialogFragment().apply {}
-        dialog.show(supportFragmentManager, "History")
+        supportFragmentManager.executePendingTransactions()
+        if (supportFragmentManager.findFragmentByTag("History") == null) {
+            HistoryDialogFragment().show(supportFragmentManager, "History")
+        }
     }
 
     private fun ipDetect() {

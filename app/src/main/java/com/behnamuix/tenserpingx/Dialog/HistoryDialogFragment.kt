@@ -323,6 +323,10 @@ class HistoryDialogFragment : DialogFragment() {
     private fun removeAllHist() {
 
     }
+    override fun onDestroyView() {
+        super.onDestroyView()
+        // تمیز کردن منابع اگر لازم است
+    }
 
 
 }
