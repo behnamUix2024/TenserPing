@@ -166,14 +166,17 @@ class MainActivity : AppCompatActivity() {
                 "سیاست های حفظ حریم خصوصی"
             ) { _, _ ->
                 var intent=Intent(this,WebViewActivity::class.java)
-                intent.putExtra("policy","p")
                 startActivity(intent)
             }
             dialog.setNeutralButton(
                 "درباره ما"
             ) { _, _ ->
-                var intent=Intent(this,WebViewActivity::class.java)
-                intent.putExtra("bio","b")
+                val intent = Intent(
+                    "android.intent.action.VIEW", "https://behnamuix2024.com/api/bio.html".toUri()
+                )
+                val b = Bundle()
+                b.putBoolean("new_window", true) //sets new window
+                intent.putExtras(b)
                 startActivity(intent)
             }
             dialog.show()
