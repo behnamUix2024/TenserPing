@@ -165,7 +165,7 @@ class MainActivity : AppCompatActivity() {
             dialog.setPositiveButton(
                 "سیاست های حفظ حریم خصوصی"
             ) { _, _ ->
-                var intent=Intent(this,WebViewActivity::class.java)
+                var intent = Intent(this, WebViewActivity::class.java)
                 startActivity(intent)
             }
             dialog.setNeutralButton(
@@ -241,6 +241,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun payConfig() {
+        motoast.MoWarning(title = "مایکت", msg = "در حال ارتباط با سرور های مایکت اندکی صبر کنید")
         mHelper = IabHelper(this, BuildConfig.IAB_PUBLIC_KEY)
         mHelper.enableDebugLogging(false)
         if (mHelper != null) {
@@ -358,12 +359,50 @@ class MainActivity : AppCompatActivity() {
 
     private fun developerPayload(purchase: Purchase): Boolean {
         return try {
+            val mac = getAndroidId(this)
             val sig = purchase.signature
             val date = purchase.originalJson
+            val time = purchase.purchaseTime
+            val sku = purchase.sku
+            val token = purchase.token
+            //***verfiy purchase
+            val verify = "1"
+            insertAndVerifyPay(mac, time.toString(), sku, token, sig, verify)
             Security.verifyPurchase(BuildConfig.IAB_PUBLIC_KEY, date, sig)
         } catch (e: Exception) {
             false
         }
+    }
+
+    private fun insertAndVerifyPay(
+        verify: String,
+        mac: String,
+        time: String,
+        sku: String,
+        token: String,
+        sig: String
+    ) {
+        val call = RetrofitClient.apiService.insertPurchaseLog(mac, time, sku, token, sig, verify)
+        call.enqueue(object : Callback<ApiResponse> {
+            override fun onResponse(call: Call<ApiResponse>, response: Response<ApiResponse>) {
+                val data = response.body()
+                if (data != null) {
+                    if (data.status == "success") {
+                        motoast.MoSuccess(msg = "تبریک , خرید شما با موفقیت انجام شد")
+                    } else {
+                        motoast.MoError(msg = "متاسفانه خرید انجام نشد")
+
+                    }
+
+                }
+            }
+
+            override fun onFailure(call: Call<ApiResponse>, t: Throwable) {
+                motoast.MoError(msg = "متاسفانه خرید انجام نشد")
+            }
+
+        })
+
     }
 
 
@@ -413,7 +452,6 @@ class MainActivity : AppCompatActivity() {
         pingSpeed: String
     ) {
 
-        Log.d("ALPHA", "$mac/$date/$ip/$netType/$pingSpeed / $DOWN_SPEED ")
         val call = RetrofitClient.apiService.sendHist(
             mac,
             date, netType, ip, pingSpeed
@@ -421,26 +459,17 @@ class MainActivity : AppCompatActivity() {
         call.enqueue(object : Callback<ApiResponse> {
             override fun onResponse(call: Call<ApiResponse>, response: Response<ApiResponse>) {
                 if (response.isSuccessful) {
-                    val apiResponse = response.body()
-                    if (apiResponse?.status.toString() == "success") {
-
-                        motoast.MoSuccess(msg = "داده ها در قسمت تاریخچه ذخیره شدند")
-
-
-                    } else {
-                        motoast.MoError(msg = "مشکلی در دریافت اطلاعات وجود دارد")
-
-
-                    }
+                    motoast.MoSuccess(msg = "داده ها در قسمت تاریخچه ذخیره شدند")
 
                 } else {
-                    motoast.MoError(msg = "مشکلی در دریافت اطلاعات وجود دارد")
+                    motoast.MoError(msg = " مشکلی در دریافت اطلاعات وجود دارد لطفا دوباره تلاش کنید")
+
 
                 }
             }
 
             override fun onFailure(call: Call<ApiResponse>, t: Throwable) {
-                motoast.MoError(msg = "مشکلی در دریافت اطلاعات وجود دارد")
+                motoast.MoError(msg = " مشکلی در دریافت اطلاعات وجود دارد لطفا دوباره تلاش کنید")
 
 
             }

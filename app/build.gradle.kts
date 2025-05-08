@@ -56,6 +56,7 @@ android {
 }
 
 dependencies {
+    implementation (libs.simplypdf)
     implementation(libs.mpandroidchart)
     implementation(libs.motiontoast)
     implementation(libs.glide)

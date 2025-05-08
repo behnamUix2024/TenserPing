@@ -17,11 +17,11 @@ import kotlin.random.Random
 
 class InternetSpeedTester(private val ctx: Context) {
     private val client = OkHttpClient()
-    suspend fun getPingSpeed(host: String = "216.239.38.120", count: Int = 4): Long? = withContext(Dispatchers.IO) {
+    suspend fun getPingSpeed(host: String = "185.147.178.12", count: Int = 3): Long? = withContext(Dispatchers.IO) {
         try {
             val startTime = System.currentTimeMillis()
             val inetAddress = InetAddress.getByName(host)
-            val reachable = inetAddress.isReachable(1000) // Timeout of 1 second
+            val reachable = inetAddress.isReachable(200) // Timeout of 1 second
             val endTime = System.currentTimeMillis()
             if (reachable) {
                 return@withContext endTime - startTime

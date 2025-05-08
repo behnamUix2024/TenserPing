@@ -25,6 +25,13 @@ interface ApiService {
         @Query("hist_ping") ping: String
     ): Call<ApiResponse>
 
-    @GET("gen.php")
-    fun getKey(): Call<ApiResponseJson>
+    @GET("send_purchase.php")
+    fun insertPurchaseLog(
+        @Query("p_mac") p_mac: String,
+        @Query("p_time") p_time: String,
+        @Query("p_sku") p_sku: String,
+        @Query("p_token") p_token: String,
+        @Query("p_sig") p_sig: String,
+        @Query("verify") verify: String
+    ): Call<ApiResponse>
 }

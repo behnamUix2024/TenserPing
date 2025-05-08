@@ -38,6 +38,7 @@ import retrofit2.Callback
 import retrofit2.Response
 import androidx.core.graphics.toColorInt
 import androidx.core.graphics.drawable.toDrawable
+import androidx.core.view.size
 import kotlinx.coroutines.delay
 
 class HistoryDialogFragment : DialogFragment() {
@@ -182,7 +183,7 @@ class HistoryDialogFragment : DialogFragment() {
         btn_show_list.visibility = View.GONE
         btn_show_chart.visibility = View.VISIBLE
         lifecycleScope.launch {
-            motoast.MoWarning(msg = "در حال دریافت داده ها ...")
+            motoast.MoInfo(msg = "در حال دریافت تاریخچه")
 
             try {
                 val call = RetrofitClient.apiService.getHist(ANDROID_IDS)
@@ -202,6 +203,10 @@ class HistoryDialogFragment : DialogFragment() {
                                     )
                                 val adapter = HistoryDialogAdapter(apiresp.data, requireContext())
                                 rec_hist.adapter = adapter
+                                if(rec_hist.size<0){
+                                    motoast.MoWarning(msg = "تاریخچه ای وجود ندارد!")
+
+                                }
                             }
                         } else {
                             motoast.MoError(msg = "داده ای دریافت نشد")
