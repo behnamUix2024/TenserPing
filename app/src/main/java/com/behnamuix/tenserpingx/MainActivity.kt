@@ -72,8 +72,6 @@ class MainActivity : AppCompatActivity() {
     private lateinit var tv_speed_download: TextView
     private lateinit var btn_save_hist: MaterialButton
     private lateinit var btn_export_pdf: MaterialButton
-    private lateinit var img_bg: ImageView
-    private lateinit var img_comment: ImageView
     private lateinit var img_hist: ImageView
     private lateinit var tv_ip: TextView
     private lateinit var tv_type: TextView
@@ -118,12 +116,11 @@ class MainActivity : AppCompatActivity() {
 
 
     private fun config() {
+        registerReceiver(networkReceiver, IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION))
         myketrate = MyketRate(this)
         btn_export_pdf = binding.btnExportPdf
         motoast = MoToast(this)
         btn_save_hist = binding.btnSaveHist
-        img_comment = binding.imgComment
-        registerReceiver(networkReceiver, IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION))
         img_hist = binding.imgHist
         tv_type = binding.tvType
         tv_ip = binding.tvIp
@@ -137,10 +134,6 @@ class MainActivity : AppCompatActivity() {
         vw_start = binding.vwStart
         btn_export_pdf.setOnClickListener {
             exportToPDF()
-        }
-        img_comment.setOnClickListener {
-            val intent = Intent(this, CommentWebViewActivity::class.java)
-            startActivity(intent)
         }
         img_hist.setOnClickListener {
 
@@ -172,24 +165,15 @@ class MainActivity : AppCompatActivity() {
             dialog.setPositiveButton(
                 "سیاست های حفظ حریم خصوصی"
             ) { _, _ ->
-                val intent = Intent(
-                    "android.intent.action.VIEW",
-                    "https://behnamuix2024.com/api/policy.html".toUri()
-                )
-                val b = Bundle()
-                b.putBoolean("new_window", true) //sets new window
-                intent.putExtras(b)
+                var intent=Intent(this,WebViewActivity::class.java)
+                intent.putExtra("policy","p")
                 startActivity(intent)
             }
             dialog.setNeutralButton(
                 "درباره ما"
             ) { _, _ ->
-                val intent = Intent(
-                    "android.intent.action.VIEW", "https://behnamuix2024.com/api/bio.html".toUri()
-                )
-                val b = Bundle()
-                b.putBoolean("new_window", true) //sets new window
-                intent.putExtras(b)
+                var intent=Intent(this,WebViewActivity::class.java)
+                intent.putExtra("bio","b")
                 startActivity(intent)
             }
             dialog.show()
