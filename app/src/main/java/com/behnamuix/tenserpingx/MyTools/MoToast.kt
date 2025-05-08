@@ -13,7 +13,7 @@ class MoToast(private val activity: Activity) {
             title,
             msg,
             MotionToastStyle.SUCCESS,
-            MotionToast.GRAVITY_TOP,
+            MotionToast.GRAVITY_CENTER,
             MotionToast.LONG_DURATION,
             ResourcesCompat.getFont(activity, R.font.vazir_fd_wol)
         )
