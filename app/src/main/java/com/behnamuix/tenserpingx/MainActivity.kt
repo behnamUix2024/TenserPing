@@ -374,12 +374,12 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun insertAndVerifyPay(
-        verify: String,
         mac: String,
         time: String,
         sku: String,
         token: String,
-        sig: String
+        sig: String,
+        verify: String
     ) {
         val call = RetrofitClient.apiService.insertPurchaseLog(mac, time, sku, token, sig, verify)
         call.enqueue(object : Callback<ApiResponse> {
