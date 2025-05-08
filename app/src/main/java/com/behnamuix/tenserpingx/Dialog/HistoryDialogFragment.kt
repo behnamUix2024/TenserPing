@@ -194,6 +194,10 @@ class HistoryDialogFragment : DialogFragment() {
                     ) {
                         if (response.isSuccessful) {
                             val apiresp = response.body()
+                            if(apiresp?.status=="notFound"){
+                                    motoast.MoWarning(msg = "تاریخچه‌ای وجود ندارد!")
+
+                                }
                             if (apiresp?.status == "success") {
                                 rec_hist.layoutManager =
                                     LinearLayoutManager(
@@ -203,10 +207,7 @@ class HistoryDialogFragment : DialogFragment() {
                                     )
                                 val adapter = HistoryDialogAdapter(apiresp.data, requireContext())
                                 rec_hist.adapter = adapter
-                                if(rec_hist.size<0){
-                                    motoast.MoWarning(msg = "تاریخچه ای وجود ندارد!")
 
-                                }
                             }
                         } else {
                             motoast.MoError(msg = "داده ای دریافت نشد")

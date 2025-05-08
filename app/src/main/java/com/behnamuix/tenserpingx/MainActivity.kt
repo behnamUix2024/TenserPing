@@ -47,6 +47,7 @@ import retrofit2.Callback
 import retrofit2.Response
 import java.text.SimpleDateFormat
 import java.util.Calendar
+import java.util.Date
 import java.util.Locale
 import java.util.TimeZone
 
@@ -241,7 +242,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun payConfig() {
-        motoast.MoWarning(title = "مایکت", msg = "در حال ارتباط با سرور های مایکت اندکی صبر کنید")
+        motoast.MoWarning(title = "مایکت", msg = "در حال ارتباط با سرور های مایکت هستیم اندکی صبر کنید")
         mHelper = IabHelper(this, BuildConfig.IAB_PUBLIC_KEY)
         mHelper.enableDebugLogging(false)
         if (mHelper != null) {
@@ -361,7 +362,7 @@ class MainActivity : AppCompatActivity() {
             val mac = getAndroidId(this)
             val sig = purchase.signature
             val date = purchase.originalJson
-            val time = purchase.purchaseTime
+            val time = formatPurchaseTime(purchase.purchaseTime)
             val sku = purchase.sku
             val token = purchase.token
             //***verfiy purchase
@@ -372,7 +373,11 @@ class MainActivity : AppCompatActivity() {
             false
         }
     }
-
+    private fun formatPurchaseTime(purchaseTime: Long): String {
+        val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
+        sdf.timeZone = TimeZone.getDefault() // یا TimeZone.getTimeZone("Asia/Tehran") برای زمان ایران
+        return sdf.format(Date(purchaseTime))
+    }
     private fun insertAndVerifyPay(
         mac: String,
         time: String,
