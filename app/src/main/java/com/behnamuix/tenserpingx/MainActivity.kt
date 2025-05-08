@@ -341,7 +341,6 @@ class MainActivity : AppCompatActivity() {
     // 6. تابع مدیریت خرید موفق
     private fun handleSuccessfulPurchase(purchase: Purchase) {
         Log.d("TAG", "Premium upgrade purchased")
-        motoast.MoSuccess(msg = "تبریک , نسخه پرمیوم برای همیشه برای شما فعال شد")
 
         // 6-1. ذخیره وضعیت خرید
         setFirstLaunchStatus(true)
