@@ -75,6 +75,7 @@ dependencies {
     implementation(libs.okhttp)
     implementation(libs.lottie)
     implementation (libs.myket.billing.client)
+    implementation ("com.squareup.picasso:picasso:2.71828")
 
 
 

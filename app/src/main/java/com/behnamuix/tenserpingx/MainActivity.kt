@@ -35,6 +35,7 @@ import com.behnamuix.tenserpingx.Retrofit.RetrofitClient
 import com.behnamuix.tenserpingx.databinding.ActivityMainBinding
 import com.behnamuix.tenserpingx.util.IabHelper
 import com.google.android.material.button.MaterialButton
+import com.squareup.picasso.Picasso
 import ir.myket.billingclient.util.Purchase
 import ir.myket.billingclient.util.Security
 import kotlinx.coroutines.CoroutineScope
@@ -97,6 +98,12 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         enableEdgeToEdge()
         setContentView(binding.root)
+
+        val imageUrl = "https://behnamuix2024.com/img/bg.png"
+
+        Picasso.get()
+            .load(imageUrl)
+            .into(binding.bg)
         main()
     }
 
