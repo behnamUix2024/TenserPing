@@ -26,6 +26,7 @@ import androidx.lifecycle.lifecycleScope
 import com.airbnb.lottie.LottieAnimationView
 import com.behnamuix.tenserping.Network.NetworkCheck
 import com.behnamuix.tenserpingx.Dialog.HistoryDialogFragment
+import com.behnamuix.tenserpingx.MyTools.FragDialogListener
 import com.behnamuix.tenserpingx.MyTools.MoToast
 import com.behnamuix.tenserpingx.MyketRate.MyketRate
 import com.behnamuix.tenserpingx.Network.InternetSpeedTester
@@ -39,6 +40,7 @@ import ir.myket.billingclient.util.Purchase
 import ir.myket.billingclient.util.Security
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -56,6 +58,7 @@ class MainActivity : AppCompatActivity() {
     val SKU_PREMIUM: String = "hist_chart_prem"
     val RC_REQUEST: Int = 10001
     lateinit var mHelper: IabHelper
+    private var testNetJob: Job? = null
 
     private var isDialogShowing = false
     private lateinit var myketrate: MyketRate
@@ -242,7 +245,10 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun payConfig() {
-        motoast.MoWarning(title = "مایکت", msg = "در حال ارتباط با سرور های مایکت هستیم اندکی صبر کنید")
+        motoast.MoWarning(
+            title = "مایکت",
+            msg = "در حال ارتباط با سرور های مایکت هستیم اندکی صبر کنید"
+        )
         mHelper = IabHelper(this, BuildConfig.IAB_PUBLIC_KEY)
         mHelper.enableDebugLogging(false)
         if (mHelper != null) {
@@ -373,11 +379,14 @@ class MainActivity : AppCompatActivity() {
             false
         }
     }
+
     private fun formatPurchaseTime(purchaseTime: Long): String {
         val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
-        sdf.timeZone = TimeZone.getDefault() // یا TimeZone.getTimeZone("Asia/Tehran") برای زمان ایران
+        sdf.timeZone =
+            TimeZone.getDefault() // یا TimeZone.getTimeZone("Asia/Tehran") برای زمان ایران
         return sdf.format(Date(purchaseTime))
     }
+
     private fun insertAndVerifyPay(
         mac: String,
         time: String,
@@ -491,10 +500,20 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun showHistDialog() {
-        supportFragmentManager.executePendingTransactions()
-        if (supportFragmentManager.findFragmentByTag("History") == null) {
-            HistoryDialogFragment().show(supportFragmentManager, "History")
+
+        val dialog = HistoryDialogFragment().apply {
+            setDialogListener(object : FragDialogListener {
+                override fun onDialogShow() {
+                    Log.d("ALPHA", "show")
+                }
+
+                override fun onDialogDismissed() {
+                    Log.d("ALPHA", "show off!")
+                }
+
+            })
         }
+        dialog.show(supportFragmentManager, "MyDialogTag")
     }
 
     private fun ipDetect() {
@@ -528,8 +547,10 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun testStart() {
+        //laghve job haye ghabli agar vojod darad
+        testNetJob?.cancel()
         val url = "https://httpbin.org/" // آدرس سرور آپلود خود را اینجا قرار دهید
-        CoroutineScope(Dispatchers.Main).launch {
+        testNetJob = CoroutineScope(Dispatchers.Main).launch {
             tv_speed_download.text = "..."
             tv_speed_upload.text = "..."
             tv_status_ping.text = resources.getString(R.string.ping_test_status)
@@ -636,11 +657,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        mHelper.dispose()
-
-    }
 
     override fun onStop() {
         super.onStop()
@@ -675,6 +691,13 @@ class MainActivity : AppCompatActivity() {
             (it as NoInternetDialogFragment).dismiss()
             isDialogShowing = false
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        mHelper.dispose()
+        testNetJob?.cancel()
+
     }
 
     private fun exportToPDF() {
