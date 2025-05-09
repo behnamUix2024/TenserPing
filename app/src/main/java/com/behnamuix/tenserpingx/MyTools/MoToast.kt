@@ -1,4 +1,5 @@
 package com.behnamuix.tenserpingx.MyTools
+
 import android.app.Activity
 import androidx.core.content.res.ResourcesCompat
 import com.behnamuix.tenserpingx.R
@@ -7,7 +8,7 @@ import www.sanju.motiontoast.MotionToastStyle
 
 class MoToast(private val activity: Activity) {
 
-    fun MoSuccess(title: String="مهم", msg: String) {
+    fun MoSuccess(msg: String, title: String = activity.getString(R.string.default_important_title)) {
         MotionToast.darkColorToast(
             activity,
             title,
@@ -19,7 +20,7 @@ class MoToast(private val activity: Activity) {
         )
     }
 
-    fun MoWarning(title: String="هشدار", msg: String) {
+    fun MoWarning(msg: String, title: String = activity.getString(R.string.default_warning_title)) {
         MotionToast.darkColorToast(
             activity,
             title,
@@ -29,10 +30,9 @@ class MoToast(private val activity: Activity) {
             MotionToast.SHORT_DURATION,
             ResourcesCompat.getFont(activity, R.font.vazir_fd_wol)
         )
-
     }
 
-    fun MoInfo(title: String="توجه", msg: String) {
+    fun MoInfo(msg: String, title: String = activity.getString(R.string.default_info_title)) {
         MotionToast.darkColorToast(
             activity,
             title,
@@ -42,10 +42,9 @@ class MoToast(private val activity: Activity) {
             MotionToast.SHORT_DURATION,
             ResourcesCompat.getFont(activity, R.font.vazir_fd_wol)
         )
-
     }
 
-    fun MoError(title: String="خطا", msg: String) {
+    fun MoError(msg: String, title: String = activity.getString(R.string.default_error_title)) {
         MotionToast.darkColorToast(
             activity,
             title,
@@ -55,9 +54,9 @@ class MoToast(private val activity: Activity) {
             MotionToast.LONG_DURATION,
             ResourcesCompat.getFont(activity, R.font.vazir_fd_wol)
         )
-
     }
-    fun MoDelete(title: String="هشدار از دست دادن داده", msg: String) {
+
+    fun MoDelete(msg: String, title: String = activity.getString(R.string.default_delete_title)) {
         MotionToast.darkColorToast(
             activity,
             title,
@@ -67,8 +66,6 @@ class MoToast(private val activity: Activity) {
             MotionToast.LONG_DURATION,
             ResourcesCompat.getFont(activity, R.font.vazir_fd_wol)
         )
-
     }
-
-
 }
+

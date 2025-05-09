@@ -7,19 +7,21 @@ import com.behnamuix.tenserpingx.R
 import androidx.core.net.toUri
 
 class MyketRate(val ctx: Context){
-     fun showRateDialog() {
+    fun showRateDialog() {
         val builder = AlertDialog.Builder(ctx, R.style.cardAlertDialog)
-        builder.setTitle("آیا به ما امتیاز می‌دهید؟")
-        builder.setPositiveButton("بله، امتیاز می‌دهم") { _, _ ->
+        builder.setTitle(ctx.getString(R.string.rate_us_title))
+        builder.setPositiveButton(ctx.getString(R.string.rate_us_positive)) { _, _ ->
             openMyketForRating()
         }
-        builder.setNegativeButton("بی‌خیال") { dialog, _ ->
+        builder.setNegativeButton(ctx.getString(R.string.cancel_text)) { dialog, _ ->
             dialog.dismiss()
         }
         builder.show()
     }
 
-     fun openMyketForRating() {
+
+
+    fun openMyketForRating() {
         val packageName = ctx.packageName
         val intent = Intent(Intent.ACTION_VIEW).apply {
             data = "myket://comment?id=$packageName".toUri()

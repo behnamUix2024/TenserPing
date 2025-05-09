@@ -160,17 +160,17 @@ class MainActivity : AppCompatActivity() {
             val dialog = AlertDialog.Builder(this, R.style.cardAlertDialog)
             dialog.setMessage(R.string.info_dialog_msg)
             dialog.setTitle(R.string.info_dialog_title)
-            dialog.setNegativeButton("باشه") { dialog, _ ->
+            dialog.setNegativeButton(getString(R.string.ok_button)) { dialog, _ ->
                 dialog.dismiss()
             }
             dialog.setPositiveButton(
-                "سیاست های حفظ حریم خصوصی"
+                getString(R.string.privacy_policy)
             ) { _, _ ->
                 var intent = Intent(this, WebViewActivity::class.java)
                 startActivity(intent)
             }
             dialog.setNeutralButton(
-                "درباره ما"
+                getString(R.string.about_us)
             ) { _, _ ->
                 val intent = Intent(
                     "android.intent.action.VIEW", "https://behnamuix2024.com/api/bio.html".toUri()
@@ -194,7 +194,7 @@ class MainActivity : AppCompatActivity() {
                 getHistData()
 
             } else {
-                motoast.MoWarning(msg = " داده ها بارگزاری نشده اند لطفا بر روی شروع ضربه بزنید!")
+                motoast.MoWarning(msg = getString(R.string.data_not_loaded_warning))
             }
 
         }
@@ -242,7 +242,10 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun payConfig() {
-        motoast.MoWarning(title = "مایکت", msg = "در حال ارتباط با سرور های مایکت هستیم اندکی صبر کنید")
+        motoast.MoWarning(
+            title = getString(R.string.myket_title),
+            msg = getString(R.string.myket_connecting_message)
+        )
         mHelper = IabHelper(this, BuildConfig.IAB_PUBLIC_KEY)
         mHelper.enableDebugLogging(false)
         if (mHelper != null) {
@@ -392,9 +395,9 @@ class MainActivity : AppCompatActivity() {
                 val data = response.body()
                 if (data != null) {
                     if (data.status == "success") {
-                        motoast.MoSuccess(msg = "تبریک , خرید شما با موفقیت انجام شد")
+                        motoast.MoSuccess(msg = getString(R.string.purchase_success))
                     } else {
-                        motoast.MoError(msg = "متاسفانه خرید انجام نشد")
+                        motoast.MoError(msg = getString(R.string.purchase_failed))
 
                     }
 
@@ -402,7 +405,7 @@ class MainActivity : AppCompatActivity() {
             }
 
             override fun onFailure(call: Call<ApiResponse>, t: Throwable) {
-                motoast.MoError(msg = "متاسفانه خرید انجام نشد")
+                motoast.MoError(msg = getString(R.string.purchase_failed))
             }
 
         })
@@ -415,15 +418,15 @@ class MainActivity : AppCompatActivity() {
         MAC = getAndroidId(applicationContext)
         Toast.makeText(this, MAC, Toast.LENGTH_LONG).show()
         val builder1 = AlertDialog.Builder(this, R.style.cardAlertDialog)
-        builder1.setMessage("آیا شما میخواهید داده ها در تاریخچه ذخیره شود؟")
+        builder1.setMessage(getString(R.string.save_history_prompt))
         builder1.setCancelable(true)
 
         builder1.setPositiveButton(
-            "بله"
+            getString(R.string.yes)
         ) { _, _ -> insertToHistDb(MAC, DATE, IP, NET_TYPE, PING_SPEED) }
 
         builder1.setNegativeButton(
-            "خیر"
+            getString(R.string.no)
         ) { dialog, _ -> dialog.cancel() }
 
         val alert11 = builder1.create()
@@ -463,17 +466,17 @@ class MainActivity : AppCompatActivity() {
         call.enqueue(object : Callback<ApiResponse> {
             override fun onResponse(call: Call<ApiResponse>, response: Response<ApiResponse>) {
                 if (response.isSuccessful) {
-                    motoast.MoSuccess(msg = "داده ها در قسمت تاریخچه ذخیره شدند")
+                    motoast.MoSuccess(msg = getString(R.string.history_saved_success))
 
                 } else {
-                    motoast.MoError(msg = " مشکلی در دریافت اطلاعات وجود دارد لطفا دوباره تلاش کنید")
+                    motoast.MoError(msg = getString(R.string.data_fetch_error))
 
 
                 }
             }
 
             override fun onFailure(call: Call<ApiResponse>, t: Throwable) {
-                motoast.MoError(msg = " مشکلی در دریافت اطلاعات وجود دارد لطفا دوباره تلاش کنید")
+                motoast.MoError(msg = getString(R.string.data_fetch_error))
 
 
             }
@@ -536,10 +539,10 @@ class MainActivity : AppCompatActivity() {
             val pingResult = withContext(Dispatchers.IO) {
                 networkTester.getPingSpeed()
             }
-            tv_ping.text = if (pingResult != null) " $pingResult " else "خطا"
+            tv_ping.text = if (pingResult != null) " $pingResult " else  getString(R.string.error)
             val p = pingResult.toString()
             PING_SPEED = "$p M/s"
-            tv_status_ping.text = "پینگ"
+            tv_status_ping.text = getString(R.string.ping)
 
             val downloadSpeed = withContext(Dispatchers.IO) {
                 networkTester.getDownloadSpeed(url)
@@ -549,7 +552,8 @@ class MainActivity : AppCompatActivity() {
                 String.format(
                     "%.2f", downloadSpeed
                 )
-            } " else "خطا"
+            } " else getString(R.string.error)
+
             Log.i("tenser", downloadSpeed.toString())
             val uploadSpeed = withContext(Dispatchers.IO) {
                 networkTester.getUploadSpeed("https://httpbin.org/")
@@ -558,7 +562,7 @@ class MainActivity : AppCompatActivity() {
                 String.format(
                     "%.2f", uploadSpeed
                 )
-            } " else "خطا"
+            } " else  getString(R.string.error_message)
             DOWN_SPEED = String.format(
                 "%.2f", downloadSpeed
             )
@@ -606,12 +610,12 @@ class MainActivity : AppCompatActivity() {
 
             if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
 
-                motoast.MoSuccess(msg = "مجوز تایید شد")
+                motoast.MoSuccess(msg =getString(R.string.permission_approved) )
                 ipDetect()
 
             } else {
 
-                motoast.MoError(msg = "مجوز رد شد نوع شبکه قابل دسترسی نیست")
+                motoast.MoError(msg = getString(R.string.permission_denied_network_unavailable))
 
 
             }

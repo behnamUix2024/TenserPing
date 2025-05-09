@@ -75,9 +75,9 @@ class HistoryDialogFragment : DialogFragment() {
     private fun setupCurveModeSpinner() {
         // ایجاد لیست گزینه‌ها
         val modes = listOf(
-            "منحنی نرم" to LineDataSet.Mode.CUBIC_BEZIER,
-            "خط مستقیم" to LineDataSet.Mode.LINEAR,
-            "سیگنالی" to LineDataSet.Mode.STEPPED
+            getString(R.string.soft_curve) to LineDataSet.Mode.CUBIC_BEZIER,
+            getString(R.string.straight_line) to LineDataSet.Mode.LINEAR,
+            getString(R.string.signal) to LineDataSet.Mode.STEPPED
         )
 
         // تنظیم آداپتر برای اسپینر
@@ -145,7 +145,7 @@ class HistoryDialogFragment : DialogFragment() {
     }
 
     private fun showChart() {
-        btn_show_chart.text = "نمایش نمودار"
+        btn_show_chart.text = getString(R.string.show_chart)
         hist_list.visibility = View.GONE
         hist_chart.visibility = View.VISIBLE
         btn_show_list.visibility = View.VISIBLE
@@ -183,7 +183,7 @@ class HistoryDialogFragment : DialogFragment() {
         btn_show_list.visibility = View.GONE
         btn_show_chart.visibility = View.VISIBLE
         lifecycleScope.launch {
-            motoast.MoInfo(msg = "در حال دریافت تاریخچه")
+            motoast.MoInfo(msg = getString(R.string.loading_history))
 
             try {
                 val call = RetrofitClient.apiService.getHist(ANDROID_IDS)
@@ -195,7 +195,7 @@ class HistoryDialogFragment : DialogFragment() {
                         if (response.isSuccessful) {
                             val apiresp = response.body()
                             if(apiresp?.status=="notFound"){
-                                    motoast.MoWarning(msg = "تاریخچه‌ای وجود ندارد!")
+                                    motoast.MoWarning(msg = getString(R.string.no_history))
 
                                 }
                             if (apiresp?.status == "success") {
@@ -210,7 +210,7 @@ class HistoryDialogFragment : DialogFragment() {
 
                             }
                         } else {
-                            motoast.MoError(msg = "داده ای دریافت نشد")
+                            motoast.MoError(msg = getString(R.string.no_data_received))
                         }
                     }
 
@@ -239,7 +239,7 @@ class HistoryDialogFragment : DialogFragment() {
         }
 
 // تنظیمات مجموعه داده‌های خطی
-        val dataSet = LineDataSet(entries, "سرعت (مگابیت بر ثانیه)").apply {
+        val dataSet = LineDataSet(entries,getString(R.string.speed_mbps) ).apply {
             color = Color.rgb(67, 153, 226)  // رنگ خط آبی آسمانی
             valueTextColor = Color.WHITE      // رنگ متن مقادیر سفید
             valueTextSize = 12f               // سایز متن مقادیر 12 پیکسل
@@ -265,8 +265,8 @@ class HistoryDialogFragment : DialogFragment() {
             valueFormatter = object : ValueFormatter() {
                 override fun getFormattedValue(value: Float): String {
                     return when (value.toInt()) {
-                        0 -> "اندازه‌گیری اول"
-                        1 -> "اندازه‌گیری دوم"
+                        0 -> getString(R.string.first_measurement)
+                        1 -> getString(R.string.second_measurement)
                         else -> ""
                     }
                 }
@@ -290,9 +290,9 @@ class HistoryDialogFragment : DialogFragment() {
 // تنظیمات کلی نمودار
         chart.apply {
             this.data = LineData(dataSet)  // اتصال داده‌ها به نمودار
-            description.text = "نمودار دقیق سرعت پینگ شبکه شما (بر اساس M/s)"
+            description.text = getString(R.string.ping_chart_description)
             description.textColor = Color.WHITE  // رنگ توضیحات سفید
-            setNoDataText("در حال دریافت داده...")  // متن هنگام عدم وجود داده
+            setNoDataText(getString(R.string.loading_data))  // متن هنگام عدم وجود داده
             setNoDataTextColor(Color.WHITE)      // رنگ متن بدون داده
             legend.textColor = Color.WHITE       // رنگ راهنما سفید
             setDrawGridBackground(false)        // غیرفعال کردن پس‌زمینه شبکه

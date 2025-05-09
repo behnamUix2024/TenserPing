@@ -16,10 +16,10 @@ import kotlinx.coroutines.withContext
 import org.json.JSONObject
 import java.net.URL
 
-
 class UserLocationProvider(val ctx: Context) {
     private val fusedLocationClient: FusedLocationProviderClient =
         LocationServices.getFusedLocationProviderClient(ctx)
+
 
     companion object {
         private const val TAG = "UserLocationProvider"
@@ -146,8 +146,10 @@ class UserLocationProvider(val ctx: Context) {
             }
 
         } else {
-            return "دسترسی غیر مجاز!"
+            return ctx.getString(R.string.access_denied)
         }
 
     }
+
+
 }
