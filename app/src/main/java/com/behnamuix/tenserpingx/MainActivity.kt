@@ -31,6 +31,7 @@ import com.behnamuix.tenserpingx.MyketRate.MyketRate
 import com.behnamuix.tenserpingx.Network.InternetSpeedTester
 import com.behnamuix.tenserpingx.Network.Location.UserLocationProvider
 import com.behnamuix.tenserpingx.Retrofit.ApiResponse
+import com.behnamuix.tenserpingx.Retrofit.ApiResponseCheckVerifyJson
 import com.behnamuix.tenserpingx.Retrofit.RetrofitClient
 import com.behnamuix.tenserpingx.databinding.ActivityMainBinding
 import com.behnamuix.tenserpingx.util.IabHelper
@@ -53,12 +54,15 @@ import java.util.Locale
 import java.util.TimeZone
 
 class MainActivity : AppCompatActivity() {
+    private val URL_BG="https://behnamuix2024.com/img/bg.png"
+
     private val KEY_FIRST_LAUNCH = "first_launch"
     val SKU_PREMIUM: String = "hist_chart_prem"
     val RC_REQUEST: Int = 10001
     lateinit var mHelper: IabHelper
 
     private var isDialogShowing = false
+    private var v:Boolean = false
     private lateinit var myketrate: MyketRate
     private lateinit var motoast: MoToast
     private var MAC = ""
@@ -98,20 +102,25 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         enableEdgeToEdge()
         setContentView(binding.root)
-
-        val imageUrl = "https://behnamuix2024.com/img/bg.png"
-
-        Picasso.get()
-            .load(imageUrl)
-            .into(binding.bg)
         main()
+
+
     }
 
     private fun main() {
         changeNavbarStyle()
+        loadBackground(URL_BG)
         keepScreenAwake(this, true)
         config()
         rateOnScreen()
+
+
+    }
+
+    private fun loadBackground(urlBg: String) {
+        Picasso.get()
+            .load(urlBg)
+            .into(binding.bg)
 
     }
 
@@ -121,7 +130,6 @@ class MainActivity : AppCompatActivity() {
             myketrate.showRateDialog()
         }
     }
-
 
     private fun config() {
         registerReceiver(networkReceiver, IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION))
@@ -242,10 +250,40 @@ class MainActivity : AppCompatActivity() {
 
 
     fun checkValidPerm(): Boolean {
-        return sharedPreferences.getBoolean(
-            KEY_FIRST_LAUNCH,
-            false
-        ) // مقدار پیش‌فرض true است اگر کلید وجود نداشته باشد.
+//        return sharedPreferences.getBoolean(
+//            KEY_FIRST_LAUNCH,
+//            false
+//        ) // مقدار پیش‌فرض true است اگر کلید وجود نداشته باشد.
+        Log.d("TAG",checkVerifyP().toString())
+        return checkVerifyP()
+    }
+
+    private fun checkVerifyP():Boolean {
+        MAC=getAndroidId(applicationContext)
+        val call=RetrofitClient.apiService.checkVerify(MAC)
+        call.enqueue(object:Callback<ApiResponseCheckVerifyJson>{
+            override fun onResponse(
+                call: Call<ApiResponseCheckVerifyJson>,
+                response: Response<ApiResponseCheckVerifyJson>
+            ) {
+               val data=response.body()
+                if (data != null) {
+                    if(data.exists){
+                        v=true
+
+                    }else{
+                        v=false
+                    }
+                }
+            }
+
+            override fun onFailure(call: Call<ApiResponseCheckVerifyJson>, t: Throwable) {
+                Log.d("error connection","error!")
+            }
+
+        })
+        return v
+
     }
 
     private fun payConfig() {

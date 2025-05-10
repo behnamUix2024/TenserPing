@@ -34,4 +34,8 @@ interface ApiService {
         @Query("p_sig") p_sig: String,
         @Query("verify") verify: String
     ): Call<ApiResponse>
+    @GET("check_verify.php")
+    fun checkVerify(
+        @Query("p_mac") p_mac:String
+    ):Call<ApiResponseCheckVerifyJson>
 }
