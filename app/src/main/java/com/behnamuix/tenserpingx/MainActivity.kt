@@ -249,10 +249,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun payConfig() {
-        motoast.MoWarning(
-            title = getString(R.string.myket_title),
-            msg = getString(R.string.myket_connecting_message)
-        )
+        motoast.MoWarning(title = "مایکت", msg = "در حال ارتباط با سرور های مایکت هستیم اندکی صبر کنید")
         mHelper = IabHelper(this, BuildConfig.IAB_PUBLIC_KEY)
         mHelper.enableDebugLogging(false)
         if (mHelper != null) {

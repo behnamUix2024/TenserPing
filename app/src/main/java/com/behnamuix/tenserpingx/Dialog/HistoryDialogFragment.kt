@@ -1,5 +1,6 @@
 package com.behnamuix.tenserpingx.Dialog
 
+import android.content.DialogInterface
 import android.graphics.Color
 import android.os.Bundle
 import android.provider.Settings
@@ -39,9 +40,11 @@ import retrofit2.Response
 import androidx.core.graphics.toColorInt
 import androidx.core.graphics.drawable.toDrawable
 import androidx.core.view.size
+import com.behnamuix.tenserpingx.MyTools.FragDialogListener
 import kotlinx.coroutines.delay
 
 class HistoryDialogFragment : DialogFragment() {
+    private var listener:FragDialogListener?=null
     private var ANDROID_IDS = ""
     private var currentCurveMode = LineDataSet.Mode.CUBIC_BEZIER
     private lateinit var chart: LineChart
@@ -116,6 +119,19 @@ class HistoryDialogFragment : DialogFragment() {
         }
     }
 
+    override fun onStart() {
+        super.onStart()
+        if (!isAdded || isRemoving) return
+        listener?.onDialogShow()
+    }
+
+    override fun onDismiss(dialog: DialogInterface) {
+        super.onDismiss(dialog)
+        listener?.onDialogDismissed()
+    }
+    fun setDialogListener(listener: FragDialogListener){
+        this.listener=listener
+    }
     private fun config() {
         ANDROID_IDS = getDeviceId()
         sp_type = binding.spType
@@ -215,13 +231,15 @@ class HistoryDialogFragment : DialogFragment() {
                     }
 
                     override fun onFailure(call: Call<ApiResponseJson>, t: Throwable) {
-                        Toast.makeText(context, t.message, Toast.LENGTH_LONG).show()
 
                     }
 
                 })
             } catch (e: Exception) {
-                Toast.makeText(context, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
+                if(context!=null){
+                    Toast.makeText(context, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
+
+                }
             }
         }
 
