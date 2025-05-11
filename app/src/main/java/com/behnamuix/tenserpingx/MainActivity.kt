@@ -132,6 +132,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun config() {
+        MAC=getAndroidId(this)
         registerReceiver(networkReceiver, IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION))
         myketrate = MyketRate(this)
         btn_export_pdf = binding.btnExportPdf
@@ -153,7 +154,7 @@ class MainActivity : AppCompatActivity() {
         }
         img_hist.setOnClickListener {
 
-            if (checkValidPerm()) {
+            if (v) {
                 showHistDialog()
 
             } else {
@@ -179,22 +180,12 @@ class MainActivity : AppCompatActivity() {
                 dialog.dismiss()
             }
             dialog.setPositiveButton(
-                getString(R.string.privacy_policy)
+                getString(R.string.about_us)
             ) { _, _ ->
                 var intent = Intent(this, WebViewActivity::class.java)
                 startActivity(intent)
             }
-            dialog.setNeutralButton(
-                getString(R.string.about_us)
-            ) { _, _ ->
-                val intent = Intent(
-                    "android.intent.action.VIEW", "https://behnamuix2024.com/api/bio.html".toUri()
-                )
-                val b = Bundle()
-                b.putBoolean("new_window", true) //sets new window
-                intent.putExtras(b)
-                startActivity(intent)
-            }
+            dialog.setPositiveButtonIcon(getDrawable(R.drawable.icon_info))
             dialog.show()
         }
         vw_start.setOnClickListener {
@@ -213,6 +204,8 @@ class MainActivity : AppCompatActivity() {
             }
 
         }
+        v=checkVerifyP()
+
 
 
     }
@@ -248,15 +241,6 @@ class MainActivity : AppCompatActivity() {
             .apply() // یا commit() برای اعمال تغییرات به صورت همزمان
     }
 
-
-    fun checkValidPerm(): Boolean {
-//        return sharedPreferences.getBoolean(
-//            KEY_FIRST_LAUNCH,
-//            false
-//        ) // مقدار پیش‌فرض true است اگر کلید وجود نداشته باشد.
-        Log.d("TAG",checkVerifyP().toString())
-        return checkVerifyP()
-    }
 
     private fun checkVerifyP():Boolean {
         MAC=getAndroidId(applicationContext)
@@ -419,8 +403,8 @@ class MainActivity : AppCompatActivity() {
         }
     }
     private fun formatPurchaseTime(purchaseTime: Long): String {
-        val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
-        sdf.timeZone = TimeZone.getDefault() // یا TimeZone.getTimeZone("Asia/Tehran") برای زمان ایران
+        val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US)
+        sdf.timeZone = TimeZone.getTimeZone("Asia/Tehran") // تنظیم منطقه زمانی ایران
         return sdf.format(Date(purchaseTime))
     }
     private fun insertAndVerifyPay(
@@ -438,6 +422,7 @@ class MainActivity : AppCompatActivity() {
                 if (data != null) {
                     if (data.status == "success") {
                         motoast.MoSuccess(msg = getString(R.string.purchase_success))
+                        v=checkVerifyP()
                     } else {
                         motoast.MoError(msg = getString(R.string.purchase_failed))
 

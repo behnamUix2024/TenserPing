@@ -221,7 +221,11 @@ class HistoryDialogFragment : DialogFragment() {
                                         LinearLayoutManager.VERTICAL,
                                         false
                                     )
-                                val adapter = HistoryDialogAdapter(apiresp.data, requireContext())
+                                val adapter = context?.let {
+                                    HistoryDialogAdapter(apiresp.data,
+                                        it
+                                    )
+                                }
                                 rec_hist.adapter = adapter
 
                             }
