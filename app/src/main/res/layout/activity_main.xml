@@ -425,7 +425,7 @@
         android:backgroundTint="@color/white"
         android:drawableTop="@drawable/icon_file_earmark_pdf"
         android:fontFamily="@font/vazir_medium"
-        android:text="خروجی فایل PDF"
+        android:text="خروجی فایل PDF\n(به زودی)"
         android:textColor="@color/black"
         android:textSize="@dimen/small2"
         app:cornerRadius="8dp"

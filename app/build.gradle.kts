@@ -1,7 +1,9 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
+
 }
+
 
 android {
 
@@ -11,6 +13,7 @@ android {
         viewBinding = true
         buildConfig = true
     }
+
 
     defaultConfig {
 
@@ -39,6 +42,7 @@ android {
 
     buildTypes {
         release {
+            //*
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
@@ -53,7 +57,9 @@ android {
     kotlinOptions {
         jvmTarget = "1.8"
     }
+
 }
+
 
 dependencies {
     implementation (libs.simplypdf)
@@ -76,6 +82,8 @@ dependencies {
     implementation(libs.lottie)
     implementation (libs.myket.billing.client)
     implementation ("com.squareup.picasso:picasso:2.71828")
+
+
 
 
 
