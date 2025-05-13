@@ -4,7 +4,8 @@
     <string name="str_btn_block">تلاش مجدد</string>
     <string name="splash_app_name">تنسر پینگ</string>
     <string name="splash">splash</string>
-    <string name="splash_tv_version">v 1.1.1 (alpha)</string>
+    <string name="splash_tv_version">v 1.0.0 (آلفا)</string>
+    <string name="splash_tv_designer"> توسعه و دیزاین:تیم ArcaDroid </string>
     <string name="ok_button">باشه</string>
     <string name="privacy_policy">سیاست های حفظ حریم خصوصی</string>
     <string name="about_us">درباره ما</string>

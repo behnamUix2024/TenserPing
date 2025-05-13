@@ -4,7 +4,7 @@ import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 
-class VpnChecker {
+class VpnChecker(ctx:Context) {
      fun checkVpnState(ctx: Context): Boolean {
         val cm=ctx.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
         val net=cm.activeNetwork?:return false

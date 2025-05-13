@@ -28,7 +28,7 @@ class SplashActivity : AppCompatActivity() {
         val windowInsetsController = WindowCompat.getInsetsController(window, window.decorView)
 
         // تغییر رنگ پس‌زمینه نوار ناوبری
-        val navigationBarColor = ContextCompat.getColor(this, R.color.start_color)
+        val navigationBarColor = ContextCompat.getColor(this, R.color.black_mat)
         window.navigationBarColor = navigationBarColor
 
     }

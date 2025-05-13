@@ -27,7 +27,7 @@ class MoToast(private val activity: Activity) {
             msg,
             MotionToastStyle.WARNING,
             MotionToast.GRAVITY_BOTTOM,
-            MotionToast.SHORT_DURATION,
+            MotionToast.LONG_DURATION,
             ResourcesCompat.getFont(activity, R.font.vazir_fd_wol)
         )
     }

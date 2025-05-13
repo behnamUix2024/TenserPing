@@ -81,6 +81,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var tv_speed_download: TextView
     private lateinit var btn_save_hist: MaterialButton
     private lateinit var btn_export_pdf: MaterialButton
+    private lateinit var img_exit: ImageView
     private lateinit var img_hist: ImageView
     private lateinit var tv_ip: TextView
     private lateinit var tv_type: TextView
@@ -115,6 +116,7 @@ class MainActivity : AppCompatActivity() {
         loadBackground(URL_BG)
         keepScreenAwake(this, true)
         config()
+        testVpnState()
         rateOnScreen()
 
 
@@ -129,7 +131,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun rateOnScreen() {
         lifecycleScope.launch {
-            delay(60000 * 2) // 1 دقیقه بعد
+            delay(150000) // 1 دقیقه بعد
             myketrate.showRateDialog()
         }
     }
@@ -137,6 +139,8 @@ class MainActivity : AppCompatActivity() {
     private fun config() {
         MAC=getAndroidId(this)
         registerReceiver(networkReceiver, IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION))
+        img_exit=binding.imgExit
+        vpnCheck=VpnChecker(this)
         myketrate = MyketRate(this)
         btn_export_pdf = binding.btnExportPdf
         motoast = MoToast(this)
@@ -152,7 +156,7 @@ class MainActivity : AppCompatActivity() {
         tv_speed_upload = binding.tvSpeedUpload
         tv_speed_download = binding.tvSpeedDownload
         vw_start = binding.vwStart
-        testVpnState()
+
         onclickHandler()
 
 
@@ -170,6 +174,9 @@ class MainActivity : AppCompatActivity() {
         }
     }
     private fun onclickHandler() {
+        img_exit.setOnClickListener(){
+            finish()
+        }
         btn_export_pdf.setOnClickListener {
             exportToPDF()
         }
