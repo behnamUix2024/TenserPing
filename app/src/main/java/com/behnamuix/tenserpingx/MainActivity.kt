@@ -8,6 +8,7 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
 import android.os.Bundle
 import android.util.Log
 import android.view.WindowManager
@@ -27,6 +28,7 @@ import com.airbnb.lottie.LottieAnimationView
 import com.behnamuix.tenserping.Network.NetworkCheck
 import com.behnamuix.tenserpingx.Dialog.HistoryDialogFragment
 import com.behnamuix.tenserpingx.MyTools.MoToast
+import com.behnamuix.tenserpingx.MyTools.VpnChecker
 import com.behnamuix.tenserpingx.MyketRate.MyketRate
 import com.behnamuix.tenserpingx.Network.InternetSpeedTester
 import com.behnamuix.tenserpingx.Network.Location.UserLocationProvider
@@ -65,6 +67,7 @@ class MainActivity : AppCompatActivity() {
     private var v:Boolean = false
     private lateinit var myketrate: MyketRate
     private lateinit var motoast: MoToast
+    private lateinit var vpnCheck: VpnChecker
     private var MAC = ""
     private var DATE = ""
     private var IP = ""
@@ -149,6 +152,24 @@ class MainActivity : AppCompatActivity() {
         tv_speed_upload = binding.tvSpeedUpload
         tv_speed_download = binding.tvSpeedDownload
         vw_start = binding.vwStart
+        testVpnState()
+        onclickHandler()
+
+
+
+
+    }
+
+
+    private fun testVpnState(){
+       val  vpn=vpnCheck.checkVpnState(this)
+        if(vpn){
+            motoast.MoWarning("روشن بودن فیلترشکن باعث اختلال در عملکرد اپلیکیشن میشود!")
+        }else{
+
+        }
+    }
+    private fun onclickHandler() {
         btn_export_pdf.setOnClickListener {
             exportToPDF()
         }
@@ -205,9 +226,6 @@ class MainActivity : AppCompatActivity() {
 
         }
         v=checkVerifyP()
-
-
-
     }
 
     fun keepScreenAwake(activity: AppCompatActivity, keepScreenOn: Boolean) {
@@ -443,7 +461,6 @@ class MainActivity : AppCompatActivity() {
     private fun getHistData() {
         DATE = getDate()
         MAC = getAndroidId(applicationContext)
-        Toast.makeText(this, MAC, Toast.LENGTH_LONG).show()
         val builder1 = AlertDialog.Builder(this, R.style.cardAlertDialog)
         builder1.setMessage(getString(R.string.save_history_prompt))
         builder1.setCancelable(true)
@@ -709,6 +726,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun exportToPDF() {
+        motoast.MoInfo("به زودی ...")
 
 
     }

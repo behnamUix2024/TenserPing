@@ -9,7 +9,7 @@ import www.sanju.motiontoast.MotionToastStyle
 class MoToast(private val activity: Activity) {
 
     fun MoSuccess(msg: String, title: String = activity.getString(R.string.default_important_title)) {
-        MotionToast.darkColorToast(
+        MotionToast.createColorToast(
             activity,
             title,
             msg,
@@ -21,7 +21,7 @@ class MoToast(private val activity: Activity) {
     }
 
     fun MoWarning(msg: String, title: String = activity.getString(R.string.default_warning_title)) {
-        MotionToast.darkColorToast(
+        MotionToast.createColorToast(
             activity,
             title,
             msg,
@@ -33,7 +33,7 @@ class MoToast(private val activity: Activity) {
     }
 
     fun MoInfo(msg: String, title: String = activity.getString(R.string.default_info_title)) {
-        MotionToast.darkColorToast(
+        MotionToast.createColorToast(
             activity,
             title,
             msg,
@@ -45,7 +45,7 @@ class MoToast(private val activity: Activity) {
     }
 
     fun MoError(msg: String, title: String = activity.getString(R.string.default_error_title)) {
-        MotionToast.darkColorToast(
+        MotionToast.createColorToast(
             activity,
             title,
             msg,

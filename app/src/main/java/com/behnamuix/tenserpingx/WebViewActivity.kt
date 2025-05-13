@@ -11,7 +11,7 @@ import com.behnamuix.tenserpingx.databinding.ActivityCommentBinding
 
 class WebViewActivity : AppCompatActivity() {
     private lateinit var binding: ActivityCommentBinding
-    private var URL = "https://behnamuix2024.com/api/bio.html"
+    private var URL = "https://behnamuix2024.com/"
     private lateinit var webView: WebView
     private lateinit var swipe: SwipeRefreshLayout
     override fun onCreate(savedInstanceState: Bundle?) {
