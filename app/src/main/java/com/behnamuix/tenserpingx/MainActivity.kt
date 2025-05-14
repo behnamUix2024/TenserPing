@@ -8,7 +8,6 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.net.ConnectivityManager
-import android.net.NetworkCapabilities
 import android.os.Bundle
 import android.util.Log
 import android.view.WindowManager
@@ -21,7 +20,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import androidx.core.net.toUri
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.lifecycleScope
 import com.airbnb.lottie.LottieAnimationView
@@ -31,7 +29,7 @@ import com.behnamuix.tenserpingx.MyTools.MoToast
 import com.behnamuix.tenserpingx.MyTools.VpnChecker
 import com.behnamuix.tenserpingx.MyketRate.MyketRate
 import com.behnamuix.tenserpingx.Network.InternetSpeedTester
-import com.behnamuix.tenserpingx.Network.Location.UserLocationProvider
+import com.behnamuix.tenserpingx.Network.IpAddress.getIpAddress
 import com.behnamuix.tenserpingx.Retrofit.ApiResponse
 import com.behnamuix.tenserpingx.Retrofit.ApiResponseCheckVerifyJson
 import com.behnamuix.tenserpingx.Retrofit.RetrofitClient
@@ -56,7 +54,9 @@ import java.util.Locale
 import java.util.TimeZone
 
 class MainActivity : AppCompatActivity() {
-    private val URL_BG="https://behnamuix2024.com/img/bg.png"
+
+
+    private val URL_BG = "https://behnamuix2024.com/img/bg.png"
 
     private val KEY_FIRST_LAUNCH = "first_launch"
     val SKU_PREMIUM: String = "hist_chart_prem"
@@ -64,7 +64,7 @@ class MainActivity : AppCompatActivity() {
     lateinit var mHelper: IabHelper
 
     private var isDialogShowing = false
-    private var v:Boolean = false
+    private var v: Boolean = false
     private lateinit var myketrate: MyketRate
     private lateinit var motoast: MoToast
     private lateinit var vpnCheck: VpnChecker
@@ -137,10 +137,10 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun config() {
-        MAC=getAndroidId(this)
+        MAC = getAndroidId(this)
         registerReceiver(networkReceiver, IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION))
-        img_exit=binding.imgExit
-        vpnCheck=VpnChecker(this)
+        img_exit = binding.imgExit
+        vpnCheck = VpnChecker(this)
         myketrate = MyketRate(this)
         btn_export_pdf = binding.btnExportPdf
         motoast = MoToast(this)
@@ -160,21 +160,20 @@ class MainActivity : AppCompatActivity() {
         onclickHandler()
 
 
-
-
     }
 
 
-    private fun testVpnState(){
-       val  vpn=vpnCheck.checkVpnState(this)
-        if(vpn){
+    private fun testVpnState() {
+        val vpn = vpnCheck.checkVpnState(this)
+        if (vpn) {
             motoast.MoWarning("روشن بودن فیلترشکن باعث اختلال در عملکرد اپلیکیشن میشود!")
-        }else{
+        } else {
 
         }
     }
+
     private fun onclickHandler() {
-        img_exit.setOnClickListener(){
+        img_exit.setOnClickListener() {
             finish()
         }
         btn_export_pdf.setOnClickListener {
@@ -217,9 +216,12 @@ class MainActivity : AppCompatActivity() {
             dialog.show()
         }
         vw_start.setOnClickListener {
-            testStart()
             ipDetect()
+            getPingSpeed()
             DATE = getDate()
+            DUtestSpeedConfig()
+            networkTester.startSpeedTest() // از مقادیر پیش فرض برای URL دانلود و اندازه تست استفاده می کند
+            // testStart()
 
 
         }
@@ -232,7 +234,20 @@ class MainActivity : AppCompatActivity() {
             }
 
         }
-        v=checkVerifyP()
+        v = checkVerifyP()
+    }
+
+    private fun getPingSpeed() {
+       lifecycleScope.launch {
+            tv_status_ping.text = resources.getString(R.string.ping_test_status)
+            val pingResult = withContext(Dispatchers.IO) {
+                networkTester.getPingSpeed()
+            }
+            tv_ping.text = if (pingResult != null) " $pingResult " else getString(R.string.error)
+            val p = pingResult.toString()
+            PING_SPEED = "$p M/s"
+            tv_status_ping.text = getString(R.string.ping)
+        }
     }
 
     fun keepScreenAwake(activity: AppCompatActivity, keepScreenOn: Boolean) {
@@ -250,8 +265,11 @@ class MainActivity : AppCompatActivity() {
         val windowInsetsController = WindowCompat.getInsetsController(window, window.decorView)
 
         // تغییر رنگ پس‌زمینه نوار ناوبری
+        val statusBarColor = ContextCompat.getColor(this, R.color.black_mat)
+
         val navigationBarColor = ContextCompat.getColor(this, R.color.transparent)
         window.navigationBarColor = navigationBarColor
+        window.statusBarColor=statusBarColor
         windowInsetsController.isAppearanceLightNavigationBars = false
     }
 
@@ -267,27 +285,27 @@ class MainActivity : AppCompatActivity() {
     }
 
 
-    private fun checkVerifyP():Boolean {
-        MAC=getAndroidId(applicationContext)
-        val call=RetrofitClient.apiService.checkVerify(MAC)
-        call.enqueue(object:Callback<ApiResponseCheckVerifyJson>{
+    private fun checkVerifyP(): Boolean {
+        MAC = getAndroidId(applicationContext)
+        val call = RetrofitClient.apiService.checkVerify(MAC)
+        call.enqueue(object : Callback<ApiResponseCheckVerifyJson> {
             override fun onResponse(
                 call: Call<ApiResponseCheckVerifyJson>,
                 response: Response<ApiResponseCheckVerifyJson>
             ) {
-               val data=response.body()
+                val data = response.body()
                 if (data != null) {
-                    if(data.exists){
-                        v=true
+                    if (data.exists) {
+                        v = true
 
-                    }else{
-                        v=false
+                    } else {
+                        v = false
                     }
                 }
             }
 
             override fun onFailure(call: Call<ApiResponseCheckVerifyJson>, t: Throwable) {
-                Log.d("error connection","error!")
+                Log.d("error connection", "error!")
             }
 
         })
@@ -296,7 +314,10 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun payConfig() {
-        motoast.MoWarning(title = "مایکت", msg = "در حال ارتباط با سرور های مایکت هستیم اندکی صبر کنید")
+        motoast.MoWarning(
+            title = "مایکت",
+            msg = "در حال ارتباط با سرور های مایکت هستیم اندکی صبر کنید"
+        )
         mHelper = IabHelper(this, BuildConfig.IAB_PUBLIC_KEY)
         mHelper.enableDebugLogging(false)
         if (mHelper != null) {
@@ -427,11 +448,13 @@ class MainActivity : AppCompatActivity() {
             false
         }
     }
+
     private fun formatPurchaseTime(purchaseTime: Long): String {
         val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US)
         sdf.timeZone = TimeZone.getTimeZone("Asia/Tehran") // تنظیم منطقه زمانی ایران
         return sdf.format(Date(purchaseTime))
     }
+
     private fun insertAndVerifyPay(
         mac: String,
         time: String,
@@ -447,7 +470,7 @@ class MainActivity : AppCompatActivity() {
                 if (data != null) {
                     if (data.status == "success") {
                         motoast.MoSuccess(msg = getString(R.string.purchase_success))
-                        v=checkVerifyP()
+                        v = checkVerifyP()
                     } else {
                         motoast.MoError(msg = getString(R.string.purchase_failed))
 
@@ -552,7 +575,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun ipDetect() {
-        val locationProvider = UserLocationProvider(this)
+        val locationProvider = getIpAddress(this)
         lifecycleScope.launch {
             val ip = locationProvider.getUserIPAddress()
             if (ip != null) {
@@ -581,20 +604,47 @@ class MainActivity : AppCompatActivity() {
 
     }
 
+    fun DUtestSpeedConfig() {
+        networkTester.setOnSpeedChangeListener(object : InternetSpeedTester.OnSpeedChangeListener {
+            override fun onDownloadSpeedChanged(mbps: Double) {
+                runOnUiThread {
+                    tv_speed_download.text = String.format("%.2f", mbps)
+                }
+            }
+
+            override fun onUploadSpeedChanged(mbps: Double) {
+                runOnUiThread {
+                    tv_speed_upload.text = String.format("%.2f", mbps)
+                }
+            }
+
+            override fun onTestStarted() {
+                runOnUiThread {
+                    motoast.MoInfo("تست سرعت دانلود در حال اجرا میباشد اندکی صبرکنید...")
+                    vw_start.isEnabled = false
+                }
+            }
+
+            override fun onTestFinished() {
+                motoast.MoSuccess("تست سرعت دانلود کامل شد.")
+                vw_start.isEnabled = true
+            }
+
+            override fun onError(message: String) {
+                runOnUiThread {
+                    Toast.makeText(this@MainActivity, "Error: $message", Toast.LENGTH_LONG).show()
+                    vw_start.isEnabled = true
+                }
+            }
+
+        })
+    }
+
     private fun testStart() {
         val url = "https://httpbin.org/" // آدرس سرور آپلود خود را اینجا قرار دهید
         CoroutineScope(Dispatchers.Main).launch {
             tv_speed_download.text = "..."
             tv_speed_upload.text = "..."
-            tv_status_ping.text = resources.getString(R.string.ping_test_status)
-            val pingResult = withContext(Dispatchers.IO) {
-                networkTester.getPingSpeed()
-            }
-            tv_ping.text = if (pingResult != null) " $pingResult " else  getString(R.string.error)
-            val p = pingResult.toString()
-            PING_SPEED = "$p M/s"
-            tv_status_ping.text = getString(R.string.ping)
-
             val downloadSpeed = withContext(Dispatchers.IO) {
                 networkTester.getDownloadSpeed(url)
             }
@@ -613,7 +663,7 @@ class MainActivity : AppCompatActivity() {
                 String.format(
                     "%.2f", uploadSpeed
                 )
-            } " else  getString(R.string.error_message)
+            } " else getString(R.string.error_message)
             DOWN_SPEED = String.format(
                 "%.2f", downloadSpeed
             )
@@ -661,7 +711,7 @@ class MainActivity : AppCompatActivity() {
 
             if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
 
-                motoast.MoSuccess(msg =getString(R.string.permission_approved) )
+                motoast.MoSuccess(msg = getString(R.string.permission_approved))
                 ipDetect()
 
             } else {
@@ -694,6 +744,7 @@ class MainActivity : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
         mHelper.dispose()
+        networkTester.stopSpeedTest()
 
     }
 

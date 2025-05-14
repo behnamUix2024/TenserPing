@@ -17,5 +17,7 @@
         <item name="elevation">4dp</item>
         <item name="textFillColor">@color/black_mat</item>
         <item name="fontFamily">@font/vazir_fd_wol</item>
+
     </style>
+
 </resources>

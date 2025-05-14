@@ -164,7 +164,8 @@
                     android:layout_height="60dp"
                     android:layout_gravity="center"
                     android:scaleType="fitXY"
-                    android:src="@drawable/icon_speedometer" />
+                    android:src="@drawable/icon_ping2"
+                    android:tint="#FFFFFF" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -189,10 +190,10 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_marginLeft="8dp"
-                        android:layout_weight="1"
+                        android:layout_weight="2"
                         android:fontFamily="@font/sprint"
                         android:gravity="center"
-                        android:text="m/s"
+                        android:text="mb/s"
                         android:textColor="@color/white"
                         android:textSize="@dimen/small1" />
                 </LinearLayout>

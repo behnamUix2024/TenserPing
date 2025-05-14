@@ -1,4 +1,4 @@
-package com.behnamuix.tenserpingx.Network.Location
+package com.behnamuix.tenserpingx.Network.IpAddress
 
 import android.Manifest
 import android.content.Context
@@ -17,11 +17,7 @@ import kotlinx.coroutines.withContext
 import org.json.JSONObject
 import java.net.URL
 
-class UserLocationProvider(val ctx: Context) {
-    private val fusedLocationClient: FusedLocationProviderClient =
-        LocationServices.getFusedLocationProviderClient(ctx)
-
-
+class getIpAddress(val ctx: Context) {
     companion object {
         private const val TAG = "UserLocationProvider"
         private const val IP_LOOKUP_URL = "https://api.ipify.org/?format=json"
