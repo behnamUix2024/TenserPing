@@ -242,6 +242,7 @@ class MainActivity : AppCompatActivity() {
             tv_status_ping.text = resources.getString(R.string.ping_test_status)
             val pingResult = withContext(Dispatchers.IO) {
                 networkTester.getPingSpeed()
+
             }
             tv_ping.text = if (pingResult != null) " $pingResult " else getString(R.string.error)
             val p = pingResult.toString()
