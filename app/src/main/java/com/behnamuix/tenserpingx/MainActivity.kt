@@ -10,8 +10,11 @@ import android.content.pm.PackageManager
 import android.net.ConnectivityManager
 import android.os.Bundle
 import android.util.Log
+import android.view.View
 import android.view.WindowManager
 import android.widget.ImageView
+import android.widget.LinearLayout
+import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
@@ -30,6 +33,7 @@ import com.behnamuix.tenserpingx.MyTools.VpnChecker
 import com.behnamuix.tenserpingx.MyketRate.MyketRate
 import com.behnamuix.tenserpingx.Network.InternetSpeedTester
 import com.behnamuix.tenserpingx.Network.IpAddress.getIpAddress
+import com.behnamuix.tenserpingx.Network.UploadTester
 import com.behnamuix.tenserpingx.Retrofit.ApiResponse
 import com.behnamuix.tenserpingx.Retrofit.ApiResponseCheckVerifyJson
 import com.behnamuix.tenserpingx.Retrofit.RetrofitClient
@@ -47,13 +51,14 @@ import kotlinx.coroutines.withContext
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 import java.util.TimeZone
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(),UploadTester.UploadCallback {
 
 
     private val URL_BG = "https://behnamuix2024.com/img/bg.png"
@@ -77,11 +82,15 @@ class MainActivity : AppCompatActivity() {
     private var UP_SPEED = ""
     private val PHONE_STATUS_REQUEST_CODE = 1
     private lateinit var binding: ActivityMainBinding
+    private lateinit var pb_card: LinearLayout
     private lateinit var lav_info: LottieAnimationView
     private lateinit var tv_speed_download: TextView
     private lateinit var btn_save_hist: MaterialButton
     private lateinit var btn_export_pdf: MaterialButton
     private lateinit var img_exit: ImageView
+    private lateinit var pb_upload: ProgressBar
+    private lateinit var tv_pb_upload: TextView
+    private lateinit var tv_status_upload: TextView
     private lateinit var img_hist: ImageView
     private lateinit var tv_ip: TextView
     private lateinit var tv_type: TextView
@@ -91,6 +100,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var tv_status: TextView
     private lateinit var vw_start: ConstraintLayout
     private lateinit var networkTester: InternetSpeedTester
+    private lateinit var uploadTester: UploadTester
     private val networkReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             if (context != null && !NetworkCheck.isInternetAvailable(context)) {
@@ -142,8 +152,12 @@ class MainActivity : AppCompatActivity() {
         img_exit = binding.imgExit
         vpnCheck = VpnChecker(this)
         myketrate = MyketRate(this)
+        pb_card=binding.pbCard
+        tv_status_upload=binding.tvStatusUpload
         btn_export_pdf = binding.btnExportPdf
         motoast = MoToast(this)
+        pb_upload=binding.pbUpload
+        tv_pb_upload=binding.tvPbUplosd
         btn_save_hist = binding.btnSaveHist
         img_hist = binding.imgHist
         tv_type = binding.tvType
@@ -156,13 +170,22 @@ class MainActivity : AppCompatActivity() {
         tv_speed_upload = binding.tvSpeedUpload
         tv_speed_download = binding.tvSpeedDownload
         vw_start = binding.vwStart
+        uploadTester = UploadTester(this)
 
         onclickHandler()
 
 
     }
 
-
+    private fun createTestFile(): File {
+        val file = File(cacheDir, "test_upload.bin")
+        if (!file.exists()) {
+            // ایجاد یک فایل 1MB برای تست
+            val data = ByteArray(1024 * 1024) { 1 }
+            file.writeBytes(data)
+        }
+        return file
+    }
     private fun testVpnState() {
         val vpn = vpnCheck.checkVpnState(this)
         if (vpn) {
@@ -217,10 +240,12 @@ class MainActivity : AppCompatActivity() {
         }
         vw_start.setOnClickListener {
             ipDetect()
+            getUploadSpeed()
             getPingSpeed()
             DATE = getDate()
             DUtestSpeedConfig()
             networkTester.startSpeedTest() // از مقادیر پیش فرض برای URL دانلود و اندازه تست استفاده می کند
+
             // testStart()
 
 
@@ -235,6 +260,14 @@ class MainActivity : AppCompatActivity() {
 
         }
         v = checkVerifyP()
+    }
+
+
+
+    private fun getUploadSpeed() {
+        val testFile = createTestFile() // ایجاد یک فایل تست
+        uploadTester.testUpload(testFile, this)
+
     }
 
     private fun getPingSpeed() {
@@ -609,14 +642,12 @@ class MainActivity : AppCompatActivity() {
         networkTester.setOnSpeedChangeListener(object : InternetSpeedTester.OnSpeedChangeListener {
             override fun onDownloadSpeedChanged(mbps: Double) {
                 runOnUiThread {
-                    tv_speed_download.text = String.format("%.2f", mbps)
+                    tv_speed_download.text = String.format("%.2f \n Mb/s", mbps)
                 }
             }
 
             override fun onUploadSpeedChanged(mbps: Double) {
-                runOnUiThread {
-                    tv_speed_upload.text = String.format("%.2f", mbps)
-                }
+
             }
 
             override fun onTestStarted() {
@@ -789,6 +820,36 @@ class MainActivity : AppCompatActivity() {
 
 
     }
+
+
+
+
+    //test Upload
+    ////////////////////////////////////////////////////////////////////
+    override fun onProgress(percent: Int) {
+        runOnUiThread {
+            tv_status_upload.visibility=View.GONE
+            pb_card.visibility=View.VISIBLE
+            pb_upload.progress = percent
+            tv_pb_upload.text = "$percent%"
+        }
+    }
+
+    override fun onSuccess(uploadSpeed: Double, timeTaken: Long) {
+        runOnUiThread {
+            pb_card.visibility=View.GONE
+            val speedText = "%.2f".format(uploadSpeed)
+            tv_speed_upload.text = "$speedText \n Mb/s"
+
+        }
+    }
+
+    override fun onFailure(error: String) {
+        runOnUiThread {
+            motoast.MoError(msg= " خطا: $error")
+        }
+    }
+    ///////////////////////////////////////////////////////////////////
 
 
 }

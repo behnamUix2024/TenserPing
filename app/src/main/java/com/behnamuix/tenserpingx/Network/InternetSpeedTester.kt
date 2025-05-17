@@ -15,11 +15,13 @@ import okhttp3.RequestBody
 import okio.BufferedSink
 import okio.IOException
 import java.io.InputStream
+import java.io.OutputStream
 import java.net.HttpURLConnection
 import java.net.InetAddress
 import java.net.URL
 import java.util.concurrent.ExecutorService
 import kotlin.math.pow
+import kotlin.math.roundToInt
 import kotlin.random.Random
 
 
@@ -54,9 +56,7 @@ class InternetSpeedTester(private val ctx: Context) {
 
         executorService.execute {
             testDownloadSpeed(downloadTestUrl, testDataSizeKb)
-            uploadTestUrl?.let { testUploadSpeed(it, testDataSizeKb) } ?: run {
-                mainHandler.post { onSpeedChangeListener?.onUploadSpeedChanged(0.0) } // اگر URL آپلود نیست، سرعت 0 گزارش شود
-            }
+
             mainHandler.post {
                 isTesting = false
                 onSpeedChangeListener?.onTestFinished()
@@ -103,6 +103,7 @@ class InternetSpeedTester(private val ctx: Context) {
                             val bytesPerSecond = totalBytesRead / timeTakenSeconds
                             val mbps = bytesPerSecond * 8.0 / (1024.0 * 1024.0)
                             mainHandler.post {
+
                                 onSpeedChangeListener?.onDownloadSpeedChanged(mbps)
                             }
                         } else {
@@ -126,15 +127,61 @@ class InternetSpeedTester(private val ctx: Context) {
             }
         }
     }
+    suspend fun testUploadSpeed(
+        uploadUrl: String = "https://eu.httpbin.org/post",
+        dataSizeKB: Int = 2048 // 1MB default test data
+    ): Double = withContext(Dispatchers.IO) {
+        var connection: HttpURLConnection? = null
+        var outputStream: OutputStream? = null
+        var inputStream: InputStream? = null
 
-    private fun testUploadSpeed(uploadUrl: String, dataSizeKb: Int) {
-        // توجه: برای تست آپلود به یک endpoint معتبر آپلود نیاز دارید.
-        // به دلیل عدم وجود یک endpoint تست آپلود عمومی و پایدار، این بخش به صورت پیش فرض 0 گزارش می کند.
-        // برای پیاده سازی واقعی، باید یک سرور با قابلیت دریافت آپلود تنظیم کنید.
-        mainHandler.post {
-            onSpeedChangeListener?.onUploadSpeedChanged(0.0)
+        try {
+            // Generate random test data
+            val testData = ByteArray(dataSizeKB * 1024) { (0..255).random().toByte() }
+
+            val url = URL(uploadUrl)
+            connection = url.openConnection() as HttpURLConnection
+            connection.apply {
+                requestMethod = "POST"
+                doOutput = true
+                connectTimeout = 15000
+                readTimeout = 30000
+                setRequestProperty("Content-Type", "application/octet-stream")
+                setRequestProperty("Connection", "close")
+            }
+
+            val startTime = System.currentTimeMillis()
+
+            // Start upload
+            outputStream = connection.outputStream
+            outputStream.write(testData)
+            outputStream.flush()
+
+            // Get response
+            val responseCode = connection.responseCode
+            if (responseCode == HttpURLConnection.HTTP_OK) {
+                inputStream = connection.inputStream
+                val response = inputStream.bufferedReader().use { it.readText() }
+                Log.d("UploadTest", "Server response: $response")
+            }
+
+            val endTime = System.currentTimeMillis()
+            val durationSeconds = (endTime - startTime) / 1000.0
+
+            // Calculate speed in Mbps (Megabits per second)
+            val speedMbps = (dataSizeKB * 8) / (durationSeconds * 1000)
+            speedMbps.roundToInt().toDouble() // Return rounded value
+
+        } catch (e: Exception) {
+            Log.e("UploadTest", "Error: ${e.localizedMessage}")
+            0.0 // Return 0 if failed
+        } finally {
+            outputStream?.close()
+            inputStream?.close()
+            connection?.disconnect()
         }
     }
+
 
 
 
