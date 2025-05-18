@@ -7,6 +7,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
+import android.content.res.Configuration
 import android.net.ConnectivityManager
 import android.os.Bundle
 import android.util.Log
@@ -28,6 +29,7 @@ import androidx.lifecycle.lifecycleScope
 import com.airbnb.lottie.LottieAnimationView
 import com.behnamuix.tenserping.Network.NetworkCheck
 import com.behnamuix.tenserpingx.Dialog.HistoryDialogFragment
+import com.behnamuix.tenserpingx.MyTools.ConverterX
 import com.behnamuix.tenserpingx.MyTools.MoToast
 import com.behnamuix.tenserpingx.MyTools.VpnChecker
 import com.behnamuix.tenserpingx.MyketRate.MyketRate
@@ -58,7 +60,7 @@ import java.util.Date
 import java.util.Locale
 import java.util.TimeZone
 
-class MainActivity : AppCompatActivity(),UploadTester.UploadCallback {
+class MainActivity : AppCompatActivity(), UploadTester.UploadCallback {
 
 
     private val URL_BG = "https://behnamuix2024.com/img/bg.png"
@@ -91,6 +93,7 @@ class MainActivity : AppCompatActivity(),UploadTester.UploadCallback {
     private lateinit var pb_upload: ProgressBar
     private lateinit var tv_pb_upload: TextView
     private lateinit var tv_status_upload: TextView
+    private lateinit var tv_status_download: TextView
     private lateinit var img_hist: ImageView
     private lateinit var tv_ip: TextView
     private lateinit var tv_type: TextView
@@ -110,6 +113,12 @@ class MainActivity : AppCompatActivity(),UploadTester.UploadCallback {
             }
         }
     }
+
+    override fun attachBaseContext(newBase: Context?) {
+        super.attachBaseContext(newBase?.let { setEnglishLocale(it) })
+
+    }
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -152,12 +161,13 @@ class MainActivity : AppCompatActivity(),UploadTester.UploadCallback {
         img_exit = binding.imgExit
         vpnCheck = VpnChecker(this)
         myketrate = MyketRate(this)
-        pb_card=binding.pbCard
-        tv_status_upload=binding.tvStatusUpload
+        pb_card = binding.pbCard
+        tv_status_upload = binding.tvStatusUpload
+        tv_status_download = binding.tvStatusDownload
         btn_export_pdf = binding.btnExportPdf
         motoast = MoToast(this)
-        pb_upload=binding.pbUpload
-        tv_pb_upload=binding.tvPbUplosd
+        pb_upload = binding.pbUpload
+        tv_pb_upload = binding.tvPbUplosd
         btn_save_hist = binding.btnSaveHist
         img_hist = binding.imgHist
         tv_type = binding.tvType
@@ -186,6 +196,7 @@ class MainActivity : AppCompatActivity(),UploadTester.UploadCallback {
         }
         return file
     }
+
     private fun testVpnState() {
         val vpn = vpnCheck.checkVpnState(this)
         if (vpn) {
@@ -240,14 +251,11 @@ class MainActivity : AppCompatActivity(),UploadTester.UploadCallback {
         }
         vw_start.setOnClickListener {
             ipDetect()
-            getUploadSpeed()
+            DtestSpeedConfig()
+            networkTester.startDownloadSpeedTest() // از مقادیر پیش فرض برای URL دانلود و اندازه تست استفاده می کند
             getPingSpeed()
             DATE = getDate()
-            DUtestSpeedConfig()
-            networkTester.startSpeedTest() // از مقادیر پیش فرض برای URL دانلود و اندازه تست استفاده می کند
-
-            // testStart()
-
+            getUploadSpeed()
 
         }
         btn_save_hist.setOnClickListener {
@@ -263,7 +271,6 @@ class MainActivity : AppCompatActivity(),UploadTester.UploadCallback {
     }
 
 
-
     private fun getUploadSpeed() {
         val testFile = createTestFile() // ایجاد یک فایل تست
         uploadTester.testUpload(testFile, this)
@@ -271,7 +278,7 @@ class MainActivity : AppCompatActivity(),UploadTester.UploadCallback {
     }
 
     private fun getPingSpeed() {
-       lifecycleScope.launch {
+        lifecycleScope.launch {
             tv_status_ping.text = resources.getString(R.string.ping_test_status)
             val pingResult = withContext(Dispatchers.IO) {
                 networkTester.getPingSpeed()
@@ -303,7 +310,7 @@ class MainActivity : AppCompatActivity(),UploadTester.UploadCallback {
 
         val navigationBarColor = ContextCompat.getColor(this, R.color.transparent)
         window.navigationBarColor = navigationBarColor
-        window.statusBarColor=statusBarColor
+        window.statusBarColor = statusBarColor
         windowInsetsController.isAppearanceLightNavigationBars = false
     }
 
@@ -638,11 +645,21 @@ class MainActivity : AppCompatActivity(),UploadTester.UploadCallback {
 
     }
 
-    fun DUtestSpeedConfig() {
+    fun DtestSpeedConfig() {
         networkTester.setOnSpeedChangeListener(object : InternetSpeedTester.OnSpeedChangeListener {
             override fun onDownloadSpeedChanged(mbps: Double) {
                 runOnUiThread {
-                    tv_speed_download.text = String.format("%.2f \n Mb/s", mbps)
+                    if(mbps>1){
+                        tv_speed_download.text = String.format("%.2f \n Mb/s", mbps)
+
+                    }else{
+                        var kbps=ConverterX.mbpsToKbpsConverter(mbps)
+                        tv_speed_download.text = "${kbps} \n Kb/s"
+
+                    }
+
+
+
                 }
             }
 
@@ -659,6 +676,7 @@ class MainActivity : AppCompatActivity(),UploadTester.UploadCallback {
 
             override fun onTestFinished() {
                 motoast.MoSuccess("تست سرعت دانلود کامل شد.")
+                tv_status_download.visibility = View.GONE
                 vw_start.isEnabled = true
             }
 
@@ -670,41 +688,6 @@ class MainActivity : AppCompatActivity(),UploadTester.UploadCallback {
             }
 
         })
-    }
-
-    private fun testStart() {
-        val url = "https://httpbin.org/" // آدرس سرور آپلود خود را اینجا قرار دهید
-        CoroutineScope(Dispatchers.Main).launch {
-            tv_speed_download.text = "..."
-            tv_speed_upload.text = "..."
-            val downloadSpeed = withContext(Dispatchers.IO) {
-                networkTester.getDownloadSpeed(url)
-            }
-
-            tv_speed_download.text = if (downloadSpeed != null) " ${
-                String.format(
-                    "%.2f", downloadSpeed
-                )
-            } " else getString(R.string.error)
-
-            Log.i("tenser", downloadSpeed.toString())
-            val uploadSpeed = withContext(Dispatchers.IO) {
-                networkTester.getUploadSpeed("https://httpbin.org/")
-            }
-            tv_speed_upload.text = if (uploadSpeed != null) " ${
-                String.format(
-                    "%.2f", uploadSpeed
-                )
-            } " else getString(R.string.error_message)
-            DOWN_SPEED = String.format(
-                "%.2f", downloadSpeed
-            )
-            UP_SPEED = String.format(
-                "%.2f", uploadSpeed
-            )
-        }
-
-
     }
 
 
@@ -821,15 +804,21 @@ class MainActivity : AppCompatActivity(),UploadTester.UploadCallback {
 
     }
 
-
+    private fun setEnglishLocale(context: Context): Context {
+        val locale = Locale("en", "US")
+        Locale.setDefault(locale)
+        val config = Configuration(context.resources.configuration)
+        config.setLocale(locale)
+        return context.createConfigurationContext(config)
+    }
 
 
     //test Upload
     ////////////////////////////////////////////////////////////////////
     override fun onProgress(percent: Int) {
         runOnUiThread {
-            tv_status_upload.visibility=View.GONE
-            pb_card.visibility=View.VISIBLE
+            tv_status_upload.visibility = View.GONE
+            pb_card.visibility = View.VISIBLE
             pb_upload.progress = percent
             tv_pb_upload.text = "$percent%"
         }
@@ -837,16 +826,25 @@ class MainActivity : AppCompatActivity(),UploadTester.UploadCallback {
 
     override fun onSuccess(uploadSpeed: Double, timeTaken: Long) {
         runOnUiThread {
-            pb_card.visibility=View.GONE
-            val speedText = "%.2f".format(uploadSpeed)
-            tv_speed_upload.text = "$speedText \n Mb/s"
+            pb_card.visibility = View.GONE
+            if (uploadSpeed > 1) {
+                val speedText = "%.2f".format(uploadSpeed)
+                tv_speed_upload.text = " $speedText \n Mb/s"
+
+
+            } else {
+                var vkbps = ConverterX.mbpsToKbpsConverter(uploadSpeed)
+                //val speedText = "".format(vkbps)
+                tv_speed_upload.text = " ${vkbps} \n Kb/s"
+
+            }
 
         }
     }
 
     override fun onFailure(error: String) {
         runOnUiThread {
-            motoast.MoError(msg= " خطا: $error")
+            motoast.MoError(msg = " خطا: $error")
         }
     }
     ///////////////////////////////////////////////////////////////////

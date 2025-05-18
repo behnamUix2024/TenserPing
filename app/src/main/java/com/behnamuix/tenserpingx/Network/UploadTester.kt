@@ -30,7 +30,7 @@ class UploadTester(private val context: Context) {
 
     fun testUpload(file: File, callback: UploadCallback) {
         if (!isNetworkAvailable()) {
-            callback.onFailure("No internet connection")
+            callback.onFailure("خطای دسترسی به شبکه اینترنت!")
             return
         }
 

@@ -42,7 +42,7 @@ class InternetSpeedTester(private val ctx: Context) {
         this.onSpeedChangeListener = listener
     }
 
-    fun startSpeedTest(
+    fun startDownloadSpeedTest(
         downloadTestUrl: String = "https://proof.ovh.net/files/10Mb.dat", // Endpoint تست دانلود معتبر
         uploadTestUrl: String? = null,
         testDataSizeKb: Int = 2048
@@ -217,70 +217,7 @@ class InternetSpeedTester(private val ctx: Context) {
      * اندازه‌گیری سرعت دانلود از یک URL مشخص و برگرداندن سرعت در مگابیت بر ثانیه (Mbps).
      * در صورت بروز خطا، null برمی‌گرداند.
      */
-    suspend fun getDownloadSpeed(url: String, fileSizeIInByte: Long = 10 * 1024 * 1024): Double? =
-        withContext(Dispatchers.IO) {
-            val req = Request.Builder().url(url).build()
-            val startTime = System.currentTimeMillis()
-            try {
-                client.newCall(req).execute().use { response ->
-                    if (!response.isSuccessful) {
-                        return@withContext null
-                    }
-                    val contentLength = response.body?.contentLength() ?: fileSizeIInByte
-                    val endTime = System.currentTimeMillis()
-                    val durationSeconds = (endTime - startTime) / 1000.0
-                    if (durationSeconds <= 0) {
-                        return@withContext null
-                    }
-                    val bytesPerSecond = contentLength / durationSeconds
-                    Log.d("DownloadTest", "StartTime: $startTime")
-                    Log.d("DownloadTest", "EndTime: $endTime")
-                    Log.d("DownloadTest", "ContentLength: $contentLength")
-                    Log.d("DownloadTest", "DurationSeconds: $durationSeconds")
-                    Log.d("DownloadTest", "BytesPerSecond: $bytesPerSecond")
-                    val downloadSpeedMbps = (bytesPerSecond * 8) / 1000.0.pow(2.0)
-                    Log.d("DownloadTest", "DownloadSpeedMbps (Calculated): $downloadSpeedMbps")
-                    return@withContext (bytesPerSecond * 8) / 1000.0.pow(2.0)
 
-                }
-            } catch (e: IOException) {
-                e.printStackTrace()
-                return@withContext null
-            }
-        }
-    suspend fun getUploadSpeed(
-        uploadUrl: String,
-        fileSizeInBytes: Long = 10 * 1024 * 1024
-    ): Double? = withContext(Dispatchers.IO) {
-        val randomBytes = ByteArray(fileSizeInBytes.toInt())
-        Random.nextBytes(randomBytes)
-        val reqBody = object : RequestBody() {
-            override fun contentType() = "application/octet-stream".toMediaTypeOrNull()
-            override fun contentLength() = fileSizeInBytes
-            override fun writeTo(sink: BufferedSink) {
-                sink.write(randomBytes)
-            }
-        }
-        val req = Request.Builder().url(uploadUrl).post(reqBody).build()
-        val startTime = System.currentTimeMillis()
-        try {
-            client.newCall(req).execute().use { res ->
-                if (!res.isSuccessful) {
-                    return@withContext null
-                }
-                val endTime = System.currentTimeMillis()
-                val durationSecond = (endTime - startTime) / 1000.0
-                if (durationSecond <= 0) {
-                    return@withContext null
-                }
-                val bytesPerSec = fileSizeInBytes / durationSecond
-                return@withContext (bytesPerSec * 8) / 1000.0.pow(2.0)
-            }
-        } catch (e: IOException) {
-            e.printStackTrace()
-            return@withContext null
-        }
-    }
 
 
 
