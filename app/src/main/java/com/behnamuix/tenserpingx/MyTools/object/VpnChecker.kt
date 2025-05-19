@@ -1,10 +1,10 @@
-package com.behnamuix.tenserpingx.MyTools
+package com.behnamuix.tenserpingx.MyTools.`object`
 
 import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 
-class VpnChecker(ctx:Context) {
+object VpnChecker {
      fun checkVpnState(ctx: Context): Boolean {
         val cm=ctx.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
         val net=cm.activeNetwork?:return false

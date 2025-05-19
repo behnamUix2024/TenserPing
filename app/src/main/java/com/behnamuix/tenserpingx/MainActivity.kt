@@ -6,6 +6,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.content.pm.ActivityInfo
 import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.net.ConnectivityManager
@@ -29,9 +30,9 @@ import androidx.lifecycle.lifecycleScope
 import com.airbnb.lottie.LottieAnimationView
 import com.behnamuix.tenserping.Network.NetworkCheck
 import com.behnamuix.tenserpingx.Dialog.HistoryDialogFragment
-import com.behnamuix.tenserpingx.MyTools.ConverterX
+import com.behnamuix.tenserpingx.MyTools.`object`.ConverterX
 import com.behnamuix.tenserpingx.MyTools.MoToast
-import com.behnamuix.tenserpingx.MyTools.VpnChecker
+import com.behnamuix.tenserpingx.MyTools.`object`.VpnChecker
 import com.behnamuix.tenserpingx.MyketRate.MyketRate
 import com.behnamuix.tenserpingx.Network.InternetSpeedTester
 import com.behnamuix.tenserpingx.Network.IpAddress.getIpAddress
@@ -45,7 +46,6 @@ import com.google.android.material.button.MaterialButton
 import com.squareup.picasso.Picasso
 import ir.myket.billingclient.util.Purchase
 import ir.myket.billingclient.util.Security
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -69,12 +69,12 @@ class MainActivity : AppCompatActivity(), UploadTester.UploadCallback {
     val SKU_PREMIUM: String = "hist_chart_prem"
     val RC_REQUEST: Int = 10001
     lateinit var mHelper: IabHelper
+    private var v: Boolean = false
+
 
     private var isDialogShowing = false
-    private var v: Boolean = false
     private lateinit var myketrate: MyketRate
     private lateinit var motoast: MoToast
-    private lateinit var vpnCheck: VpnChecker
     private var MAC = ""
     private var DATE = ""
     private var IP = ""
@@ -95,6 +95,7 @@ class MainActivity : AppCompatActivity(), UploadTester.UploadCallback {
     private lateinit var tv_status_upload: TextView
     private lateinit var tv_status_download: TextView
     private lateinit var img_hist: ImageView
+    private lateinit var img_rotate_phone: ImageView
     private lateinit var tv_ip: TextView
     private lateinit var tv_type: TextView
     private lateinit var tv_speed_upload: TextView
@@ -159,8 +160,8 @@ class MainActivity : AppCompatActivity(), UploadTester.UploadCallback {
         MAC = getAndroidId(this)
         registerReceiver(networkReceiver, IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION))
         img_exit = binding.imgExit
-        vpnCheck = VpnChecker(this)
         myketrate = MyketRate(this)
+        img_rotate_phone= binding.imgRotatePhone!!
         pb_card = binding.pbCard
         tv_status_upload = binding.tvStatusUpload
         tv_status_download = binding.tvStatusDownload
@@ -198,7 +199,7 @@ class MainActivity : AppCompatActivity(), UploadTester.UploadCallback {
     }
 
     private fun testVpnState() {
-        val vpn = vpnCheck.checkVpnState(this)
+        val vpn = VpnChecker.checkVpnState(this)
         if (vpn) {
             motoast.MoWarning("روشن بودن فیلترشکن باعث اختلال در عملکرد اپلیکیشن میشود!")
         } else {
@@ -207,6 +208,10 @@ class MainActivity : AppCompatActivity(), UploadTester.UploadCallback {
     }
 
     private fun onclickHandler() {
+        v = checkVerifyP()
+        img_rotate_phone.setOnClickListener(){
+            rotatePhone()
+        }
         img_exit.setOnClickListener() {
             finish()
         }
@@ -267,7 +272,19 @@ class MainActivity : AppCompatActivity(), UploadTester.UploadCallback {
             }
 
         }
-        v = checkVerifyP()
+
+
+    }
+
+    private fun rotatePhone() {
+        if(resources.configuration.orientation==Configuration.ORIENTATION_PORTRAIT){
+            requestedOrientation=ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+        }else{
+            requestedOrientation=ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+
+        }
+        overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
+
     }
 
 
@@ -354,13 +371,14 @@ class MainActivity : AppCompatActivity(), UploadTester.UploadCallback {
 
     }
 
+
     private fun payConfig() {
         motoast.MoWarning(
             title = "مایکت",
             msg = "در حال ارتباط با سرور های مایکت هستیم اندکی صبر کنید"
         )
         mHelper = IabHelper(this, BuildConfig.IAB_PUBLIC_KEY)
-        mHelper.enableDebugLogging(false)
+        mHelper.enableDebugLogging(true)
         if (mHelper != null) {
             mHelper.startSetup { result ->
                 if (result != null) {
@@ -649,15 +667,14 @@ class MainActivity : AppCompatActivity(), UploadTester.UploadCallback {
         networkTester.setOnSpeedChangeListener(object : InternetSpeedTester.OnSpeedChangeListener {
             override fun onDownloadSpeedChanged(mbps: Double) {
                 runOnUiThread {
-                    if(mbps>1){
+                    if (mbps > 1) {
                         tv_speed_download.text = String.format("%.2f \n Mb/s", mbps)
 
-                    }else{
-                        var kbps=ConverterX.mbpsToKbpsConverter(mbps)
+                    } else {
+                        var kbps = ConverterX.mbpsToKbpsConverter(mbps)
                         tv_speed_download.text = "${kbps} \n Kb/s"
 
                     }
-
 
 
                 }
@@ -758,7 +775,11 @@ class MainActivity : AppCompatActivity(), UploadTester.UploadCallback {
 
     override fun onDestroy() {
         super.onDestroy()
-        mHelper.dispose()
+        // قبل از استفاده، چک کنید آیا mHelper مقداردهی شده یا نه
+        if (::mHelper.isInitialized) {
+            mHelper.dispose()
+        }
+
         networkTester.stopSpeedTest()
 
     }

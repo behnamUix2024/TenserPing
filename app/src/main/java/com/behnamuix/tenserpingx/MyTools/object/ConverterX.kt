@@ -1,4 +1,4 @@
-package com.behnamuix.tenserpingx.MyTools
+package com.behnamuix.tenserpingx.MyTools.`object`
 
 object ConverterX {
     fun mbpsToKbpsConverter(vMbps: Double): Int {
