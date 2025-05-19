@@ -29,6 +29,7 @@ import androidx.core.view.WindowCompat
 import androidx.lifecycle.lifecycleScope
 import com.airbnb.lottie.LottieAnimationView
 import com.behnamuix.tenserping.Network.NetworkCheck
+import com.behnamuix.tenserpingx.AndroidWraper.DeviceInfo
 import com.behnamuix.tenserpingx.Dialog.HistoryDialogFragment
 import com.behnamuix.tenserpingx.MyTools.`object`.ConverterX
 import com.behnamuix.tenserpingx.MyTools.MoToast
@@ -157,11 +158,11 @@ class MainActivity : AppCompatActivity(), UploadTester.UploadCallback {
     }
 
     private fun config() {
-        MAC = getAndroidId(this)
+        MAC = DeviceInfo.getAndroidId(this)
         registerReceiver(networkReceiver, IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION))
         img_exit = binding.imgExit
         myketrate = MyketRate(this)
-        img_rotate_phone= binding.imgRotatePhone!!
+        img_rotate_phone = binding.imgRotatePhone!!
         pb_card = binding.pbCard
         tv_status_upload = binding.tvStatusUpload
         tv_status_download = binding.tvStatusDownload
@@ -209,7 +210,7 @@ class MainActivity : AppCompatActivity(), UploadTester.UploadCallback {
 
     private fun onclickHandler() {
         v = checkVerifyP()
-        img_rotate_phone.setOnClickListener(){
+        img_rotate_phone.setOnClickListener() {
             rotatePhone()
         }
         img_exit.setOnClickListener() {
@@ -277,10 +278,10 @@ class MainActivity : AppCompatActivity(), UploadTester.UploadCallback {
     }
 
     private fun rotatePhone() {
-        if(resources.configuration.orientation==Configuration.ORIENTATION_PORTRAIT){
-            requestedOrientation=ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
-        }else{
-            requestedOrientation=ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+        if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
+            requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+        } else {
+            requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
 
         }
         overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
@@ -344,7 +345,7 @@ class MainActivity : AppCompatActivity(), UploadTester.UploadCallback {
 
 
     private fun checkVerifyP(): Boolean {
-        MAC = getAndroidId(applicationContext)
+        MAC = DeviceInfo.getAndroidId(applicationContext)
         val call = RetrofitClient.apiService.checkVerify(MAC)
         call.enqueue(object : Callback<ApiResponseCheckVerifyJson> {
             override fun onResponse(
@@ -493,7 +494,7 @@ class MainActivity : AppCompatActivity(), UploadTester.UploadCallback {
 
     private fun developerPayload(purchase: Purchase): Boolean {
         return try {
-            val mac = getAndroidId(this)
+            val mac = DeviceInfo.getAndroidId(this)
             val sig = purchase.signature
             val date = purchase.originalJson
             val time = formatPurchaseTime(purchase.purchaseTime)
@@ -506,6 +507,41 @@ class MainActivity : AppCompatActivity(), UploadTester.UploadCallback {
         } catch (e: Exception) {
             false
         }
+    }
+
+    private fun insertToHistDb(
+        mac: String,
+        date: String,
+        ip: String,
+        netType: String,
+        pingSpeed: String
+    ) {
+
+        val call = RetrofitClient.apiService.sendHist(
+            mac,
+            date, netType, ip, pingSpeed
+        )
+        call.enqueue(object : Callback<ApiResponse> {
+            override fun onResponse(call: Call<ApiResponse>, response: Response<ApiResponse>) {
+                if (response.isSuccessful) {
+                    motoast.MoSuccess(msg = getString(R.string.history_saved_success))
+
+                } else {
+                    motoast.MoError(msg = getString(R.string.data_fetch_error))
+
+
+                }
+            }
+
+            override fun onFailure(call: Call<ApiResponse>, t: Throwable) {
+                motoast.MoError(msg = getString(R.string.data_fetch_error))
+
+
+            }
+
+        })
+
+
     }
 
     private fun formatPurchaseTime(purchaseTime: Long): String {
@@ -546,10 +582,9 @@ class MainActivity : AppCompatActivity(), UploadTester.UploadCallback {
 
     }
 
-
     private fun getHistData() {
         DATE = getDate()
-        MAC = getAndroidId(applicationContext)
+        MAC = DeviceInfo.getAndroidId(applicationContext)
         val builder1 = AlertDialog.Builder(this, R.style.cardAlertDialog)
         builder1.setMessage(getString(R.string.save_history_prompt))
         builder1.setCancelable(true)
@@ -567,57 +602,6 @@ class MainActivity : AppCompatActivity(), UploadTester.UploadCallback {
 
     }
 
-    /**
-     * دریافت Android ID دستگاه
-     * (منحصر به فرد برای هر دستگاه + اپلیکیشن)
-     */
-    @SuppressLint("HardwareIds")
-    private fun getAndroidId(context: Context): String {
-        return try {
-            android.provider.Settings.Secure.getString(
-                context.contentResolver,
-                android.provider.Settings.Secure.ANDROID_ID
-            ) ?: "unknown"
-        } catch (e: Exception) {
-            Log.e("DeviceUtils", "Error getting Android ID", e)
-            "unknown"
-        }
-    }
-
-    private fun insertToHistDb(
-        mac: String,
-        date: String,
-        ip: String,
-        netType: String,
-        pingSpeed: String
-    ) {
-
-        val call = RetrofitClient.apiService.sendHist(
-            mac,
-            date, netType, ip, pingSpeed
-        )
-        call.enqueue(object : Callback<ApiResponse> {
-            override fun onResponse(call: Call<ApiResponse>, response: Response<ApiResponse>) {
-                if (response.isSuccessful) {
-                    motoast.MoSuccess(msg = getString(R.string.history_saved_success))
-
-                } else {
-                    motoast.MoError(msg = getString(R.string.data_fetch_error))
-
-
-                }
-            }
-
-            override fun onFailure(call: Call<ApiResponse>, t: Throwable) {
-                motoast.MoError(msg = getString(R.string.data_fetch_error))
-
-
-            }
-
-        })
-
-
-    }
 
     private fun getDate(): String {
         val dte = Calendar.getInstance(TimeZone.getTimeZone("Asia/Tehran")).time
