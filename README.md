@@ -1,12 +1,12 @@
 <h1> اپلیکیشن تنسر پینگ  </h1>
 <h3>1.1.1 v(alpha)</h3>
 <p>🔧(در حال توسعه ...)</p>
-<p>وضعیت پروژه تا به 1404/02/19:</p>
+<p>وضعیت پروژه تا به 1404/02/30:</p>
 <ul>
   <li>✅Design Ui/Ux(Phase 1)</li>
   <li>✅Developing(Phase 2)</li>
-  <li>⬛⬜️⬛A/B testing(Phase 3)</li>
-  <li>❌Export And Share(Phase 4)</li>
+  <li>✅A/B testing(Phase 3)</li>
+  <li>⬛⬜️⬛Export And Share(Phase 4)</li>
 </ul>
 <img src="http://www.behnamuix2024.com/img/git/maintenance.gif" width="20%" height="20%"  />
 
