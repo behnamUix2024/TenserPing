@@ -29,6 +29,7 @@ import androidx.lifecycle.lifecycleScope
 import com.airbnb.lottie.LottieAnimationView
 import com.behnamuix.tenserping.Network.NetworkCheck
 import com.behnamuix.tenserpingx.AndroidWraper.DeviceInfo
+import com.behnamuix.tenserpingx.Dialog.BuildConfigs
 import com.behnamuix.tenserpingx.Dialog.HistoryDialogFragment
 import com.behnamuix.tenserpingx.MyTools.Object.ConverterX
 import com.behnamuix.tenserpingx.MyTools.MoToast
@@ -377,7 +378,7 @@ class MainActivity : AppCompatActivity(), UploadTester.UploadCallback {
             title = "مایکت",
             msg = "در حال ارتباط با سرور های مایکت هستیم اندکی صبر کنید"
         )
-        mHelper = IabHelper(this, BuildConfig.IAB_PUBLIC_KEY)
+        mHelper = IabHelper(this, BuildConfigs.getIAB())
         mHelper.enableDebugLogging(true)
         if (mHelper != null) {
             mHelper.startSetup { result ->
@@ -502,7 +503,7 @@ class MainActivity : AppCompatActivity(), UploadTester.UploadCallback {
             //***verfiy purchase
             val verify = "1"
             insertAndVerifyPay(mac, time.toString(), sku, token, sig, verify)
-            Security.verifyPurchase(BuildConfig.IAB_PUBLIC_KEY, date, sig)
+            Security.verifyPurchase(BuildConfigs.getIAB(), date, sig)
         } catch (e: Exception) {
             false
         }
@@ -741,6 +742,7 @@ class MainActivity : AppCompatActivity(), UploadTester.UploadCallback {
     }
 
 
+    @Deprecated("This method has been deprecated in favor of using the Activity Result API\n      which brings increased type safety via an {@link ActivityResultContract} and the prebuilt\n      contracts for common intents available in\n      {@link androidx.activity.result.contract.ActivityResultContracts}, provides hooks for\n      testing, and allow receiving results in separate, testable classes independent from your\n      activity. Use\n      {@link #registerForActivityResult(ActivityResultContract, ActivityResultCallback)}\n      with the appropriate {@link ActivityResultContract} and handling the result in the\n      {@link ActivityResultCallback#onActivityResult(Object) callback}.")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         Log.d("TAG", "onActivityResult($requestCode,$resultCode,$data")
 
