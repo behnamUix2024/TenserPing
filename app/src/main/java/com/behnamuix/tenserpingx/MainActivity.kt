@@ -27,10 +27,10 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.lifecycleScope
 import com.airbnb.lottie.LottieAnimationView
-import com.behnamuix.tenserping.Network.NetworkCheck
+import com.behnamuix.tenserpingx.Network.NetworkCheck
 import com.behnamuix.tenserpingx.AndroidWraper.DeviceInfo
-import com.behnamuix.tenserpingx.Dialog.BuildConfigs
 import com.behnamuix.tenserpingx.Dialog.HistoryDialogFragment
+import com.behnamuix.tenserpingx.Dialog.NoInternetDialogFragment
 import com.behnamuix.tenserpingx.MyTools.Object.ConverterX
 import com.behnamuix.tenserpingx.MyTools.MoToast
 import com.behnamuix.tenserpingx.MyTools.Object.VpnChecker
@@ -378,7 +378,7 @@ class MainActivity : AppCompatActivity(), UploadTester.UploadCallback {
             title = "مایکت",
             msg = "در حال ارتباط با سرور های مایکت هستیم اندکی صبر کنید"
         )
-        mHelper = IabHelper(this, BuildConfigs.getIAB())
+        mHelper = IabHelper(this, BuildConfig.IAB_PUBLIC_KEY)
         mHelper.enableDebugLogging(true)
         if (mHelper != null) {
             mHelper.startSetup { result ->
@@ -503,7 +503,7 @@ class MainActivity : AppCompatActivity(), UploadTester.UploadCallback {
             //***verfiy purchase
             val verify = "1"
             insertAndVerifyPay(mac, time.toString(), sku, token, sig, verify)
-            Security.verifyPurchase(BuildConfigs.getIAB(), date, sig)
+            Security.verifyPurchase(BuildConfig.IAB_PUBLIC_KEY, date, sig)
         } catch (e: Exception) {
             false
         }

@@ -11,8 +11,9 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
-import com.behnamuix.tenserping.Network.NetworkCheck
+
 import com.behnamuix.tenserpingx.MyTools.MoToast
+import com.behnamuix.tenserpingx.Network.NetworkCheck
 
 class SplashActivity : AppCompatActivity() {
     private var netCheck: Boolean = false

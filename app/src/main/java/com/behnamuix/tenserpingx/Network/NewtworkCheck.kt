@@ -1,4 +1,4 @@
-package com.behnamuix.tenserping.Network
+package com.behnamuix.tenserpingx.Network
 
 import android.content.Context
 import android.net.ConnectivityManager

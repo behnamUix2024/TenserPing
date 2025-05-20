@@ -1,4 +1,4 @@
-package com.behnamuix.tenserpingx
+package com.behnamuix.tenserpingx.Dialog
 
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
@@ -8,6 +8,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.DialogFragment
+import com.behnamuix.tenserpingx.R
 import com.google.android.material.button.MaterialButton
 
 class NoInternetDialogFragment:DialogFragment() {
