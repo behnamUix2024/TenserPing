@@ -1,7 +1,11 @@
 package com.behnamuix.tenserpingx.Network
+
 import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
+import android.util.Log
+import android.widget.Toast
+import com.behnamuix.tenserpingx.MyTools.Object.GetServer
 import okhttp3.*
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.RequestBody.Companion.asRequestBody
@@ -49,14 +53,15 @@ class UploadTester(private val context: Context) {
         }
 
 
-
-
-
+        val server = GetServer.getRandomServer(
+            "https://tmpfiles.org/api/v1/upload",
+            "https://eu.httpbin.org/post"
+        )
         val request = Request.Builder()
-            .url("https://eu.httpbin.org/post") // یا هر اندپوینت دیگری
+            .url(server)
             .post(progressRequestBody)
             .build()
-
+       Log.i("server", "server in use :$server")
         val startTime = System.nanoTime()
 
         client.newCall(request).enqueue(object : Callback {
@@ -82,7 +87,8 @@ class UploadTester(private val context: Context) {
     }
 
     private fun isNetworkAvailable(): Boolean {
-        val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val connectivityManager =
+            context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
         val network = connectivityManager.activeNetwork ?: return false
         val capabilities = connectivityManager.getNetworkCapabilities(network) ?: return false
         return capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) ||

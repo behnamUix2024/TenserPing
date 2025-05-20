@@ -1,4 +1,4 @@
-package com.behnamuix.tenserpingx.MyTools.`object`
+package com.behnamuix.tenserpingx.MyTools.Object
 
 import android.content.Context
 import android.net.ConnectivityManager

@@ -1,7 +1,6 @@
 package com.behnamuix.tenserpingx
 
 import android.Manifest
-import android.annotation.SuppressLint
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -31,9 +30,9 @@ import com.airbnb.lottie.LottieAnimationView
 import com.behnamuix.tenserping.Network.NetworkCheck
 import com.behnamuix.tenserpingx.AndroidWraper.DeviceInfo
 import com.behnamuix.tenserpingx.Dialog.HistoryDialogFragment
-import com.behnamuix.tenserpingx.MyTools.`object`.ConverterX
+import com.behnamuix.tenserpingx.MyTools.Object.ConverterX
 import com.behnamuix.tenserpingx.MyTools.MoToast
-import com.behnamuix.tenserpingx.MyTools.`object`.VpnChecker
+import com.behnamuix.tenserpingx.MyTools.Object.VpnChecker
 import com.behnamuix.tenserpingx.MyketRate.MyketRate
 import com.behnamuix.tenserpingx.Network.InternetSpeedTester
 import com.behnamuix.tenserpingx.Network.IpAddress.getIpAddress
@@ -834,14 +833,14 @@ class MainActivity : AppCompatActivity(), UploadTester.UploadCallback {
             pb_card.visibility = View.GONE
             if (uploadSpeed > 1) {
                 val speedText = "%.2f".format(uploadSpeed)
-                tv_speed_upload.text = " $speedText \n Mb/s"
-
+                tv_speed_upload.text = "$speedText\nMb/s"
 
             } else {
-                var vkbps = ConverterX.mbpsToKbpsConverter(uploadSpeed)
-                //val speedText = "".format(vkbps)
-                tv_speed_upload.text = " ${vkbps} \n Kb/s"
-
+                val kbpsValue = ConverterX.mbpsToKbpsConverter(uploadSpeed)
+                // Ensure kbpsValue is a floating-point type before formatting
+                val speedText = "%.2f".format(kbpsValue.toFloat()) // Convert to Float
+                // OR: val speedText = "%.2f".format(kbpsValue.toDouble()) // Convert to Double
+                tv_speed_upload.text = "$speedText\nKb/s"
             }
 
         }
