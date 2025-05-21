@@ -11,7 +11,7 @@
 <img src="http://www.behnamuix2024.com/img/git/maintenance.gif" width="20%" height="20%"  />
 
 <p>خیلی راحت از وضعیت اینترتت باخبر شو و ببین سرعت  آپلود و دانلودت چنده پینگت بگیر به همراه تاریخچه ونمودار</p>
-<h3>Developing & Design : BehnamUix</h3>
+<h3>Developing & Design : ArcaDroid</h3>
 <hr>
 <p> :اسکرین شات ها 📷</p>
 <table>
