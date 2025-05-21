@@ -58,8 +58,12 @@
 
 # --- Third-party Libraries ---
 
-# Picasso (used for image loading, specifically `Picasso.get().load(urlBg).into(binding.bg)`)
-# Picasso uses reflection heavily, so these rules are vital.
+-keep class okhttp3.** { *; }
+-keep interface okhttp3.** { *; }
+-dontwarn okhttp3.**
+-keepclasseswithmembers class * {
+    @retrofit2.http.* <methods>;
+}
 -dontwarn com.squareup.picasso.**
 -keep class com.squareup.picasso.** { *; }
 -keep interface com.squareup.picasso.** { *; }

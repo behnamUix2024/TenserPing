@@ -5,15 +5,12 @@ import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.util.Log
 import android.widget.Toast
-import com.behnamuix.tenserpingx.MyTools.Object.GetServer
+import com.behnamuix.tenserpingx.MyTools.MoToast
 import okhttp3.*
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.RequestBody.Companion.asRequestBody
-import okio.Buffer
-import okio.BufferedSink
-import okio.ForwardingSink
-import okio.Sink
-import okio.buffer
+import okhttp3.logging.HttpLoggingInterceptor
+import okio.*
 import java.io.File
 import java.io.IOException
 import java.util.concurrent.TimeUnit
@@ -24,11 +21,15 @@ class UploadTester(private val context: Context) {
         .connectTimeout(30, TimeUnit.SECONDS)
         .readTimeout(30, TimeUnit.SECONDS)
         .writeTimeout(30, TimeUnit.SECONDS)
+        .addInterceptor(HttpLoggingInterceptor().apply {
+            level = HttpLoggingInterceptor.Level.BASIC
+
+        })
         .build()
 
     interface UploadCallback {
         fun onProgress(percent: Int)
-        fun onSuccess(uploadSpeed: Double, timeTaken: Long)
+        fun onSuccess(uploadSpeedMbps: Double, timeTakenMs: Long)
         fun onFailure(error: String)
     }
 
@@ -38,50 +39,75 @@ class UploadTester(private val context: Context) {
             return
         }
 
+        if (!file.exists() || file.length() == 0L) {
+            callback.onFailure("فایل تست نامعتبر است")
+            return
+        }
+
         val requestBody = MultipartBody.Builder()
             .setType(MultipartBody.FORM)
             .addFormDataPart(
                 "file",
                 file.name,
-                file.asRequestBody("application/octet-stream".toMediaType())
+                ProgressRequestBody(
+                    file.asRequestBody("application/octet-stream".toMediaType())
+                ) { bytesWritten, totalBytes ->
+                    val percent = (bytesWritten * 100 / totalBytes).toInt()
+                    callback.onProgress(percent)
+                }
             )
             .build()
 
-        val progressRequestBody = ProgressRequestBody(requestBody) { bytesWritten, totalBytes ->
-            val percent = (bytesWritten * 100 / totalBytes).toInt()
-            callback.onProgress(percent)
-        }
-
-
-        val server = GetServer.getRandomServer(
-            "https://tmpfiles.org/api/v1/upload",
-            "https://eu.httpbin.org/post"
+        val servers = listOf(
+            "https://httpbin.org/post",
+            "https://postman-echo.com/post"
         )
+
+        val server = servers.random()
+        Log.d("UploadTester", "Selected server: $server")
+        //Toast.makeText(context,"سرور انتخابی:$server",Toast.LENGTH_SHORT).show()
+
         val request = Request.Builder()
             .url(server)
-            .post(progressRequestBody)
+            .post(requestBody)
             .build()
-       Log.i("server", "server in use :$server")
+
         val startTime = System.nanoTime()
 
         client.newCall(request).enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
-                callback.onFailure(e.message ?: "Unknown error")
+                Log.e("UploadTester", "Upload failed", e)
+                callback.onFailure("خطا در اتصال: ${e.message ?: "Unknown error"}")
             }
 
             override fun onResponse(call: Call, response: Response) {
-                if (!response.isSuccessful) {
-                    callback.onFailure("Server error: ${response.code}")
-                    return
+                try {
+                    if (!response.isSuccessful) {
+                        val errorBody = response.body?.string() ?: ""
+                        Log.e("UploadTester", "Server error: ${response.code} - $errorBody")
+                        callback.onFailure("خطای سرور: ${response.code}")
+                        return
+                    }
+
+                    val endTime = System.nanoTime()
+                    val timeTakenNanos = endTime - startTime
+                    val timeTakenMs = TimeUnit.NANOSECONDS.toMillis(timeTakenNanos)
+
+                    // محاسبه سرعت بر حسب مگابیت بر ثانیه (Mbps)
+                    val fileSizeBits = file.length() * 8
+                    val uploadSpeedMbps = (fileSizeBits / (timeTakenNanos / 1e9)) / 1e6
+
+                    Log.d("UploadTester",
+                        "Upload completed. Size: ${file.length() / (1024*1024)} MB, " +
+                                "Time: ${timeTakenMs}ms, Speed: %.2f Mbps".format(uploadSpeedMbps))
+
+                    callback.onSuccess(uploadSpeedMbps, timeTakenMs)
+                } catch (e: Exception) {
+                    Log.e("UploadTester", "Error processing response", e)
+                    callback.onFailure("خطا در پردازش پاسخ سرور")
+                } finally {
+                    response.close()
                 }
-
-                val endTime = System.nanoTime()
-                val timeTaken = TimeUnit.NANOSECONDS.toMillis(endTime - startTime)
-                val fileSizeInMB = file.length().toDouble() / (1024 * 1024)
-                val timeTakenInSeconds = timeTaken.toDouble() / 1000
-                val uploadSpeed = fileSizeInMB / timeTakenInSeconds // MB/s
-
-                callback.onSuccess(uploadSpeed, timeTaken)
             }
         })
     }

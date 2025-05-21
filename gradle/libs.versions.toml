@@ -15,9 +15,11 @@ motiontoast = "1.4"
 mpandroidchart = "v3.1.0"
 myketBillingClient = "1.6"
 okhttp = "4.12.0"
+picasso = "2.71828"
 playServicesLocation = "21.3.0"
 retrofit = "2.9.0"
 simplypdf = "2.0.0"
+speedtestAndroid = "1.0.0"
 swiperefreshlayout = "1.1.0"
 firebaseFirestoreKtx = "25.1.4"
 
@@ -37,11 +39,13 @@ motiontoast = { module = "com.github.Spikeysanju:MotionToast", version.ref = "mo
 mpandroidchart = { module = "com.github.PhilJay:MPAndroidChart", version.ref = "mpandroidchart" }
 myket-billing-client = { module = "com.github.myketstore:myket-billing-client", version.ref = "myketBillingClient" }
 okhttp = { module = "com.squareup.okhttp3:okhttp", version.ref = "okhttp" }
+picasso = { module = "com.squareup.picasso:picasso", version.ref = "picasso" }
 play-services-location = { group = "com.google.android.gms", name = "play-services-location", version.ref = "playServicesLocation" }
 retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }
 androidx-swiperefreshlayout = { group = "androidx.swiperefreshlayout", name = "swiperefreshlayout", version.ref = "swiperefreshlayout" }
 simplypdf = { module = "com.github.wwdablu:SimplyPDF", version.ref = "simplypdf" }
 firebase-firestore-ktx = { group = "com.google.firebase", name = "firebase-firestore-ktx", version.ref = "firebaseFirestoreKtx" }
+speedtest-android = { module = "com.ookla:speedtest-android", version.ref = "speedtestAndroid" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

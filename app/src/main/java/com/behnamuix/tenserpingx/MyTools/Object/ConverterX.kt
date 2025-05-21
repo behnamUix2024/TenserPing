@@ -1,12 +1,12 @@
 package com.behnamuix.tenserpingx.MyTools.Object
 
 object ConverterX {
-    fun mbpsToKbpsConverter(vMbps: Double): Int {
+    fun mbpsToKBpsConverter(vMbps: Double): Double {
         if (vMbps == 0.0) {
-            return 0
+            return 0.0
         }
-        val vKbps = vMbps * 1000
-        return vKbps.toInt()
+        val vKBps = vMbps * 1000
+        return vKBps
     }
 
 }

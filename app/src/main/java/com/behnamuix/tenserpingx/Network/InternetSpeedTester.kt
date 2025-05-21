@@ -45,10 +45,10 @@ class InternetSpeedTester(private val ctx: Context) {
     fun startDownloadSpeedTest(
         downloadTestUrl: String = "https://proof.ovh.net/files/10Mb.dat", // Endpoint تست دانلود معتبر
         uploadTestUrl: String? = null,
-        testDataSizeKb: Int = 2048
+        testDataSizeKb: Int = 3072
     ) {
         if (isTesting) {
-            onSpeedChangeListener?.onError("Speed test is already running.")
+            onSpeedChangeListener?.onError("عملیات تست در حال اجرا میباشد!")
             return
         }
         isTesting = true

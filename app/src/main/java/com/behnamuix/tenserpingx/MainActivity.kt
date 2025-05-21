@@ -144,9 +144,7 @@ class MainActivity : AppCompatActivity(), UploadTester.UploadCallback {
     }
 
     private fun loadBackground(urlBg: String) {
-        Picasso.get()
-            .load(urlBg)
-            .into(binding.bg)
+        Picasso.get().load(urlBg).into(binding.bg)
 
     }
 
@@ -192,8 +190,8 @@ class MainActivity : AppCompatActivity(), UploadTester.UploadCallback {
     private fun createTestFile(): File {
         val file = File(cacheDir, "test_upload.bin")
         if (!file.exists()) {
-            // ایجاد یک فایل 1MB برای تست
-            val data = ByteArray(1024 * 1024) { 1 }
+            // ایجاد یک فایل 5MB برای تست
+            val data = ByteArray(1024 * 1024) { 4 }
             file.writeBytes(data)
         }
         return file
@@ -256,12 +254,16 @@ class MainActivity : AppCompatActivity(), UploadTester.UploadCallback {
             dialog.show()
         }
         vw_start.setOnClickListener {
+            tv_speed_download.text = "--,--"
+            tv_speed_upload.text = "--,--"
+
             ipDetect()
+            getUploadSpeed()
             DtestSpeedConfig()
             networkTester.startDownloadSpeedTest() // از مقادیر پیش فرض برای URL دانلود و اندازه تست استفاده می کند
             getPingSpeed()
             DATE = getDate()
-            getUploadSpeed()
+
 
         }
         btn_save_hist.setOnClickListener {
@@ -338,8 +340,7 @@ class MainActivity : AppCompatActivity(), UploadTester.UploadCallback {
     }
 
     fun setFirstLaunchStatus(isFirstLaunch: Boolean) {
-        sharedPreferences.edit()
-            .putBoolean(KEY_FIRST_LAUNCH, isFirstLaunch)
+        sharedPreferences.edit().putBoolean(KEY_FIRST_LAUNCH, isFirstLaunch)
             .apply() // یا commit() برای اعمال تغییرات به صورت همزمان
     }
 
@@ -375,8 +376,7 @@ class MainActivity : AppCompatActivity(), UploadTester.UploadCallback {
 
     private fun payConfig() {
         motoast.MoWarning(
-            title = "مایکت",
-            msg = "در حال ارتباط با سرور های مایکت هستیم اندکی صبر کنید"
+            title = "مایکت", msg = "در حال ارتباط با سرور های مایکت هستیم اندکی صبر کنید"
         )
         mHelper = IabHelper(this, BuildConfig.IAB_PUBLIC_KEY)
         mHelper.enableDebugLogging(true)
@@ -450,8 +450,7 @@ class MainActivity : AppCompatActivity(), UploadTester.UploadCallback {
     // 5. تابع شروع فرآیند خرید
     private fun startPurchaseFlow() {
         mHelper.launchPurchaseFlow(
-            this,
-            SKU_PREMIUM, // شناسه محصول
+            this, SKU_PREMIUM, // شناسه محصول
             RC_REQUEST, // کد درخواست
             IabHelper.OnIabPurchaseFinishedListener { result, info ->
                 when {
@@ -469,8 +468,7 @@ class MainActivity : AppCompatActivity(), UploadTester.UploadCallback {
                     // 5-4. اگر خرید محصول پریمیوم موفق بود
                     info.sku == SKU_PREMIUM -> handleSuccessfulPurchase(info)
                 }
-            },
-            "" // developerPayload
+            }, "" // developerPayload
         )
     }
 
@@ -510,16 +508,11 @@ class MainActivity : AppCompatActivity(), UploadTester.UploadCallback {
     }
 
     private fun insertToHistDb(
-        mac: String,
-        date: String,
-        ip: String,
-        netType: String,
-        pingSpeed: String
+        mac: String, date: String, ip: String, netType: String, pingSpeed: String
     ) {
 
         val call = RetrofitClient.apiService.sendHist(
-            mac,
-            date, netType, ip, pingSpeed
+            mac, date, netType, ip, pingSpeed
         )
         call.enqueue(object : Callback<ApiResponse> {
             override fun onResponse(call: Call<ApiResponse>, response: Response<ApiResponse>) {
@@ -551,12 +544,7 @@ class MainActivity : AppCompatActivity(), UploadTester.UploadCallback {
     }
 
     private fun insertAndVerifyPay(
-        mac: String,
-        time: String,
-        sku: String,
-        token: String,
-        sig: String,
-        verify: String
+        mac: String, time: String, sku: String, token: String, sig: String, verify: String
     ) {
         val call = RetrofitClient.apiService.insertPurchaseLog(mac, time, sku, token, sig, verify)
         call.enqueue(object : Callback<ApiResponse> {
@@ -647,17 +635,20 @@ class MainActivity : AppCompatActivity(), UploadTester.UploadCallback {
 
     }
 
+    //DownloadTester
     fun DtestSpeedConfig() {
         networkTester.setOnSpeedChangeListener(object : InternetSpeedTester.OnSpeedChangeListener {
             override fun onDownloadSpeedChanged(mbps: Double) {
                 runOnUiThread {
+                    vw_start.alpha = 1f
+                    vw_start.isEnabled = true
+                    pb_card.visibility = View.GONE
                     if (mbps > 1) {
-                        tv_speed_download.text = String.format("%.2f \n Mb/s", mbps)
-
+                        val speedText = "%.2f ".format(mbps)
+                        tv_speed_download.text = "$speedText\nMb/s"
                     } else {
-                        var kbps = ConverterX.mbpsToKbpsConverter(mbps)
-                        tv_speed_download.text = "${kbps} \n Kb/s"
-
+                        val speedText = "%.2f ".format(ConverterX.mbpsToKBpsConverter(mbps))
+                        tv_speed_download.text = "$speedText\nKb/s"
                     }
 
 
@@ -665,26 +656,37 @@ class MainActivity : AppCompatActivity(), UploadTester.UploadCallback {
             }
 
             override fun onUploadSpeedChanged(mbps: Double) {
+                runOnUiThread {
 
+                }
             }
 
             override fun onTestStarted() {
                 runOnUiThread {
-                    motoast.MoInfo("تست سرعت دانلود در حال اجرا میباشد اندکی صبرکنید...")
                     vw_start.isEnabled = false
+                    tv_status.text="..."
+                    motoast.MoInfo("تست سرعت دانلود و آپلود در حال اجرا میباشد اندکی صبرکنید...")
                 }
             }
 
             override fun onTestFinished() {
                 motoast.MoSuccess("تست سرعت دانلود کامل شد.")
                 tv_status_download.visibility = View.GONE
-                vw_start.isEnabled = true
+
             }
+
 
             override fun onError(message: String) {
                 runOnUiThread {
-                    Toast.makeText(this@MainActivity, "Error: $message", Toast.LENGTH_LONG).show()
                     vw_start.isEnabled = true
+                    tv_status.text="شروع"
+                    Toast.makeText(
+                        this@MainActivity,
+                        "خطا در تست دانلود دوباره امتهان کنید: $message",
+                        Toast.LENGTH_LONG
+                    ).show()
+
+
                 }
             }
 
@@ -718,10 +720,7 @@ class MainActivity : AppCompatActivity(), UploadTester.UploadCallback {
     }
 
     override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<out String>,
-        grantResults: IntArray,
-        deviceId: Int
+        requestCode: Int, permissions: Array<out String>, grantResults: IntArray, deviceId: Int
     ) {
         if (requestCode == PHONE_STATUS_REQUEST_CODE) {
 
@@ -823,6 +822,8 @@ class MainActivity : AppCompatActivity(), UploadTester.UploadCallback {
     ////////////////////////////////////////////////////////////////////
     override fun onProgress(percent: Int) {
         runOnUiThread {
+            tv_status.text="..."
+            vw_start.isEnabled = false
             tv_status_upload.visibility = View.GONE
             pb_card.visibility = View.VISIBLE
             pb_upload.progress = percent
@@ -832,24 +833,28 @@ class MainActivity : AppCompatActivity(), UploadTester.UploadCallback {
 
     override fun onSuccess(uploadSpeed: Double, timeTaken: Long) {
         runOnUiThread {
+            tv_status.text="شروع"
+
+            vw_start.isEnabled = true
             pb_card.visibility = View.GONE
             if (uploadSpeed > 1) {
-                val speedText = "%.2f".format(uploadSpeed)
+                val speedText = "%.2f ".format(uploadSpeed)
                 tv_speed_upload.text = "$speedText\nMb/s"
-
             } else {
-                val kbpsValue = ConverterX.mbpsToKbpsConverter(uploadSpeed)
-                // Ensure kbpsValue is a floating-point type before formatting
-                val speedText = "%.2f".format(kbpsValue.toFloat()) // Convert to Float
-                // OR: val speedText = "%.2f".format(kbpsValue.toDouble()) // Convert to Double
+                val speedText = "%.2f ".format(ConverterX.mbpsToKBpsConverter(uploadSpeed))
                 tv_speed_upload.text = "$speedText\nKb/s"
             }
+            motoast.MoSuccess("تست سرعت آپلود کامل شد.")
+
+
 
         }
     }
 
     override fun onFailure(error: String) {
         runOnUiThread {
+            tv_status.text="شروع"
+            vw_start.isEnabled = true
             motoast.MoError(msg = " خطا: $error")
         }
     }
