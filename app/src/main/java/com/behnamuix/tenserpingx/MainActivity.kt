@@ -60,7 +60,6 @@ import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 import java.util.TimeZone
-
 class MainActivity : AppCompatActivity(), UploadTester.UploadCallback {
 
 
@@ -71,6 +70,7 @@ class MainActivity : AppCompatActivity(), UploadTester.UploadCallback {
     val RC_REQUEST: Int = 10001
     lateinit var mHelper: IabHelper
     private var v: Boolean = false
+
 
 
     private var isDialogShowing = false
@@ -99,6 +99,9 @@ class MainActivity : AppCompatActivity(), UploadTester.UploadCallback {
     private lateinit var img_rotate_phone: ImageView
     private lateinit var tv_ip: TextView
     private lateinit var tv_type: TextView
+    private lateinit var tv_c1: TextView
+    private lateinit var tv_c2: TextView
+    private lateinit var tv_c3: TextView
     private lateinit var tv_speed_upload: TextView
     private lateinit var tv_status_ping: TextView
     private lateinit var tv_ping: TextView
@@ -181,11 +184,11 @@ class MainActivity : AppCompatActivity(), UploadTester.UploadCallback {
         tv_speed_download = binding.tvSpeedDownload
         vw_start = binding.vwStart
         uploadTester = UploadTester(this)
-
         onclickHandler()
 
 
     }
+
 
     private fun createTestFile(): File {
         val file = File(cacheDir, "test_upload.bin")
@@ -664,7 +667,7 @@ class MainActivity : AppCompatActivity(), UploadTester.UploadCallback {
             override fun onTestStarted() {
                 runOnUiThread {
                     vw_start.isEnabled = false
-                    tv_status.text="..."
+                    tv_status.text = "..."
                     motoast.MoInfo("تست سرعت دانلود و آپلود در حال اجرا میباشد اندکی صبرکنید...")
                 }
             }
@@ -679,7 +682,7 @@ class MainActivity : AppCompatActivity(), UploadTester.UploadCallback {
             override fun onError(message: String) {
                 runOnUiThread {
                     vw_start.isEnabled = true
-                    tv_status.text="شروع"
+                    tv_status.text = "شروع"
                     Toast.makeText(
                         this@MainActivity,
                         "خطا در تست دانلود دوباره امتهان کنید: $message",
@@ -822,7 +825,7 @@ class MainActivity : AppCompatActivity(), UploadTester.UploadCallback {
     ////////////////////////////////////////////////////////////////////
     override fun onProgress(percent: Int) {
         runOnUiThread {
-            tv_status.text="..."
+            tv_status.text = "..."
             vw_start.isEnabled = false
             tv_status_upload.visibility = View.GONE
             pb_card.visibility = View.VISIBLE
@@ -833,7 +836,7 @@ class MainActivity : AppCompatActivity(), UploadTester.UploadCallback {
 
     override fun onSuccess(uploadSpeed: Double, timeTaken: Long) {
         runOnUiThread {
-            tv_status.text="شروع"
+            tv_status.text = "شروع"
 
             vw_start.isEnabled = true
             pb_card.visibility = View.GONE
@@ -847,17 +850,18 @@ class MainActivity : AppCompatActivity(), UploadTester.UploadCallback {
             motoast.MoSuccess("تست سرعت آپلود کامل شد.")
 
 
-
         }
     }
 
     override fun onFailure(error: String) {
         runOnUiThread {
-            tv_status.text="شروع"
+            tv_status.text = "شروع"
             vw_start.isEnabled = true
             motoast.MoError(msg = " خطا: $error")
         }
     }
+
+
     ///////////////////////////////////////////////////////////////////
 
 

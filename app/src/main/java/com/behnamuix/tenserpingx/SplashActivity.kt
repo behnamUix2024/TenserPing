@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
@@ -14,6 +15,12 @@ import androidx.core.view.WindowInsetsCompat
 
 import com.behnamuix.tenserpingx.MyTools.MoToast
 import com.behnamuix.tenserpingx.Network.NetworkCheck
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlin.coroutines.CoroutineContext
 
 class SplashActivity : AppCompatActivity() {
     private var netCheck: Boolean = false
@@ -21,17 +28,23 @@ class SplashActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_splash)
-        changeNavbarStyle()
-        netCheck = NetworkCheck.isInternetAvailable(this)
+        config()
         if (netCheck) {
-            Handler(Looper.getMainLooper()).postDelayed({
-                val intent = Intent(this, MainActivity::class.java)
-                startActivity(intent)
-                finish()
-            }, 400)
+            startMainActivity()
         } else {
-            motoast.MoError(title = "ارتباط با سرور برقرار نشد", msg = "اینترنت شما متصل نیست لطفا از اپلیکیشن خارج شده و مجدد وارد شوید")
+            motoast.MoError(
+                title = "ارتباط با سرور برقرار نشد",
+                msg = "اینترنت شما متصل نیست لطفا از اپلیکیشن خارج شده و مجدد وارد شوید"
+            )
         }
+
+
+    }
+
+    private fun config() {
+        netCheck = NetworkCheck.isInternetAvailable(this)
+        changeNavbarStyle()
+
     }
 
     private fun changeNavbarStyle() {
@@ -43,8 +56,17 @@ class SplashActivity : AppCompatActivity() {
 
         val navigationBarColor = ContextCompat.getColor(this, R.color.black_mat)
         window.navigationBarColor = navigationBarColor
-        window.statusBarColor=statusBarColor
+        window.statusBarColor = statusBarColor
         windowInsetsController.isAppearanceLightNavigationBars = false
     }
+
+    private fun startMainActivity() {
+        Handler(Looper.getMainLooper()).postDelayed({
+            val intent = Intent(this, MainActivity::class.java)
+            startActivity(intent)
+            finish()
+        }, 400)
+    }
+
 
 }
