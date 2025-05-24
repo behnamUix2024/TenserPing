@@ -16,8 +16,8 @@ fun main() {
 fun passwordChecker(pass: String): Boolean {
     if (pass.length >= 8 &&
         pass.any { it.isDigit() } &&
-        pass.contains("@") &&
-        pass.contains("#") &&
+        pass.contains("@") ||
+        pass.contains("#") ||
         pass.contains("%")
     ) {
 

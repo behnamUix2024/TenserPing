@@ -1,6 +1,6 @@
-package com.behnamuix.tenserpingx.src.ClassExample.MafiaSim
+package com.behnamuix.tenserpingx.src.ClassExample.MyMafiaSim
 
-import com.behnamuix.tenserpingx.src.ClassExample.MafiaSim.Enums.ERoles
+import com.behnamuix.tenserpingx.src.ClassExample.MyMafiaSim.Enums.ERoles
 
 class Mafia : Players() {
     fun shotPlayer(name: String): MutableMap<String, ERoles> {

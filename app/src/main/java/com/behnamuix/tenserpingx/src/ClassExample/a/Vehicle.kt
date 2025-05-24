@@ -1,4 +1,4 @@
-package com.behnamuix.tenserpingx.src.ClassExample
+package com.behnamuix.tenserpingx.src.ClassExample.a
 
 open class Vehicle(
     val type: VehicleType,

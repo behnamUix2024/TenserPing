@@ -1,6 +1,6 @@
-package com.behnamuix.tenserpingx.src.ClassExample.MafiaSim
+package com.behnamuix.tenserpingx.src.ClassExample.MyMafiaSim
 
-import com.behnamuix.tenserpingx.src.ClassExample.MafiaSim.Enums.ERoles
+import com.behnamuix.tenserpingx.src.ClassExample.MyMafiaSim.Enums.ERoles
 import kotlinx.coroutines.delay
 
 open class Players() {
