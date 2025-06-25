@@ -9,6 +9,7 @@ import android.content.pm.ActivityInfo
 import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.net.ConnectivityManager
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -19,6 +20,7 @@ import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -812,6 +814,7 @@ class MainActivity : AppCompatActivity(), UploadTester.UploadCallback {
 
     }
 
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
     private fun setEnglishLocale(context: Context): Context {
         val locale = Locale("en", "US")
         Locale.setDefault(locale)

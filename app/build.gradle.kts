@@ -85,6 +85,9 @@ dependencies {
     implementation (libs.picasso)
     implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
 
+    implementation("ir.tapsell.plus:tapsell-plus-sdk-android:2.3.2")
+
+
 
 
 
