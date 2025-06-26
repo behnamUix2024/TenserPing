@@ -58,12 +58,10 @@ class UploadTester(private val context: Context) {
             )
             .build()
 
-        val servers = listOf(
-            "https://httpbin.org/post",
-            "https://postman-echo.com/post"
-        )
+        val server = "https://httpbin.org/post"
+        //    ""
 
-        val server = servers.random()
+
         Log.d("UploadTester", "Selected server: $server")
         //Toast.makeText(context,"سرور انتخابی:$server",Toast.LENGTH_SHORT).show()
 

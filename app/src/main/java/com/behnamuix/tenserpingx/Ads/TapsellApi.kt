@@ -1,9 +1,8 @@
-package com.behnamuix.metremajazi.Ads
+package com.behnamuix.tenserpingx.Ads
 //Created by BehnamUix @1404
 import android.app.Activity
 import android.util.Log
 import android.widget.Toast
-import com.behnamuix.metremajazi.Model.MainModel
 import ir.tapsell.plus.AdRequestCallback
 import ir.tapsell.plus.AdShowListener
 import ir.tapsell.plus.TapsellPlus
@@ -19,9 +18,9 @@ class TapsellApi(private val activity: Activity) {
 
     private var initResponseID = ""
 
-    private var tapsell_key = MainModel().TAPSELL_KEY
+    private var tapsell_key = "pqdofsqhcotlkesjscqonkfkkfalqchfjnpfinldksqomrtotolfitnildgthoiqjbbnho"
 
-    private var ads_zone_id = MainModel().ZONE_ID
+    private var ads_zone_id = "685d5bb62973e423038e71d8"
 
     fun TapsellConfig() {
         TapsellPlus.initialize(activity, tapsell_key, object : TapsellPlusInitListener {
@@ -56,7 +55,7 @@ class TapsellApi(private val activity: Activity) {
                     super.response(p0)
                     if (p0 != null) {
                         initResponseID = p0.responseId
-                        Toast.makeText(activity, "Ok+${initResponseID}+Now show ads!", Toast.LENGTH_SHORT).show()
+                        //Toast.makeText(activity, "Ok+${initResponseID}+Now show ads!", Toast.LENGTH_SHORT).show()
                         showAds(initResponseID)
                     }
 

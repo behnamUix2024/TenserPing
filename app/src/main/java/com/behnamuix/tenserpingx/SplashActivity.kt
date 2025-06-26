@@ -12,6 +12,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
+import com.behnamuix.tenserpingx.Ads.TapsellApi
 
 import com.behnamuix.tenserpingx.MyTools.MoToast
 import com.behnamuix.tenserpingx.Network.NetworkCheck
@@ -29,7 +30,9 @@ class SplashActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_splash)
         config()
+
         if (netCheck) {
+
             startMainActivity()
         } else {
             motoast.MoError(
@@ -65,7 +68,7 @@ class SplashActivity : AppCompatActivity() {
             val intent = Intent(this, MainActivity::class.java)
             startActivity(intent)
             finish()
-        }, 400)
+        }, 1000)
     }
 
 

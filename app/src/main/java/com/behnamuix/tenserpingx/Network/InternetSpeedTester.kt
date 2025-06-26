@@ -43,7 +43,7 @@ class InternetSpeedTester(private val ctx: Context) {
     }
 
     fun startDownloadSpeedTest(
-        downloadTestUrl: String = "https://proof.ovh.net/files/10Mb.dat", // Endpoint تست دانلود معتبر
+        downloadTestUrl: String = "https://httpbin.org/bytes/5242880", // Endpoint تست دانلود معتبر
         uploadTestUrl: String? = null,
         testDataSizeKb: Int = 3072
     ) {

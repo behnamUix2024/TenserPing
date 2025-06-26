@@ -1,6 +1,7 @@
 package com.behnamuix.tenserpingx
 
 import android.Manifest
+import android.animation.ObjectAnimator
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -14,6 +15,7 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.view.WindowManager
+import android.view.animation.AccelerateDecelerateInterpolator
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.ProgressBar
@@ -29,6 +31,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.lifecycleScope
 import com.airbnb.lottie.LottieAnimationView
+import com.behnamuix.tenserpingx.Ads.TapsellApi
 import com.behnamuix.tenserpingx.Network.NetworkCheck
 import com.behnamuix.tenserpingx.AndroidWraper.DeviceInfo
 import com.behnamuix.tenserpingx.Dialog.HistoryDialogFragment
@@ -93,6 +96,7 @@ class MainActivity : AppCompatActivity(), UploadTester.UploadCallback {
     private lateinit var btn_save_hist: MaterialButton
     private lateinit var btn_export_pdf: MaterialButton
     private lateinit var img_exit: ImageView
+    private lateinit var img_upload: ImageView
     private lateinit var pb_upload: ProgressBar
     private lateinit var tv_pb_upload: TextView
     private lateinit var tv_status_upload: TextView
@@ -132,6 +136,10 @@ class MainActivity : AppCompatActivity(), UploadTester.UploadCallback {
         binding = ActivityMainBinding.inflate(layoutInflater)
         enableEdgeToEdge()
         setContentView(binding.root)
+        val instance: TapsellApi by lazy {
+            TapsellApi(this)
+        }
+        instance.TapsellConfig()
         main()
 
 
@@ -167,6 +175,7 @@ class MainActivity : AppCompatActivity(), UploadTester.UploadCallback {
         myketrate = MyketRate(this)
         img_rotate_phone = binding.imgRotatePhone!!
         pb_card = binding.pbCard
+        img_upload=binding.imgUpload
         tv_status_upload = binding.tvStatusUpload
         tv_status_download = binding.tvStatusDownload
         btn_export_pdf = binding.btnExportPdf
@@ -190,7 +199,44 @@ class MainActivity : AppCompatActivity(), UploadTester.UploadCallback {
 
 
     }
+    private fun uploadAnimator(){
+            val animationDuration = 500L // مدت زمان هر حرکت (بالا یا پایین) بر حسب میلی‌ثانیه
+            val moveDistance = 20f // مقدار جابجایی (بالا و پایین) بر حسب پیکسل
 
+            // 1. انیمیشن رفتن به بالا
+            val moveUpAnimator = ObjectAnimator.ofFloat(img_upload, "translationY", 0f, -moveDistance)
+            moveUpAnimator.duration = animationDuration
+            moveUpAnimator.interpolator = AccelerateDecelerateInterpolator() // برای حرکت نرم‌تر
+
+            // 2. انیمیشن برگشتن به پایین (از بالا به موقعیت اولیه)
+            val moveDownAnimator = ObjectAnimator.ofFloat(img_upload, "translationY", -moveDistance, 0f)
+            moveDownAnimator.duration = animationDuration
+            moveDownAnimator.interpolator = AccelerateDecelerateInterpolator()
+
+            // 3. انیمیشن رفتن به پایین (از موقعیت اولیه به پایین)
+            val moveFurtherDownAnimator = ObjectAnimator.ofFloat(img_upload, "translationY", 0f, moveDistance)
+            moveFurtherDownAnimator.duration = animationDuration
+            moveFurtherDownAnimator.interpolator = AccelerateDecelerateInterpolator()
+
+            // 4. انیمیشن برگشتن به موقعیت اولیه (از پایین به موقعیت اولیه)
+            val moveBackUpAnimator = ObjectAnimator.ofFloat(img_upload, "translationY", moveDistance, 0f)
+            moveBackUpAnimator.duration = animationDuration
+            moveBackUpAnimator.interpolator = AccelerateDecelerateInterpolator()
+
+
+
+            // استفاده از PropertyValuesHolder برای حرکت رفت و برگشت یکجا
+            val upAndDown = ObjectAnimator.ofFloat(img_upload, "translationY", 0f, -moveDistance, 0f, moveDistance, 0f)
+            upAndDown.duration = animationDuration * 4 // دو رفت و برگشت کامل در یک چرخه
+            upAndDown.interpolator = AccelerateDecelerateInterpolator()
+
+            // تنظیم تعداد تکرار
+            upAndDown.repeatCount = 2 // 0 = 1 بار، 1 = 2 بار، 2 = 3 بار (برای سه بار کلی)
+            upAndDown.repeatMode = ObjectAnimator.RESTART // بعد از هر تکرار، انیمیشن از ابتدا شروع می‌شود
+
+            upAndDown.start() // شروع انیمیشن
+
+    }
 
     private fun createTestFile(): File {
         val file = File(cacheDir, "test_upload.bin")
@@ -259,6 +305,10 @@ class MainActivity : AppCompatActivity(), UploadTester.UploadCallback {
             dialog.show()
         }
         vw_start.setOnClickListener {
+
+
+
+
             tv_speed_download.text = "--,--"
             tv_speed_upload.text = "--,--"
 
@@ -687,7 +737,7 @@ class MainActivity : AppCompatActivity(), UploadTester.UploadCallback {
                     tv_status.text = "شروع"
                     Toast.makeText(
                         this@MainActivity,
-                        "خطا در تست دانلود دوباره امتهان کنید: $message",
+                        "خطا در تست دانلود دوباره امتحان کنید: $message",
                         Toast.LENGTH_LONG
                     ).show()
 
@@ -828,6 +878,7 @@ class MainActivity : AppCompatActivity(), UploadTester.UploadCallback {
     ////////////////////////////////////////////////////////////////////
     override fun onProgress(percent: Int) {
         runOnUiThread {
+            uploadAnimator()
             tv_status.text = "..."
             vw_start.isEnabled = false
             tv_status_upload.visibility = View.GONE
