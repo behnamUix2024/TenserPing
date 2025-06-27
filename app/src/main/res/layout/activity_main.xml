@@ -282,7 +282,8 @@
                     android:layout_weight="2"
                     android:progress="0"
                     android:progressBackgroundTint="#9CCC65"
-                    android:progressTint="@color/end_color" />
+                    android:progressTint="@color/end_color"
+                    android:visibility="gone" />
 
                 <TextView
                     android:id="@+id/tv_pb_uplosd"
@@ -293,7 +294,8 @@
                     android:gravity="center"
                     android:text="0%"
                     android:textColor="#FFFFFF"
-                    android:textSize="@dimen/small1" />
+                    android:textSize="@dimen/small1"
+                    android:visibility="gone" />
 
             </LinearLayout>
 

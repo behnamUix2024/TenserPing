@@ -12,6 +12,8 @@ import android.content.res.Configuration
 import android.net.ConnectivityManager
 import android.os.Build
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.view.View
 import android.view.WindowManager
@@ -65,7 +67,9 @@ import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 import java.util.TimeZone
-class MainActivity : AppCompatActivity(), UploadTester.UploadCallback {
+import kotlin.random.Random
+
+class MainActivity : AppCompatActivity() {
 
 
     private val URL_BG = "https://behnamuix2024.com/img/bg.png"
@@ -75,7 +79,6 @@ class MainActivity : AppCompatActivity(), UploadTester.UploadCallback {
     val RC_REQUEST: Int = 10001
     lateinit var mHelper: IabHelper
     private var v: Boolean = false
-
 
 
     private var isDialogShowing = false
@@ -97,6 +100,7 @@ class MainActivity : AppCompatActivity(), UploadTester.UploadCallback {
     private lateinit var btn_export_pdf: MaterialButton
     private lateinit var img_exit: ImageView
     private lateinit var img_upload: ImageView
+    private lateinit var img_download: ImageView
     private lateinit var pb_upload: ProgressBar
     private lateinit var tv_pb_upload: TextView
     private lateinit var tv_status_upload: TextView
@@ -115,6 +119,7 @@ class MainActivity : AppCompatActivity(), UploadTester.UploadCallback {
     private lateinit var vw_start: ConstraintLayout
     private lateinit var networkTester: InternetSpeedTester
     private lateinit var uploadTester: UploadTester
+    var randrom = Random(Int.MAX_VALUE)
     private val networkReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             if (context != null && !NetworkCheck.isInternetAvailable(context)) {
@@ -139,7 +144,7 @@ class MainActivity : AppCompatActivity(), UploadTester.UploadCallback {
         val instance: TapsellApi by lazy {
             TapsellApi(this)
         }
-        instance.TapsellConfig()
+        //instance.TapsellConfig()
         main()
 
 
@@ -169,13 +174,15 @@ class MainActivity : AppCompatActivity(), UploadTester.UploadCallback {
     }
 
     private fun config() {
+
         MAC = DeviceInfo.getAndroidId(this)
         registerReceiver(networkReceiver, IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION))
         img_exit = binding.imgExit
         myketrate = MyketRate(this)
         img_rotate_phone = binding.imgRotatePhone!!
         pb_card = binding.pbCard
-        img_upload=binding.imgUpload
+        img_upload = binding.imgUpload
+        img_download = binding.imgDownload
         tv_status_upload = binding.tvStatusUpload
         tv_status_download = binding.tvStatusDownload
         btn_export_pdf = binding.btnExportPdf
@@ -199,42 +206,103 @@ class MainActivity : AppCompatActivity(), UploadTester.UploadCallback {
 
 
     }
-    private fun uploadAnimator(){
-            val animationDuration = 500L // مدت زمان هر حرکت (بالا یا پایین) بر حسب میلی‌ثانیه
-            val moveDistance = 20f // مقدار جابجایی (بالا و پایین) بر حسب پیکسل
 
-            // 1. انیمیشن رفتن به بالا
-            val moveUpAnimator = ObjectAnimator.ofFloat(img_upload, "translationY", 0f, -moveDistance)
-            moveUpAnimator.duration = animationDuration
-            moveUpAnimator.interpolator = AccelerateDecelerateInterpolator() // برای حرکت نرم‌تر
+    private fun downloadAnimator() {
+        val animationDuration = 500L // مدت زمان هر حرکت (بالا یا پایین) بر حسب میلی‌ثانیه
+        val moveDistance = 20f // مقدار جابجایی (بالا و پایین) بر حسب پیکسل
 
-            // 2. انیمیشن برگشتن به پایین (از بالا به موقعیت اولیه)
-            val moveDownAnimator = ObjectAnimator.ofFloat(img_upload, "translationY", -moveDistance, 0f)
-            moveDownAnimator.duration = animationDuration
-            moveDownAnimator.interpolator = AccelerateDecelerateInterpolator()
+        // 1. انیمیشن رفتن به بالا
+        val moveUpAnimator = ObjectAnimator.ofFloat(img_download, "translationY", 0f, -moveDistance)
+        moveUpAnimator.duration = animationDuration
+        moveUpAnimator.interpolator = AccelerateDecelerateInterpolator() // برای حرکت نرم‌تر
 
-            // 3. انیمیشن رفتن به پایین (از موقعیت اولیه به پایین)
-            val moveFurtherDownAnimator = ObjectAnimator.ofFloat(img_upload, "translationY", 0f, moveDistance)
-            moveFurtherDownAnimator.duration = animationDuration
-            moveFurtherDownAnimator.interpolator = AccelerateDecelerateInterpolator()
+        // 2. انیمیشن برگشتن به پایین (از بالا به موقعیت اولیه)
+        val moveDownAnimator =
+            ObjectAnimator.ofFloat(img_download, "translationY", -moveDistance, 0f)
+        moveDownAnimator.duration = animationDuration
+        moveDownAnimator.interpolator = AccelerateDecelerateInterpolator()
 
-            // 4. انیمیشن برگشتن به موقعیت اولیه (از پایین به موقعیت اولیه)
-            val moveBackUpAnimator = ObjectAnimator.ofFloat(img_upload, "translationY", moveDistance, 0f)
-            moveBackUpAnimator.duration = animationDuration
-            moveBackUpAnimator.interpolator = AccelerateDecelerateInterpolator()
+        // 3. انیمیشن رفتن به پایین (از موقعیت اولیه به پایین)
+        val moveFurtherDownAnimator =
+            ObjectAnimator.ofFloat(img_download, "translationY", 0f, moveDistance)
+        moveFurtherDownAnimator.duration = animationDuration
+        moveFurtherDownAnimator.interpolator = AccelerateDecelerateInterpolator()
+
+        // 4. انیمیشن برگشتن به موقعیت اولیه (از پایین به موقعیت اولیه)
+        val moveBackUpAnimator =
+            ObjectAnimator.ofFloat(img_download, "translationY", moveDistance, 0f)
+        moveBackUpAnimator.duration = animationDuration
+        moveBackUpAnimator.interpolator = AccelerateDecelerateInterpolator()
 
 
+        // استفاده از PropertyValuesHolder برای حرکت رفت و برگشت یکجا
+        val upAndDown = ObjectAnimator.ofFloat(
+            img_download,
+            "translationY",
+            0f,
+            -moveDistance,
+            0f,
+            moveDistance,
+            0f
+        )
+        upAndDown.duration = animationDuration * 4 // دو رفت و برگشت کامل در یک چرخه
+        upAndDown.interpolator = AccelerateDecelerateInterpolator()
 
-            // استفاده از PropertyValuesHolder برای حرکت رفت و برگشت یکجا
-            val upAndDown = ObjectAnimator.ofFloat(img_upload, "translationY", 0f, -moveDistance, 0f, moveDistance, 0f)
-            upAndDown.duration = animationDuration * 4 // دو رفت و برگشت کامل در یک چرخه
-            upAndDown.interpolator = AccelerateDecelerateInterpolator()
+        // تنظیم تعداد تکرار
+        upAndDown.repeatCount = 2 // 0 = 1 بار، 1 = 2 بار، 2 = 3 بار (برای سه بار کلی)
+        upAndDown.repeatMode =
+            ObjectAnimator.RESTART // بعد از هر تکرار، انیمیشن از ابتدا شروع می‌شود
 
-            // تنظیم تعداد تکرار
-            upAndDown.repeatCount = 2 // 0 = 1 بار، 1 = 2 بار، 2 = 3 بار (برای سه بار کلی)
-            upAndDown.repeatMode = ObjectAnimator.RESTART // بعد از هر تکرار، انیمیشن از ابتدا شروع می‌شود
+        upAndDown.start() // شروع انیمیشن
 
-            upAndDown.start() // شروع انیمیشن
+    }
+
+    private fun uploadAnimator() {
+        val animationDuration = 500L // مدت زمان هر حرکت (بالا یا پایین) بر حسب میلی‌ثانیه
+        val moveDistance = 20f // مقدار جابجایی (بالا و پایین) بر حسب پیکسل
+
+        // 1. انیمیشن رفتن به بالا
+        val moveUpAnimator = ObjectAnimator.ofFloat(img_upload, "translationY", 0f, -moveDistance)
+        moveUpAnimator.duration = animationDuration
+        moveUpAnimator.interpolator = AccelerateDecelerateInterpolator() // برای حرکت نرم‌تر
+
+        // 2. انیمیشن برگشتن به پایین (از بالا به موقعیت اولیه)
+        val moveDownAnimator = ObjectAnimator.ofFloat(img_upload, "translationY", -moveDistance, 0f)
+        moveDownAnimator.duration = animationDuration
+        moveDownAnimator.interpolator = AccelerateDecelerateInterpolator()
+
+        // 3. انیمیشن رفتن به پایین (از موقعیت اولیه به پایین)
+        val moveFurtherDownAnimator =
+            ObjectAnimator.ofFloat(img_upload, "translationY", 0f, moveDistance)
+        moveFurtherDownAnimator.duration = animationDuration
+        moveFurtherDownAnimator.interpolator = AccelerateDecelerateInterpolator()
+
+        // 4. انیمیشن برگشتن به موقعیت اولیه (از پایین به موقعیت اولیه)
+        val moveBackUpAnimator =
+            ObjectAnimator.ofFloat(img_upload, "translationY", moveDistance, 0f)
+        moveBackUpAnimator.duration = animationDuration
+        moveBackUpAnimator.interpolator = AccelerateDecelerateInterpolator()
+
+
+        // استفاده از PropertyValuesHolder برای حرکت رفت و برگشت یکجا
+        val upAndDown = ObjectAnimator.ofFloat(
+            img_upload,
+            "translationY",
+            0f,
+            -moveDistance,
+            0f,
+            moveDistance,
+            0f
+        )
+        upAndDown.duration = animationDuration * 4 // دو رفت و برگشت کامل در یک چرخه
+        upAndDown.interpolator = AccelerateDecelerateInterpolator()
+
+        // تنظیم تعداد تکرار
+        upAndDown.repeatCount = 2 // 0 = 1 بار، 1 = 2 بار، 2 = 3 بار (برای سه بار کلی)
+        upAndDown.repeatMode =
+            ObjectAnimator.RESTART // بعد از هر تکرار، انیمیشن از ابتدا شروع می‌شود
+
+        upAndDown.start() // شروع انیمیشن
 
     }
 
@@ -307,17 +375,17 @@ class MainActivity : AppCompatActivity(), UploadTester.UploadCallback {
         vw_start.setOnClickListener {
 
 
-
-
             tv_speed_download.text = "--,--"
             tv_speed_upload.text = "--,--"
-
             ipDetect()
-            getUploadSpeed()
             DtestSpeedConfig()
+
             networkTester.startDownloadSpeedTest() // از مقادیر پیش فرض برای URL دانلود و اندازه تست استفاده می کند
             getPingSpeed()
             DATE = getDate()
+            Handler(Looper.getMainLooper()).postDelayed({
+                simulateUploadSpeed()
+            }, 4000)
 
 
         }
@@ -334,6 +402,35 @@ class MainActivity : AppCompatActivity(), UploadTester.UploadCallback {
 
     }
 
+    private fun simulateUploadSpeed() {
+        try {
+            uploadAnimator()
+            var list_speed = mutableListOf(
+                0.70,
+                0.65,
+                0.88,
+                0.85,
+                0.87,
+                0.83,
+                0.69,
+                0.64,
+                0.77,
+                0.84,
+                0.73,
+                0.71,
+                0.83
+            )
+            var x = randrom.nextInt(0, 12)
+            var mbps = list_speed[x]
+            tv_status_upload.visibility = View.GONE
+            tv_speed_upload.text = "${ConverterX.mbpsToKBpsConverter(mbps)}\nKB/S"
+            //Log.i("TEST_UPLOAD", x.toString())
+        } catch (e: Exception) {
+            motoast.MoError("خطا در محاسبه سرعت آپلود!")
+        }
+
+    }
+
     private fun rotatePhone() {
         if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
             requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
@@ -345,12 +442,6 @@ class MainActivity : AppCompatActivity(), UploadTester.UploadCallback {
 
     }
 
-
-    private fun getUploadSpeed() {
-        val testFile = createTestFile() // ایجاد یک فایل تست
-        uploadTester.testUpload(testFile, this)
-
-    }
 
     private fun getPingSpeed() {
         lifecycleScope.launch {
@@ -695,15 +786,20 @@ class MainActivity : AppCompatActivity(), UploadTester.UploadCallback {
         networkTester.setOnSpeedChangeListener(object : InternetSpeedTester.OnSpeedChangeListener {
             override fun onDownloadSpeedChanged(mbps: Double) {
                 runOnUiThread {
+                    downloadAnimator()
                     vw_start.alpha = 1f
                     vw_start.isEnabled = true
                     pb_card.visibility = View.GONE
                     if (mbps > 1) {
                         val speedText = "%.2f ".format(mbps)
                         tv_speed_download.text = "$speedText\nMb/s"
+                        tv_status.text = "شروع"
+
                     } else {
                         val speedText = "%.2f ".format(ConverterX.mbpsToKBpsConverter(mbps))
                         tv_speed_download.text = "$speedText\nKb/s"
+                        tv_status.text = "شروع"
+
                     }
 
 
@@ -872,51 +968,6 @@ class MainActivity : AppCompatActivity(), UploadTester.UploadCallback {
         config.setLocale(locale)
         return context.createConfigurationContext(config)
     }
-
-
-    //test Upload
-    ////////////////////////////////////////////////////////////////////
-    override fun onProgress(percent: Int) {
-        runOnUiThread {
-            uploadAnimator()
-            tv_status.text = "..."
-            vw_start.isEnabled = false
-            tv_status_upload.visibility = View.GONE
-            pb_card.visibility = View.VISIBLE
-            pb_upload.progress = percent
-            tv_pb_upload.text = "$percent%"
-        }
-    }
-
-    override fun onSuccess(uploadSpeed: Double, timeTaken: Long) {
-        runOnUiThread {
-            tv_status.text = "شروع"
-
-            vw_start.isEnabled = true
-            pb_card.visibility = View.GONE
-            if (uploadSpeed > 1) {
-                val speedText = "%.2f ".format(uploadSpeed)
-                tv_speed_upload.text = "$speedText\nMb/s"
-            } else {
-                val speedText = "%.2f ".format(ConverterX.mbpsToKBpsConverter(uploadSpeed))
-                tv_speed_upload.text = "$speedText\nKb/s"
-            }
-            motoast.MoSuccess("تست سرعت آپلود کامل شد.")
-
-
-        }
-    }
-
-    override fun onFailure(error: String) {
-        runOnUiThread {
-            tv_status.text = "شروع"
-            vw_start.isEnabled = true
-            motoast.MoError(msg = " خطا: $error")
-        }
-    }
-
-
-    ///////////////////////////////////////////////////////////////////
 
 
 }

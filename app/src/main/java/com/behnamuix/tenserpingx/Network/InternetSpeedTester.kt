@@ -8,12 +8,15 @@ import java.util.concurrent.Executors
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody
+import okhttp3.RequestBody.Companion.asRequestBody
 import okio.BufferedSink
 import okio.IOException
+import java.io.File
 import java.io.InputStream
 import java.io.OutputStream
 import java.net.HttpURLConnection
@@ -30,6 +33,10 @@ class InternetSpeedTester(private val ctx: Context) {
     private val mainHandler = Handler(Looper.getMainLooper())
     private var onSpeedChangeListener: OnSpeedChangeListener? = null
     private var isTesting: Boolean = false
+    var random: Random
+    init {
+        random = Random(System.currentTimeMillis()) // مقداردهی در init
+    }
 
     interface OnSpeedChangeListener {
         fun onDownloadSpeedChanged(mbps: Double)
@@ -38,6 +45,7 @@ class InternetSpeedTester(private val ctx: Context) {
         fun onTestFinished()
         fun onError(message: String)
     }
+
     fun setOnSpeedChangeListener(listener: OnSpeedChangeListener) {
         this.onSpeedChangeListener = listener
     }
@@ -89,11 +97,12 @@ class InternetSpeedTester(private val ctx: Context) {
                     startTime = System.currentTimeMillis()
                     connection.inputStream.use { inputStream ->
                         val buffer = ByteArray(1024)
-                        var bytesRead=0
+                        var bytesRead = 0
                         var totalBytesRead: Long = 0
 
                         while (totalBytesRead < dataSizeKb * 1024L &&
-                            inputStream.read(buffer).also { bytesRead = it } != -1) {
+                            inputStream.read(buffer).also { bytesRead = it } != -1
+                        ) {
                             totalBytesRead += bytesRead
                         }
                         endTime = System.currentTimeMillis()
@@ -122,103 +131,79 @@ class InternetSpeedTester(private val ctx: Context) {
             }
         } catch (e: Exception) {
             mainHandler.post {
-                Log.e("ALPHA",e.localizedMessage.toString())
+                Log.e("ALPHA", e.localizedMessage.toString())
                 onSpeedChangeListener?.onError("Download test error: ${e.localizedMessage}")
             }
         }
     }
-    suspend fun testUploadSpeed(
-        uploadUrl: String = "https://eu.httpbin.org/post",
-        dataSizeKB: Int = 2048 // 1MB default test data
-    ): Double = withContext(Dispatchers.IO) {
-        var connection: HttpURLConnection? = null
-        var outputStream: OutputStream? = null
-        var inputStream: InputStream? = null
 
-        try {
-            // Generate random test data
-            val testData = ByteArray(dataSizeKB * 1024) { (0..255).random().toByte() }
-
-            val url = URL(uploadUrl)
-            connection = url.openConnection() as HttpURLConnection
-            connection.apply {
-                requestMethod = "POST"
-                doOutput = true
-                connectTimeout = 15000
-                readTimeout = 30000
-                setRequestProperty("Content-Type", "application/octet-stream")
-                setRequestProperty("Connection", "close")
-            }
-
-            val startTime = System.currentTimeMillis()
-
-            // Start upload
-            outputStream = connection.outputStream
-            outputStream.write(testData)
-            outputStream.flush()
-
-            // Get response
-            val responseCode = connection.responseCode
-            if (responseCode == HttpURLConnection.HTTP_OK) {
-                inputStream = connection.inputStream
-                val response = inputStream.bufferedReader().use { it.readText() }
-                Log.d("UploadTest", "Server response: $response")
-            }
-
-            val endTime = System.currentTimeMillis()
-            val durationSeconds = (endTime - startTime) / 1000.0
-
-            // Calculate speed in Mbps (Megabits per second)
-            val speedMbps = (dataSizeKB * 8) / (durationSeconds * 1000)
-            speedMbps.roundToInt().toDouble() // Return rounded value
-
-        } catch (e: Exception) {
-            Log.e("UploadTest", "Error: ${e.localizedMessage}")
-            0.0 // Return 0 if failed
-        } finally {
-            outputStream?.close()
-            inputStream?.close()
-            connection?.disconnect()
-        }
+    fun createRandomFile(fileSizeMB: Int = 5): File {
+        val file = File.createTempFile("upload_test_", ".bin")
+        val bytes = ByteArray(fileSizeMB * 1024 * 1024)
+        random.nextBytes(bytes) // پر کردن فایل با داده تصادفی
+        file.writeBytes(bytes)
+        println("فایل موقت ساخته شد: ${file.absolutePath} (${fileSizeMB} مگابایت)")
+        return file
     }
 
+    fun testUploadSpeed(file: File): Double {
+        val client = OkHttpClient()
+        val requestBody = file.asRequestBody("application/octet-stream".toMediaType())
 
+        val request = Request.Builder()
+            .url("https://httpbin.org/post")
+            .post(requestBody)
+            .build()
 
+        val startTime = System.nanoTime()
+        val response = client.newCall(request).execute()
+        val endTime = System.nanoTime()
 
+        response.use {
+            if (!it.isSuccessful) {
+                throw RuntimeException("خطا در آپلود: ${it.code}")
+            }
+        }
 
-    private val client = OkHttpClient()
-    suspend fun getPingSpeed(host: String = "185.147.178.12", count: Int = 3): Long? = withContext(Dispatchers.IO) {
-        try {
-            val startTime = System.currentTimeMillis()
-            val inetAddress = InetAddress.getByName(host)
-            val reachable = inetAddress.isReachable(200) // Timeout of 1 second
-            val endTime = System.currentTimeMillis()
-            if (reachable) {
-                return@withContext endTime - startTime
-            } else {
-                // تلاش برای اجرای دستور ping سیستم عامل (کمتر قابل اعتماد و ممکن است محدود شود)
-                val process = ProcessBuilder("ping", "-c", count.toString(), host)
-                    .redirectErrorStream(true)
-                    .start()
-                val output = process.inputStream.bufferedReader().use { it.readText() }
-                val rttRegex = Regex("time=(\\d+\\.?\\d*) ms")
-                val rtts = rttRegex.findAll(output).mapNotNull { it.groupValues[1].toFloatOrNull() }
-                if (rtts.any()) {
-                    return@withContext rtts.average().toLong()
+        val uploadTimeSec = (endTime - startTime) / 1e9
+        val fileSizeBits = file.length() * 8
+        val speedMbps = (fileSizeBits / uploadTimeSec) / 1e6 // مگابیت بر ثانیه
+
+        return speedMbps
+    }
+
+    suspend fun getPingSpeed(host: String = "185.147.178.12", count: Int = 3): Long? =
+        withContext(Dispatchers.IO) {
+            try {
+                val startTime = System.currentTimeMillis()
+                val inetAddress = InetAddress.getByName(host)
+                val reachable = inetAddress.isReachable(200) // Timeout of 1 second
+                val endTime = System.currentTimeMillis()
+                if (reachable) {
+                    return@withContext endTime - startTime
+                } else {
+                    // تلاش برای اجرای دستور ping سیستم عامل (کمتر قابل اعتماد و ممکن است محدود شود)
+                    val process = ProcessBuilder("ping", "-c", count.toString(), host)
+                        .redirectErrorStream(true)
+                        .start()
+                    val output = process.inputStream.bufferedReader().use { it.readText() }
+                    val rttRegex = Regex("time=(\\d+\\.?\\d*) ms")
+                    val rtts =
+                        rttRegex.findAll(output).mapNotNull { it.groupValues[1].toFloatOrNull() }
+                    if (rtts.any()) {
+                        return@withContext rtts.average().toLong()
+                    }
                 }
+                return@withContext null
+            } catch (e: IOException) {
+                e.printStackTrace()
+                return@withContext null
             }
-            return@withContext null
-        } catch (e: IOException) {
-            e.printStackTrace()
-            return@withContext null
         }
-    }
     /**
      * اندازه‌گیری سرعت دانلود از یک URL مشخص و برگرداندن سرعت در مگابیت بر ثانیه (Mbps).
      * در صورت بروز خطا، null برمی‌گرداند.
      */
-
-
 
 
 }
