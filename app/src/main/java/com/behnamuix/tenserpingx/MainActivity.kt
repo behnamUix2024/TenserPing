@@ -386,6 +386,10 @@ class MainActivity : AppCompatActivity() {
             Handler(Looper.getMainLooper()).postDelayed({
                 simulateUploadSpeed()
             }, 4000)
+            Handler(Looper.getMainLooper()).postDelayed({
+                var tapsel=TapsellApi(this)
+                tapsel.TapsellConfig()
+            }, 5000)
 
 
         }
